@@ -1,4 +1,4 @@
-﻿/*using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -41,33 +41,22 @@ namespace FreezeFrame
 
         private Transform recordingAvatar;
         private GameObject recordingPlayer;
-        public bool RemoteRecording = false;
         private bool _recording = false;
 
-        public void StartRecording(Player player, bool calledByRemote = false)
+        public void StartRecording(GameObject player, bool calledByRemote = false)
         {
             if (calledByRemote && !freezeFrame.allowRemoteRecording.Value)
                 return;
             _recording = true;
-            recordingPlayer = player.gameObject;
-            if (player.field_Private_APIUser_0.id == Player.prop_Player_0.field_Private_APIUser_0.id)
-            {
-                RemoteRecording = false;
-                recordingAvatar = player.gameObject.transform.Find("ForwardDirection/_AvatarMirrorClone");
-            }
-            else
-            {
-                RemoteRecording = true;
-                recordingAvatar = player.gameObject.transform.Find("ForwardDirection/Avatar");
-            }
-
+            recordingPlayer = player;
+            
             AnimationsCache.Clear();
             freezeFrame.Resync();
             CurrentTime = 0;
 
             if (freezeFrame.VRCWSLibaryPresent && !calledByRemote)
             {
-                VRCWSLibaryIntegration.CreateFreezeOf(FreezeAction.StartAnim, player.field_Private_APIUser_0.id);
+                //VRCWSLibaryIntegration.CreateFreezeOf(FreezeAction.StartAnim, player.field_Private_APIUser_0.id);
             }
 
         }
@@ -80,7 +69,7 @@ namespace FreezeFrame
 
             if (freezeFrame.VRCWSLibaryPresent && !calledByRemote)
             {
-                VRCWSLibaryIntegration.CreateFreezeOf(FreezeAction.StopAnim, Player.prop_Player_0.field_Private_APIUser_0.id);
+                //VRCWSLibaryIntegration.CreateFreezeOf(FreezeAction.StopAnim, Player.prop_Player_0.field_Private_APIUser_0.id);
             }
         }
 
@@ -92,9 +81,9 @@ namespace FreezeFrame
             clip.legacy = true;
             clip.name = "FreezeAnimation";
 
-            var transformType = UnhollowerRuntimeLib.Il2CppType.Of<Transform>();
-            var skinnedMeshrendererType = UnhollowerRuntimeLib.Il2CppType.Of<SkinnedMeshRenderer>();
-            var gameObjectType = UnhollowerRuntimeLib.Il2CppType.Of<GameObject>();
+            var transformType = typeof(Transform);
+            var skinnedMeshrendererType = typeof(SkinnedMeshRenderer);
+            var gameObjectType = typeof(GameObject);
             
             float loopingDelay = freezeFrame.smoothLoopingDuration.Value;
             foreach (var item in AnimationsCache)
@@ -123,7 +112,7 @@ namespace FreezeFrame
                 curve.preWrapMode = WrapMode.Loop;
                 curve.postWrapMode = WrapMode.Loop;
                 
-                Keyframe frame = curve.GetKey(0);
+                Keyframe frame = curve.keys[0];
                 frame.time = CurrentTime + loopingDelay;
                 frame.weightedMode = WeightedMode.None;
                 curve.AddKey(frame);
@@ -171,7 +160,7 @@ namespace FreezeFrame
             if (renderer != null && freezeFrame.recordBlendshapes.Value)
             {
                 string[] lookup;
-                if (!blendShapeLookup.TryGetValue(renderer.Pointer, out lookup))
+                if (!blendShapeLookup.TryGetValue(renderer, out lookup))
                 {
                     freezeFrame.LoggerInstance.Msg("Building lookup for " + path);
                     lookup = new string[renderer.sharedMesh.blendShapeCount];
@@ -179,7 +168,7 @@ namespace FreezeFrame
                     {
                         lookup[i] = renderer.sharedMesh.GetBlendShapeName(i);
                     }
-                    blendShapeLookup[renderer.Pointer] = lookup;
+                    blendShapeLookup[renderer] = lookup;
                 }
                 {
                     for (int i = 0; i < renderer.sharedMesh.blendShapeCount; i++)
@@ -190,7 +179,7 @@ namespace FreezeFrame
                 }
             }
 
-            Save(path, "m_IsActive", transform.gameObject.active ? 1 : 0);
+            Save(path, "m_IsActive", transform.gameObject.activeInHierarchy ? 1 : 0);
 
             for (int i = 0; i < transform.childCount; i++)
             {
@@ -201,7 +190,7 @@ namespace FreezeFrame
             }
         }
 
-        private Dictionary<IntPtr, string[]> blendShapeLookup = new Dictionary<IntPtr, string[]>();
+        private Dictionary<SkinnedMeshRenderer, string[]> blendShapeLookup = new Dictionary<SkinnedMeshRenderer, string[]>();
 
         private void Save(string path, string propertyName, float value)
         {
@@ -216,4 +205,3 @@ namespace FreezeFrame
         }
     }
 }
-*/

@@ -410,14 +410,13 @@ namespace FreezeFrame
 
         public GameObject FullCopy(GameObject player)
         {
-            Transform temp = player.transform.Find("ForwardDirection/Avatar");
-            var obj = temp.gameObject;
-            var copy = GameObject.Instantiate(obj, ClonesParent.transform, true);
+            
+            var copy = GameObject.Instantiate(player, ClonesParent.transform, true);
             copy.name = "Avatar Clone";
 
-            UpdateShadersRecurive(copy, obj);
+            UpdateShadersRecurive(copy, player);
 
-            if (obj.layer == LayerMask.NameToLayer("PlayerLocal"))
+            if (player.layer == LayerMask.NameToLayer("PlayerLocal"))
             {
                 foreach (var copycomp in copy.GetComponents<UnityEngine.Component>())
                 {
