@@ -1,0 +1,19 @@
+{
+  "_id": -1,
+  "name": "NoHighlight",
+  "modversion": "1.0.0",
+  "gameversion": "2022r165",
+  "loaderversion": "0.5.4",
+  "modtype": "Mod",
+  "author": "Eric Fandenfart",
+  "description": "Removes Highlights/Glow vom Props (and maybe other things)",
+  "searchtags": [
+    "NoHightlight",
+    "NoGlow"
+  ],
+  "requirements": [],
+  "downloadlink": "https://github.com/Er1807/CVR-Mods/releases/download/NoHightlights1.0.0/NoHighlight.dll",
+  "sourcelink": "https://github.com/Er1807/CVR-Mods/tree/main/NoHighlight",
+  "changelog": "Initial Release",
+  "embedcolor": "7F60CA"
+}
