@@ -27,7 +27,7 @@ namespace FreezeFrame
                 {
                     module.Record();
                 }
-            
+
             foreach (var module in animationModules.Values)
             {
                 module.CurrentTime += Time.deltaTime;
@@ -49,11 +49,11 @@ namespace FreezeFrame
         {
             AnimationsCache.Clear();
             _recording = true;
-            
+
             FreezeFrameMod.Instance.Resync();
             CurrentTime = 0;
         }
-        
+
         public void StopRecording(bool isMain = false)
         {
             _recording = false;
@@ -72,13 +72,13 @@ namespace FreezeFrame
             var transformType = typeof(Transform);
             var skinnedMeshrendererType = typeof(SkinnedMeshRenderer);
             var gameObjectType = typeof(GameObject);
-            
+
             float loopingDelay = FreezeFrameMod.Instance.smoothLoopingDuration.Value;
             foreach (var item in AnimationsCache)
             {
                 if (item.Value.Property.StartsWith("blendShape"))
                 {
-                    if(loopingDelay > 0)
+                    if (loopingDelay > 0)
                         FixLooping(item.Value.Curve);
                     clip.SetCurve(item.Value.Path, skinnedMeshrendererType, item.Value.Property, item.Value.Curve);
                 }
@@ -88,7 +88,7 @@ namespace FreezeFrame
                 }
                 else
                 {
-                    if(loopingDelay > 0)
+                    if (loopingDelay > 0)
                         FixLooping(item.Value.Curve);
                     clip.SetCurve(item.Value.Path, transformType, item.Value.Property, item.Value.Curve);
                 }
@@ -99,7 +99,7 @@ namespace FreezeFrame
             {
                 curve.preWrapMode = WrapMode.Loop;
                 curve.postWrapMode = WrapMode.Loop;
-                
+
                 Keyframe frame = curve.keys[0];
                 frame.time = CurrentTime + loopingDelay;
                 frame.weightedMode = WeightedMode.None;
@@ -109,80 +109,74 @@ namespace FreezeFrame
 
         public void Record(Transform transform = null, string path = "")
         {
+            if (transform.name.EndsWith("_ShadowClone"))
+                return;
+
             if (Player == null)
             {
                 _recording = false;
                 AnimationsCache.Clear();
                 return;
             }
-            
+
             if (transform == null) transform = Player.GetAvatarGameObject().transform;
-            if (path == "")
-            {
-                Save(path, "localPosition.x", transform.position.x);
-                Save(path, "localPosition.y", transform.position.y);
-                Save(path, "localPosition.z", transform.position.z);
-            }
-            else
-            {
-                Save(path, "localPosition.x", transform.localPosition.x);
-                Save(path, "localPosition.y", transform.localPosition.y);
-                Save(path, "localPosition.z", transform.localPosition.z);
-            }
-
-            if (path == "")
-            {
-                Save(path, "localRotation.x", transform.rotation.x);
-                Save(path, "localRotation.y", transform.rotation.y);
-                Save(path, "localRotation.z", transform.rotation.z);
-                Save(path, "localRotation.w", transform.rotation.w);
-            }
-            else
-            {
-                Save(path, "localRotation.x", transform.localRotation.x);
-                Save(path, "localRotation.y", transform.localRotation.y);
-                Save(path, "localRotation.z", transform.localRotation.z);
-                Save(path, "localRotation.w", transform.localRotation.w);
-            }
-            if (Time.frameCount % 10 == 0)
-            {
-                Save(path, "localScale.x", transform.localScale.x);
-                Save(path, "localScale.y", transform.localScale.y);
-                Save(path, "localScale.z", transform.localScale.z);
-            }
+            var position = transform.localPosition;
+            var rotation = transform.localRotation;
             var renderer = transform.gameObject.GetComponent<SkinnedMeshRenderer>();
-
-            if (renderer != null && FreezeFrameMod.Instance.recordBlendshapes.Value)
+            if (path == "") //root level
             {
-                string[] lookup;
-                if (!blendShapeLookup.TryGetValue(renderer, out lookup))
-                {
-                    FreezeFrameMod.Instance.LoggerInstance.Msg("Building lookup for " + path);
-                    lookup = new string[renderer.sharedMesh.blendShapeCount];
-                    for (int i = 0; i < renderer.sharedMesh.blendShapeCount; i++)
-                    {
-                        lookup[i] = renderer.sharedMesh.GetBlendShapeName(i);
-                    }
-                    blendShapeLookup[renderer] = lookup;
-                }
-                {
-                    for (int i = 0; i < renderer.sharedMesh.blendShapeCount; i++)
-                    {
-                        if (Time.frameCount % 5 == i % 5)
-                            Save(path, $"blendShape.{lookup[i]}", renderer.GetBlendShapeWeight(i));
-                    }
-                }
+                position = transform.position;
+                rotation = transform.rotation;
             }
 
+            Save(path, "localPosition.x", position.x);
+            Save(path, "localPosition.y", position.y);
+            Save(path, "localPosition.z", position.z);
+            Save(path, "localRotation.x", rotation.x);
+            Save(path, "localRotation.y", rotation.y);
+            Save(path, "localRotation.z", rotation.z);
+            Save(path, "localRotation.w", rotation.w);
+            Save(path, "localScale.x", transform.localScale.x);
+            Save(path, "localScale.y", transform.localScale.y);
+            Save(path, "localScale.z", transform.localScale.z);
             Save(path, "m_IsActive", transform.gameObject.activeInHierarchy ? 1 : 0);
+            SaveBlendshapes(path, renderer);
 
+
+            var prefix = path == "" ? "" : path + "/";
             for (int i = 0; i < transform.childCount; i++)
             {
-                if (path == "")
-                    Record(transform.GetChild(i), path + transform.GetChild(i).name);
-                else
-                    Record(transform.GetChild(i), $"{path}/{transform.GetChild(i).name}");
+                Record(transform.GetChild(i), $"{prefix}{transform.GetChild(i).name}");
             }
+        }
+
+        private void SaveBlendshapes(string path, SkinnedMeshRenderer renderer)
+        {
+            if (renderer != null && FreezeFrameMod.Instance.recordBlendshapes.Value)
+            {
+                string[] lookup = GetBlendShapeLookup(renderer);
+
+                for (int i = 0; i < renderer.sharedMesh.blendShapeCount; i++)
+                {
+                    Save(path, $"blendShape.{lookup[i]}", renderer.GetBlendShapeWeight(i));
+                }
+
+            }
+        }
+
+        private string[] GetBlendShapeLookup(SkinnedMeshRenderer renderer)
+        {
+            if (!blendShapeLookup.TryGetValue(renderer, out var lookup))
+            {
+                lookup = new string[renderer.sharedMesh.blendShapeCount];
+                for (int i = 0; i < renderer.sharedMesh.blendShapeCount; i++)
+                {
+                    lookup[i] = renderer.sharedMesh.GetBlendShapeName(i);
+                }
+                blendShapeLookup[renderer] = lookup;
+            }
+
+            return lookup;
         }
 
         private Dictionary<SkinnedMeshRenderer, string[]> blendShapeLookup = new Dictionary<SkinnedMeshRenderer, string[]>();
