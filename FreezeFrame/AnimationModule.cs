@@ -109,9 +109,6 @@ namespace FreezeFrame
 
         public void Record(Transform transform = null, string path = "")
         {
-            if (transform.name.EndsWith("_ShadowClone"))
-                return;
-
             if (Player == null)
             {
                 _recording = false;
@@ -120,6 +117,10 @@ namespace FreezeFrame
             }
 
             if (transform == null) transform = Player.GetAvatarGameObject().transform;
+
+            if (transform.name.EndsWith("_ShadowClone"))
+                return;
+            
             var position = transform.localPosition;
             var rotation = transform.localRotation;
             var renderer = transform.gameObject.GetComponent<SkinnedMeshRenderer>();

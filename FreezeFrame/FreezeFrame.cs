@@ -67,19 +67,16 @@ namespace FreezeFrame
             HarmonyInstance.Patch(typeof(AssetBundle).GetMethod("Unload"), prefix: new HarmonyMethod(typeof(FreezeFrameMod).GetMethod("PrefixUnload", BindingFlags.Static | BindingFlags.Public)));
 
 
-            MelonCoroutines.Start(RecordingCoroutine());
             var freeze = LoadImage("freeze");
             freeze.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
             var category = MelonPreferences.CreateCategory("FreezeFrame");
-            MelonPreferences_Entry<bool> onlyTrusted = category.CreateEntry("Only Trusted", false);
             freezeType = category.CreateEntry("FreezeType", FreezeType.PerformanceFreeze, display_name: "Freeze Type", description: "Full Freeze is more accurate and copys everything but is less performant");
             recordBlendshapes = category.CreateEntry("recordBlendshapes", true, display_name: "Record Blendshapes", description: "Blendshape Recording can quite limit the performance you can disable it here");
             skipFrames = category.CreateEntry("skipFrames", 0, display_name: "Skip Frames", description: "Amount of frames to skip between recordings");
             saveAnimations = category.CreateEntry("saveAnimations", true, display_name: "Save Animations on freeze animations", description: "If anaimations are saved they can be later exported (uses more ram)");
             smoothLoopingDuration = category.CreateEntry("smoothLoopingDuration", 0.2f, "Smoothing Duration", "Duration of loop smoothing");
 
-            MelonLogger.Msg($"Actionmenu initialised");
 
             MelonCoroutines.Start(WaitForUIInit());
         }
@@ -204,27 +201,12 @@ namespace FreezeFrame
                     }
                 }
         }
-        public IEnumerator RecordingCoroutine()
-        {
-            while (true)
-            {
-                yield return new WaitForEndOfFrame();
-
-                // if (animationModule.Recording)
-                //{
-                //     if (Time.frameCount % (skipFrames.Value + 1) == 0)
-                //        animationModule.Record();
-
-                //     AnimationModule.CurrentTime += Time.deltaTime;
-                // }
-            }
-        }
 
         private void CreateSelf()
         {
             MelonLogger.Msg($"Creating Freeze Frame for yourself");
             EnsureHolderCreated();
-
+            
             InstantiateAvatar(PlayerSetup.Instance.GetComponent<PlayerDescriptor>());
         }
 
@@ -330,6 +312,8 @@ namespace FreezeFrame
 
         }
 
+        
+
         public void FullCopyWithAnimations(PlayerDescriptor player, AnimationClip animationClip, bool isMain, Dictionary<(string, string), AnimationContainer> animationsCache)
         {
             EnsureHolderCreated();
@@ -352,23 +336,22 @@ namespace FreezeFrame
 
             var copy = GameObject.Instantiate(source, ClonesParent.transform, true);
             copy.name = "Avatar Clone";
-
-            UpdateShadersRecurive(copy, source);
-
-
-            foreach (var copycomp in copy.GetComponents<UnityEngine.Component>())
+            
+            foreach (var copycomp in copy.GetComponents<Component>())
             {
                 if (copycomp != copy.transform)
                 {
-                    GameObject.Destroy(copycomp);
+                    GameObject.DestroyImmediate(copycomp);
                 }
             }
 
+            UpdateShadersRecurive(copy, source); //update/restore AFTER Animator was destroyed
+
             copy.GetComponentsInChildren<SkinnedMeshRenderer>().Do(x => x.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On);
+            copy.GetComponentsInChildren<SkinnedMeshRenderer>().DoIf( x=> x.name.EndsWith("_ShadowClone"), x => GameObject.Destroy(x));
             var data = copy.AddComponent<FreezeData>();
             data.AvatarId = player.GetAvatarId();
             data.Type = FreezeType.FullFreeze;
-            //VRC_UdonTrigger.Instantiate(copy, "Delete", () => GameObject.Destroy(copy));
             return copy;
         }
 
@@ -455,7 +438,6 @@ namespace FreezeFrame
             var data = avatar.AddComponent<FreezeData>();
             data.AvatarId = player.GetAvatarId();
             data.Type = FreezeType.PerformanceFreeze;
-            //VRC_UdonTrigger.Instantiate(avatar, "Delete", () => GameObject.Destroy(avatar));
         }
     }
 }
