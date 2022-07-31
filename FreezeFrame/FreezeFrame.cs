@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
-using System.ComponentModel;
 using System.Collections;
 using UnityEngine.UI;
 using System.IO;
@@ -13,18 +12,10 @@ using UnityEngine;
 using ABI_RC.Core.Player;
 
 [assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "1.4.2", "Eric van Fandenfart")]
-//[assembly: MelonOptionalDependencies("VRCWSLibary")]
 [assembly: MelonGame]
 
 namespace FreezeFrame
 {
-    public enum FreezeType
-    {
-        [Description("Full Freeze")]
-        FullFreeze,
-        [Description("Performance Freeze")]
-        PerformanceFreeze
-    }
 
     public class FreezeFrameMod : MelonMod
     {
@@ -57,16 +48,13 @@ namespace FreezeFrame
         private DateTime? DelayedSelf = null;
         private DateTime? DelayedAll = null;
 
-        public bool VRCWSLibaryPresent = false;
         private static bool active = false;
         public MelonPreferences_Entry<FreezeType> freezeType;
-        public MelonPreferences_Entry<bool> allowRemoteRecording;
         public MelonPreferences_Entry<bool> recordBlendshapes;
-        public MelonPreferences_Entry<bool> copyPhysBones;
         public MelonPreferences_Entry<int> skipFrames;
         public MelonPreferences_Entry<float> smoothLoopingDuration;
-        
-        //public AnimationModule animationModule;
+        public MelonPreferences_Entry<bool> saveAnimations;
+
 
         private bool deleteMode;
 
@@ -78,7 +66,6 @@ namespace FreezeFrame
             MelonLogger.Msg("Patching AssetBundle unloading");
             HarmonyInstance.Patch(typeof(AssetBundle).GetMethod("Unload"), prefix: new HarmonyMethod(typeof(FreezeFrameMod).GetMethod("PrefixUnload", BindingFlags.Static | BindingFlags.Public)));
 
-            //animationModule = new AnimationModule(this);
 
             MelonCoroutines.Start(RecordingCoroutine());
             var freeze = LoadImage("freeze");
@@ -89,24 +76,10 @@ namespace FreezeFrame
             freezeType = category.CreateEntry("FreezeType", FreezeType.PerformanceFreeze, display_name: "Freeze Type", description: "Full Freeze is more accurate and copys everything but is less performant");
             recordBlendshapes = category.CreateEntry("recordBlendshapes", true, display_name: "Record Blendshapes", description: "Blendshape Recording can quite limit the performance you can disable it here");
             skipFrames = category.CreateEntry("skipFrames", 0, display_name: "Skip Frames", description: "Amount of frames to skip between recordings");
-            copyPhysBones = category.CreateEntry("copyPhysBones", true, display_name: "Copy Physbones", description: "Copy Physbones to freeze frame");
-
-            MelonPreferences_Entry<bool> showInModMenu = category.CreateEntry("UseModMenu", false, "Use the AM Mods Category");
-            //if (showInModMenu.Value)
-            //    AMUtils.AddToModsFolder("Freeze Frame Animation", CreateActionMenu, freeze);
-            //else
-            //    VRCActionMenuPage.AddSubMenu(ActionMenuPage.Main, "Freeze Frame Animation", CreateActionMenu, freeze);
-            
+            saveAnimations = category.CreateEntry("saveAnimations", true, display_name: "Save Animations on freeze animations", description: "If anaimations are saved they can be later exported (uses more ram)");
             smoothLoopingDuration = category.CreateEntry("smoothLoopingDuration", 0.2f, "Smoothing Duration", "Duration of loop smoothing");
 
             MelonLogger.Msg($"Actionmenu initialised");
-
-            if (MelonHandler.Mods.Any(x => x.Info.Name == "VRCWSLibary"))
-            {
-                allowRemoteRecording = category.CreateEntry("allowRemoteRecording", true, display_name: "Allow Remote Recording (VRCWS)", description: "Since Recordings can quite limit the performance you can disable it here");
-
-                LoadVRCWS(onlyTrusted);
-            }
 
             MelonCoroutines.Start(WaitForUIInit());
         }
@@ -185,13 +158,6 @@ namespace FreezeFrame
             //LoadUI();
         }
 
-        public void LoadVRCWS(MelonPreferences_Entry<bool> onlyTrusted)
-        {
-            //VRCWSLibaryPresent = true;
-            //MelonLogger.Msg("Found VRCWSLibary. Initialising Client Functions");
-            //VRCWSLibaryIntegration.Init(this, onlyTrusted);
-        }
-
         public static List<AssetBundle> StillLoaded = new List<AssetBundle>();
 
         public static void PrefixUnload(AssetBundle __instance, ref bool unloadAllLoadedObjects)
@@ -205,9 +171,6 @@ namespace FreezeFrame
 
         public override void OnUpdate()
         {
-            //if (VRCWSLibaryIntegration.AsyncUtils._toMainThreadQueue.TryDequeue(out Action result))
-            //    result.Invoke();
-
             if (DelayedSelf.HasValue && DelayedSelf < DateTime.Now)
             {
                 DelayedSelf = null;
@@ -219,20 +182,17 @@ namespace FreezeFrame
                 Create();
             }
 
-            //if (animationModule.Recording)
-            //{
-            //    if(Time.frameCount % (skipFrames.Value + 1) == 0)
-            //        animationModule.Record();
+            AnimationModule.Update();
 
-            //    AnimationModule.CurrentTime += Time.deltaTime;
-            //}
+
+
             if (ClonesParent != null && ClonesParent.scene.IsValid())
                 foreach (var anim in ClonesParent.GetComponentsInChildren<Animation>())
                 {
                     if (!anim.IsPlaying("FreezeAnimation") && !deleteMode)
                     {
                         anim.Play("FreezeAnimation");
-                        if (anim.gameObject.GetComponent<VRC_FreezeData>().IsMain)
+                        if (anim.gameObject.GetComponent<FreezeData>().IsMain)
                         {
                             foreach (var anim2 in ClonesParent.GetComponentsInChildren<Animation>())
                             {
@@ -250,34 +210,24 @@ namespace FreezeFrame
             {
                 yield return new WaitForEndOfFrame();
 
-               // if (animationModule.Recording)
+                // if (animationModule.Recording)
                 //{
-               //     if (Time.frameCount % (skipFrames.Value + 1) == 0)
+                //     if (Time.frameCount % (skipFrames.Value + 1) == 0)
                 //        animationModule.Record();
 
-               //     AnimationModule.CurrentTime += Time.deltaTime;
-               // }
+                //     AnimationModule.CurrentTime += Time.deltaTime;
+                // }
             }
         }
 
         private void CreateSelf()
         {
-            
-            var player = PlayerSetup.Instance.transform.Find("[PlayerAvatar]/_CVRAvatar(Clone)").gameObject ;
             MelonLogger.Msg($"Creating Freeze Frame for yourself");
             EnsureHolderCreated();
-            //if (VRCWSLibaryPresent)
-            //    VRCWSCreateFreezeOfWrapper(Player.prop_Player_0.field_Private_APIUser_0.id);
 
-            InstantiateAvatar(player);
+            InstantiateAvatar(PlayerSetup.Instance.GetComponent<PlayerDescriptor>());
         }
 
-        /*public void VRCWSCreateFreezeOfWrapper(string attr = "all")
-        {
-            VRCWSLibaryIntegration.CreateFreezeOf(FreezeAction.Freeze, attr);
-        }*/
-
-        //private MenuStateController menuStateController;
         private static AssetBundle iconsAssetBundle;
 
         /*private void LoadUI()
@@ -293,8 +243,6 @@ namespace FreezeFrame
                 MelonLogger.Msg($"Creating Freeze Frame for selected avatar");
                 EnsureHolderCreated();
                 string userid = menuStateController.GetComponentInChildren<SelectedUserMenuQM>().field_Private_IUser_0.prop_String_0;
-                if (VRCWSLibaryPresent)
-                    VRCWSCreateFreezeOfWrapper(userid);
                 InstantiateByID(userid);
             }));
             createFreezeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Create Freeze";
@@ -357,78 +305,69 @@ namespace FreezeFrame
         {
             MelonLogger.Msg("Creating Freeze Frame for all Avatars");
             EnsureHolderCreated();
-            //if (VRCWSLibaryPresent)
-            //    VRCWSCreateFreezeOfWrapper();
 
-            //InstantiateAll();
-        }
 
-        public void InstantiateByID(string id)
-        {
-            foreach (var player in CVRPlayerManager.Instance.NetworkPlayers)
-            {
-                if (player.Uuid == id)
-                {
-                    InstantiateAvatar(player.PlayerObject.transform.Find("[PlayerAvatar]/_CVRAvatar(Clone)").gameObject);
-                    return;
-                }
-            }
+            InstantiateAll();
         }
 
 
-        /*public void InstantiateAll()
+        public void InstantiateAll()
         {
-            foreach (var player in VRC.PlayerManager.field_Private_Static_PlayerManager_0.field_Private_List_1_Player_0)
-                InstantiateAvatar(player.gameObject);
-        }*/
+            foreach (var player in GameObject.FindObjectsOfType<PlayerDescriptor>())
+                InstantiateAvatar(player);
+        }
 
-        public void InstantiateAvatar(GameObject item)
+        public void InstantiateAvatar(PlayerDescriptor player)
         {
-            if (item == null)
+            if (player == null)
                 return;
 
             if (freezeType.Value == FreezeType.FullFreeze)
-                FullCopy(item);
+                FullCopy(player);
             else
-                PerformantCopy(item);
+                PerformantCopy(player);
 
 
         }
 
-        public void FullCopyWithAnimations(GameObject player, AnimationClip animationClip, bool isMain)
+        public void FullCopyWithAnimations(PlayerDescriptor player, AnimationClip animationClip, bool isMain, Dictionary<(string, string), AnimationContainer> animationsCache)
         {
             EnsureHolderCreated();
             var copy = FullCopy(player);
             if (isMain == true)
-                ClonesParent.GetComponentsInChildren<VRC_FreezeData>().Do(x => x.IsMain = false);
-            copy.AddComponent<VRC_FreezeData>().IsMain = isMain;
+                ClonesParent.GetComponentsInChildren<FreezeData>().Do(x => x.IsMain = false);
+            var data = copy.GetComponent<FreezeData>();
+            data.IsMain = isMain;
+            data.Animation = animationsCache;
 
             var animator = copy.AddComponent<Animation>();
             animator.AddClip(animationClip, animationClip.name);
             animator.Play(animationClip.name);
         }
 
-        public GameObject FullCopy(GameObject player)
+        public GameObject FullCopy(PlayerDescriptor player)
         {
-            
-            var copy = GameObject.Instantiate(player, ClonesParent.transform, true);
+
+            var source = player.GetAvatarGameObject();
+
+            var copy = GameObject.Instantiate(source, ClonesParent.transform, true);
             copy.name = "Avatar Clone";
 
-            UpdateShadersRecurive(copy, player);
+            UpdateShadersRecurive(copy, source);
 
-            if (player.layer == LayerMask.NameToLayer("PlayerLocal"))
+
+            foreach (var copycomp in copy.GetComponents<UnityEngine.Component>())
             {
-                foreach (var copycomp in copy.GetComponents<UnityEngine.Component>())
+                if (copycomp != copy.transform)
                 {
-                    if (copycomp != copy.transform)
-                    {
-                        GameObject.Destroy(copycomp);
-                    }
+                    GameObject.Destroy(copycomp);
                 }
             }
 
             copy.GetComponentsInChildren<SkinnedMeshRenderer>().Do(x => x.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On);
-
+            var data = copy.AddComponent<FreezeData>();
+            data.AvatarId = player.GetAvatarId();
+            data.Type = FreezeType.FullFreeze;
             //VRC_UdonTrigger.Instantiate(copy, "Delete", () => GameObject.Destroy(copy));
             return copy;
         }
@@ -452,9 +391,10 @@ namespace FreezeFrame
             }
 
         }
-        
-        public void PerformantCopy(GameObject source)
+
+        public void PerformantCopy(PlayerDescriptor player)
         {
+            var source = player.GetAvatarGameObject();
             var avatar = new GameObject("Avatar Clone");
             avatar.layer = LayerMask.NameToLayer("Player");
             avatar.transform.SetParent(ClonesParent.transform);
@@ -512,7 +452,9 @@ namespace FreezeFrame
                     holder.transform.rotation = lightsource.transform.rotation;
                 }
             }
-
+            var data = avatar.AddComponent<FreezeData>();
+            data.AvatarId = player.GetAvatarId();
+            data.Type = FreezeType.PerformanceFreeze;
             //VRC_UdonTrigger.Instantiate(avatar, "Delete", () => GameObject.Destroy(avatar));
         }
     }

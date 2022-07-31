@@ -1,76 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using MelonLoader;
+﻿using System.Collections.Generic;
+using ABI_RC.Core.Player;
 using UnityEngine;
 
 namespace FreezeFrame
 {
 
 
-    public class AnimationModule
+    public partial class AnimationModule
     {
 
-        public class AnimationContainer
+        public static readonly Dictionary<PlayerDescriptor, AnimationModule> animationModules = new Dictionary<PlayerDescriptor, AnimationModule>();
+        public static AnimationModule GetAnimationModuleForPlayer(PlayerDescriptor player)
         {
-            public string Path;
-            public string Property;
-            public AnimationCurve Curve = new AnimationCurve();
+            if (!animationModules.ContainsKey(player))
+                animationModules.Add(player, new AnimationModule(player));
 
-            public AnimationContainer(string path, string property)
+            return animationModules[player];
+        }
+
+        public static void Update()
+        {
+
+
+            if (Time.frameCount % (FreezeFrameMod.Instance.skipFrames.Value + 1) == 0)
+                foreach (var module in animationModules.Values)
+                {
+                    module.Record();
+                }
+            
+            foreach (var module in animationModules.Values)
             {
-                Path = path;
-                Property = property;
-            }
-
-
-            public void Record(float value)
-            {
-                Curve.AddKey(CurrentTime, value);
+                module.CurrentTime += Time.deltaTime;
             }
         }
 
-        public AnimationModule(FreezeFrameMod fr) => freezeFrame = fr;
+        private AnimationModule(PlayerDescriptor player)
+        {
+            Player = player;
+        }
 
-        public FreezeFrameMod freezeFrame;
-
+        private readonly PlayerDescriptor Player;
         public Dictionary<(string, string), AnimationContainer> AnimationsCache = new Dictionary<(string, string), AnimationContainer>();
 
-        public static float CurrentTime;
-
-        private Transform recordingAvatar;
-        private GameObject recordingPlayer;
+        public float CurrentTime;
         private bool _recording = false;
 
-        public void StartRecording(GameObject player, bool calledByRemote = false)
+        public void StartRecording(PlayerDescriptor player, bool calledByRemote = false)
         {
-            if (calledByRemote && !freezeFrame.allowRemoteRecording.Value)
-                return;
-            _recording = true;
-            recordingPlayer = player;
-            
             AnimationsCache.Clear();
-            freezeFrame.Resync();
+            _recording = true;
+            
+            FreezeFrameMod.Instance.Resync();
             CurrentTime = 0;
-
-            if (freezeFrame.VRCWSLibaryPresent && !calledByRemote)
-            {
-                //VRCWSLibaryIntegration.CreateFreezeOf(FreezeAction.StartAnim, player.field_Private_APIUser_0.id);
-            }
-
         }
-        public void StopRecording(bool calledByRemote = false, bool isMain = false)
+        
+        public void StopRecording(bool isMain = false)
         {
-            if (calledByRemote && !freezeFrame.allowRemoteRecording.Value)
-                return;
             _recording = false;
-            freezeFrame.FullCopyWithAnimations(recordingPlayer, CreateClip(), isMain);
+            FreezeFrameMod.Instance.FullCopyWithAnimations(Player, CreateClip(), isMain, AnimationsCache);
 
-            if (freezeFrame.VRCWSLibaryPresent && !calledByRemote)
-            {
-                //VRCWSLibaryIntegration.CreateFreezeOf(FreezeAction.StopAnim, Player.prop_Player_0.field_Private_APIUser_0.id);
-            }
         }
 
         public bool Recording => _recording;
@@ -85,7 +73,7 @@ namespace FreezeFrame
             var skinnedMeshrendererType = typeof(SkinnedMeshRenderer);
             var gameObjectType = typeof(GameObject);
             
-            float loopingDelay = freezeFrame.smoothLoopingDuration.Value;
+            float loopingDelay = FreezeFrameMod.Instance.smoothLoopingDuration.Value;
             foreach (var item in AnimationsCache)
             {
                 if (item.Value.Property.StartsWith("blendShape"))
@@ -121,7 +109,14 @@ namespace FreezeFrame
 
         public void Record(Transform transform = null, string path = "")
         {
-            if (transform == null) transform = recordingAvatar;
+            if (Player == null)
+            {
+                _recording = false;
+                AnimationsCache.Clear();
+                return;
+            }
+            
+            if (transform == null) transform = Player.GetAvatarGameObject().transform;
             if (path == "")
             {
                 Save(path, "localPosition.x", transform.position.x);
@@ -157,12 +152,12 @@ namespace FreezeFrame
             }
             var renderer = transform.gameObject.GetComponent<SkinnedMeshRenderer>();
 
-            if (renderer != null && freezeFrame.recordBlendshapes.Value)
+            if (renderer != null && FreezeFrameMod.Instance.recordBlendshapes.Value)
             {
                 string[] lookup;
                 if (!blendShapeLookup.TryGetValue(renderer, out lookup))
                 {
-                    freezeFrame.LoggerInstance.Msg("Building lookup for " + path);
+                    FreezeFrameMod.Instance.LoggerInstance.Msg("Building lookup for " + path);
                     lookup = new string[renderer.sharedMesh.blendShapeCount];
                     for (int i = 0; i < renderer.sharedMesh.blendShapeCount; i++)
                     {
@@ -201,7 +196,7 @@ namespace FreezeFrame
                 AnimationsCache[(path, propertyName)] = container;
             }
 
-            container.Record(value);
+            container.Record(CurrentTime, value);
         }
     }
 }

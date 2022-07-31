@@ -73,11 +73,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnimationContainer.cs" />
     <Compile Include="AnimationModule.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="FreezeFrame.cs" />
+    <Compile Include="FreezeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VRCWSLibaryIntegration.cs" />
-    <Compile Include="VRC_FreezeData.cs" />
+    <Compile Include="FreezeData.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="icons-freeze" />
