@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuteTTSClient", "MuteTTSCli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoHighlight", "NoHighlight\NoHighlight.csproj", "{2DACC52A-0D01-415D-A30F-E24E1A7B0FD9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.csproj", "{B09F6951-4D6C-4977-88C0-1C8863EED47C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{2DACC52A-0D01-415D-A30F-E24E1A7B0FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DACC52A-0D01-415D-A30F-E24E1A7B0FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DACC52A-0D01-415D-A30F-E24E1A7B0FD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B09F6951-4D6C-4977-88C0-1C8863EED47C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B09F6951-4D6C-4977-88C0-1C8863EED47C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B09F6951-4D6C-4977-88C0-1C8863EED47C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B09F6951-4D6C-4977-88C0-1C8863EED47C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
