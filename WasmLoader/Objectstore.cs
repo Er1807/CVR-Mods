@@ -44,9 +44,15 @@ namespace WasmLoader
             if (obj == null)
                 return NullCounter;
 
+            if (reverseObjects.ContainsKey(obj))
+            {
+                return reverseObjects[obj];
+            }
+
             Counter++;
 
             objects[Counter] = obj;
+            reverseObjects[obj] = Counter;
             return Counter;
         }
     }
