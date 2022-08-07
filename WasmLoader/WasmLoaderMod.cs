@@ -1,40 +1,42 @@
 ﻿using MelonLoader;
 using System;
-using Test;
-using Test.Refs;
+using WasmLoader;
+using WasmLoader.Refs;
 using UnityEngine;
 using Wasmtime;
 
-[assembly: MelonInfo(typeof(TestMod), "TestMod", "1.0.1", "Eric van Fandenfart")]
+[assembly: MelonInfo(typeof(WasmLoaderMod), "WasmLoader", "1.0.1", "Eric van Fandenfart")]
 [assembly: MelonGame]
 
-namespace Test
+namespace WasmLoader
 {
 
-    public class TestMod : MelonMod
+    public class WasmLoaderMod : MelonMod
     {
         private Engine engine;
         private Linker linker;
         private Store store;
+        private Objectstore objects;
         private Module module;
         private Action onApplicationStart;
         private Action onApplicationLateStart;
         private Action onUpdate;
         private Action onLateUpdate;
-        private Action eventr;
-        private Action eventr2;
+        private Action teleport;
+        private Action mirrottoggle1;
+        private Action mirrortoggle2;
 
-        public TestMod()
+        public WasmLoaderMod()
         {
             engine = new Engine();
             module = Module.FromTextFile(engine, "memory.wat");
             linker = new Linker(engine);
             store = new Store(engine);
-
-            new GameObject_Ref().Setup(linker, store);
-            new Log().Setup(linker, store);
+            objects = new Objectstore();
+            new GameObject_Ref().Setup(linker, store, objects);
+            new Log().Setup(linker, store, objects);
             var memall = new MemoryAllocator();
-            memall.Setup(linker, store);
+            memall.Setup(linker, store, objects);
             
             
             var instance = linker.Instantiate(store, module);
@@ -44,8 +46,9 @@ namespace Test
             onApplicationLateStart = instance.GetAction(store, "OnApplicationLateStart");
             onUpdate = instance.GetAction(store, "OnUpdate");
             onLateUpdate = instance.GetAction(store, "OnLateUpdate");
-            eventr = instance.GetAction(store, "event");
-            eventr2 = instance.GetAction(store, "event2");
+            teleport = instance.GetAction(store, "Teleport");
+            mirrottoggle1 = instance.GetAction(store, "ToggleMirror");
+            mirrortoggle2 = instance.GetAction(store, "ToggleMirror2");
 
 
 
@@ -80,11 +83,15 @@ namespace Test
             
             if (Input.GetKeyDown(KeyCode.P))
             {
-                eventr();
+                teleport();
             }
             if (Input.GetKeyDown(KeyCode.O))
             {
-                eventr2();
+                mirrottoggle1();
+            }
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                mirrortoggle2();
             }
 
         }

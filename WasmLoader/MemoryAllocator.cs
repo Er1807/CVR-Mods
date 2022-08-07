@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Test.Refs;
+using WasmLoader.Refs;
 using Wasmtime;
 
-namespace Test
+namespace WasmLoader
 {
     internal class MemoryAllocator : IRef
     {
@@ -28,7 +28,7 @@ namespace Test
             allocations.Add(new Allocations() { Ptr = start, Size=10 });
         }
         
-        public void Setup(Linker linker, Store store)
+        public void Setup(Linker linker, Store store, Objectstore objects)
         {
             linker.DefineFunction("env", "malloc", (Caller caller, int size) =>
             {
