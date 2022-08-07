@@ -1,54 +1,132 @@
 (module
-  (import "Log" "Msg" (func $log (param i32)))
-  (import "GameObject" "SetActive" (func $GameObject_SetActive (param i32 i32)))
-  (import "GameObject" "IsActive" (func $GameObject_IsActive (param i32) (result i32)))
-  (import "GameObject" "Find" (func $GameObject_Find (param i32) (result i32)))
-  (import "MovementSystem" "Instance" (func $MovementSystem_Instance (result i32)))
-  (import "MovementSystem" "TeleportTo" (func $MovementSystem_TeleportTo (param i32 i32)))
-  (import "Vector3" "ctor" (func $Vector3_ctor (param i32 i32 i32) (result i32)))
+  (data (i32.const 4) "MirrorButtons/Mirrors/Mirrorrightp/\00")
+  (data (i32.const 40) "Mirror is now Visible\00")
+  (data (i32.const 62) "Mirror is now Invisible\00")
+  (data (i32.const 86) "Method Done\00")
+  (data (i32.const 98) "Current number is \00")
+  (import "env" "ABI_RC_Systems_MovementSystem_MovementSystem__Instance__ABI_RCSystemsMovementSystemMovementSystem"(func $ABI_RC_Systems_MovementSystem_MovementSystem__Instance__ABI_RCSystemsMovementSystemMovementSystem  (result i32)))
+  (import "env" "UnityEngine_Vector3__ctor_SystemSingle_SystemSingle_SystemSingle__SystemVoid"(func $UnityEngine_Vector3__ctor_SystemSingle_SystemSingle_SystemSingle__SystemVoid (param f32 f32 f32) (result i32)))
+  (import "env" "ABI_RC_Systems_MovementSystem_MovementSystem__TeleportTo_this_UnityEngineVector3_UnityEngineVector3_SystemBoolean__SystemVoid"(func $ABI_RC_Systems_MovementSystem_MovementSystem__TeleportTo_this_UnityEngineVector3_UnityEngineVector3_SystemBoolean__SystemVoid (param i32 i32 i32 i32) ))
+  (import "env" "UnityEngine_GameObject__Find_SystemString__UnityEngineGameObject"(func $UnityEngine_GameObject__Find_SystemString__UnityEngineGameObject (param i32) (result i32)))
+  (import "env" "UnityEngine_GameObject__get_activeSelf_this__SystemBoolean"(func $UnityEngine_GameObject__get_activeSelf_this__SystemBoolean (param i32) (result i32)))
+  (import "env" "UnityEngine_GameObject__SetActive_this_SystemBoolean__SystemVoid"(func $UnityEngine_GameObject__SetActive_this_SystemBoolean__SystemVoid (param i32 i32) ))
+  (import "env" "WasmLoader_Logtest__Msg_SystemString__SystemVoid"(func $WasmLoader_Logtest__Msg_SystemString__SystemVoid (param i32) ))
+  (import "env" "System_Int32__ToString_this__SystemString"(func $System_Int32__ToString_this__SystemString (param i32) (result i32)))
+  (import "env" "System_String__Concat_SystemString_SystemString__SystemString"(func $System_String__Concat_SystemString_SystemString__SystemString (param i32 i32) (result i32)))
+  (export "Teleport" (func $Teleport))
+  (export "ToggleMirror" (func $ToggleMirror))
+  (export "ToggleMirror2" (func $ToggleMirror2))
+  (export "Test" (func $Test))
   (memory (export "memory") 1 2)
- (data (i32.const 0) "\00\00\03\EA")
- (data (i32.const 16) "start\00")
- (data (i32.const 32) "latestart\00")
- (data (i32.const 64) "teleporting\00")
- (data (i32.const 94) "Toggle Mirror\00")
- (data (i32.const 128) "MirrorButtons/Mirrors/Mirrorrightp/\00")
-  (func $OnApplicationStart
-    i32.const 16
-    call $log
+  (func $Teleport
+    nop
+    call $ABI_RC_Systems_MovementSystem_MovementSystem__Instance__ABI_RCSystemsMovementSystemMovementSystem
+    f32.const 93
+    f32.const 87
+    f32.const -40
+    call $UnityEngine_Vector3__ctor_SystemSingle_SystemSingle_SystemSingle__SystemVoid
+    i32.const 0
+    i32.const 0
+    call $ABI_RC_Systems_MovementSystem_MovementSystem__TeleportTo_this_UnityEngineVector3_UnityEngineVector3_SystemBoolean__SystemVoid
+    nop
+    return
   )
-    (func $OnApplicationLateStart
-    i32.const 32
-    call $log
+
+  (func $ToggleMirror
+    (local $local0 i32)
+    (local $local1 i32)
+    nop
+    i32.const 4
+    call $UnityEngine_GameObject__Find_SystemString__UnityEngineGameObject
+    set_local $local0
+    get_local $local0
+    call $UnityEngine_GameObject__get_activeSelf_this__SystemBoolean
+    set_local $local1
+    get_local $local1
+    i32.const 0
+    i32.eq
+    set_local $local1
+    get_local $local0
+    get_local $local1
+    call $UnityEngine_GameObject__SetActive_this_SystemBoolean__SystemVoid
+    nop
+    return
   )
-  (func $event2
-    (local $obj i32)
-    i32.const 94
-    call $log
-    i32.const 128
-    call $GameObject_Find
-    set_local $obj
-    get_local $obj
-    get_local $obj
-    call $GameObject_IsActive
+
+  (func $ToggleMirror2
+    (local $local0 i32)
+    (local $local1 i32)
+    nop
+    i32.const 4
+    call $UnityEngine_GameObject__Find_SystemString__UnityEngineGameObject
+    set_local $local0
+    get_local $local0
+    get_local $local0
+    call $UnityEngine_GameObject__get_activeSelf_this__SystemBoolean
+    i32.const 0
+    i32.eq
+    call $UnityEngine_GameObject__SetActive_this_SystemBoolean__SystemVoid
+    nop
+    get_local $local0
+    call $UnityEngine_GameObject__get_activeSelf_this__SystemBoolean
+    set_local $local1
+    block $bl51
+    get_local $local1
+    i32.const 0
+    i32.eq
+    br_if $bl51
+    i32.const 40
+    call $WasmLoader_Logtest__Msg_SystemString__SystemVoid
+    nop
+    block $bl62
+    br $bl62
+    end
+    i32.const 62
+    call $WasmLoader_Logtest__Msg_SystemString__SystemVoid
+    nop
+    end
+    i32.const 86
+    call $WasmLoader_Logtest__Msg_SystemString__SystemVoid
+    nop
+    return
+  )
+
+  (func $Test
+    (local $local0 i32)
+    (local $local1 i32)
+    (local $for1 i32)
     i32.const 1
-	i32.xor
-    call $GameObject_SetActive
-    call $MovementSystem_TeleportTo
+    set_local $for1
+    nop
+    i32.const 0
+    set_local $local0
+    loop $lp5
+    block $bl34
+    get_local $for1
+    i32.const 0
+    set_local $for1
+    br_if $bl34
+    nop
+    i32.const 98
+    get_local $local0
+    call $System_Int32__ToString_this__SystemString
+    call $System_String__Concat_SystemString_SystemString__SystemString
+    call $WasmLoader_Logtest__Msg_SystemString__SystemVoid
+    nop
+    nop
+    get_local $local0
+    i32.const 1
+    i32.add
+    set_local $local0
+    end
+    get_local $local0
+    i32.const 10
+    i32.lt_s
+    set_local $local1
+    get_local $local1
+    br_if $lp5
+    end
+    return
   )
-  (func $event
-    i32.const 64
-    call $log
-	call $MovementSystem_Instance
-    i32.const 93
-    i32.const 87
-    i32.const -40
-    call $Vector3_ctor
-    call $Vector3_ctor
-  )
-    
-  (export "OnApplicationStart" (func $OnApplicationStart))
-  (export "OnApplicationLateStart" (func $OnApplicationLateStart))
-  (export "event" (func $event))
-  (export "event2" (func $event2))
+
 )

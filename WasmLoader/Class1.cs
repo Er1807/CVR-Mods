@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using WasmLoader;
 
 namespace Test
 {
@@ -31,7 +32,18 @@ namespace Test
                 Logtest.Msg("Mirror is now Visible");
             else
                 Logtest.Msg("Mirror is now Invisible");
-            Logtest.Msg("Method DOne");
+            Logtest.Msg("Method Done");
+
+        }
+
+        public void Test()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                Logtest.Msg("Current number is " + i);
+            }
+            
+
         }
     }
 }

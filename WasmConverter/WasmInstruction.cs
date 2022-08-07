@@ -71,6 +71,14 @@ namespace Converter
                     return "i32.gt_u";
                 case WasmInstructions.i64_gt_u:
                     return "i64.gt_u";
+                case WasmInstructions.i32_lt_s:
+                    return "i32.lt_s";
+                case WasmInstructions.i64_lt_s:
+                    return "i64.lt_s";
+                case WasmInstructions.i32_lt_u:
+                    return "i32.lt_u";
+                case WasmInstructions.i64_lt_u:
+                    return "i64.lt_u";
                 default:
                     return Instruction.ToString();
             }

@@ -65,11 +65,10 @@
     <Compile Include="Class1.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Objectstore.cs" />
-    <Compile Include="MemoryAllocator.cs" />
     <Compile Include="Refs\Log.cs" />
     <Compile Include="Refs\GameObject.cs" />
     <Compile Include="Refs\IRef.cs" />
-    <Compile Include="TestMod.cs" />
+    <Compile Include="WasmLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

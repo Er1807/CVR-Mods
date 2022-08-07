@@ -3,27 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wasmtime;
 
 namespace WasmLoader
 {
     public class Objectstore
     {
+        private readonly Store store;
         public Dictionary<int, object> objects = new Dictionary<int, object>();
-
-        public Objectstore()
+        public Dictionary<object, int> reverseObjects = new Dictionary<object, int>();
+        public int Counter = 10000;
+        public int NullCounter = 9999;
+        public Objectstore(Store store)
         {
-            objects[0] = null;
+            objects[NullCounter] = null;
+            this.store = store;
         }
-
-        public T RetriveObject<T>(int id)
+        
+        public T RetriveObject<T>(int id, Caller caller)
         {
+            if (typeof(T).FullName == "System.String" && id < 10000)
+                return (T)(object)caller.GetMemory("memory").ReadNullTerminatedString(store, id);
             if (!objects.TryGetValue(id, out object obj))
                 return default(T);
             if (obj == null)
-                    return default(T);
+                return default(T);
             try
             {
-                return (T) obj;
+                return (T)obj;
             }
             catch (Exception)
             {
@@ -35,10 +42,12 @@ namespace WasmLoader
 
         {
             if (obj == null)
-                return 0;
-            
-            objects[obj.GetHashCode()] = obj;
-            return obj.GetHashCode();
+                return NullCounter;
+
+            Counter++;
+
+            objects[Counter] = obj;
+            return Counter;
         }
     }
 }

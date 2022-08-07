@@ -70,8 +70,10 @@ namespace Converter
                     break;
                 case Code.Ldc_I4:
                 case Code.Ldc_I4_S:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, instruction.Operand));
+                    func.stack.Push(WasmDataType.i32);
+                    break;
                 case Code.Ldstr:
-
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, Allocate((string)instruction.Operand, func)));
                     func.stack.Push(WasmDataType.i32);
                     break;
@@ -193,7 +195,11 @@ namespace Converter
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, $"local{Ldloc}"));
                     func.stack.Push(func.Locals[$"local{Ldloc}"]);
                     break;
-
+                case Code.Ldloca_S:
+                    var Ldlocas = (Local)instruction.Operand;
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, $"local{Ldlocas.Index}"));
+                    func.stack.Push(func.Locals[$"local{Ldlocas.Index}"]);
+                    break;
                 case Code.Dup:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.tee_local, instruction.Offset, $"temp{func.stack.Peek()}"));
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, $"temp{func.stack.Peek()}"));
@@ -363,6 +369,40 @@ namespace Converter
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.i32);
                     break;
+                case Code.Clt:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_lt_s, instruction.Offset));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_lt_s, instruction.Offset));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_lt, instruction.Offset));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_lt, instruction.Offset));
+                            break;
+                    }
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Clt_Un:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_lt_u, instruction.Offset));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_lt_u, instruction.Offset));
+                            break;
+                    }
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
                 case Code.Brfalse_S:
                     switch (func.stack.Peek())
                     {
@@ -383,6 +423,10 @@ namespace Converter
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_eq, instruction.Offset));
                             break;
                     }
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, ((Instruction)instruction.Operand).Offset));
+                    func.stack.Pop();
+                    break;
+                case Code.Brtrue_S:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, ((Instruction)instruction.Operand).Offset));
                     func.stack.Pop();
                     break;

@@ -21,7 +21,9 @@ namespace Converter
         i32_eqz, i64_eqz,
         i32_gt_s, i64_gt_s, f32_gt, f64_gt,
         i32_gt_u, i64_gt_u,
+        i32_lt_s, i64_lt_s, f32_lt, f64_lt,
+        i32_lt_u, i64_lt_u,
         get_local, set_local, tee_local,
-        br, br_if, block, end
+        br, br_if, block, loop, end
     }
 }

@@ -13,9 +13,9 @@ namespace WasmLoader.Refs
         static MelonLogger.Instance logger = new MelonLogger.Instance("WebAssembly", ConsoleColor.DarkGreen);
         public void Setup(Linker linker, Store store, Objectstore objects)
         {
-            linker.DefineFunction("env", "Test_Logtest__Msg_SystemString__SystemVoid", (Caller caller, int ptr) =>
+            linker.DefineFunction("env", "WasmLoader_Logtest__Msg_SystemString__SystemVoid", (Caller caller, int ptr) =>
             {
-                logger.Msg(caller.GetMemory("memory").ReadNullTerminatedString(store, ptr));
+                logger.Msg(objects.RetriveObject<string>(ptr, caller));
             });
         }
     }

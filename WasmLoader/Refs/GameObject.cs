@@ -15,23 +15,23 @@ namespace WasmLoader.Refs
         {
             linker.DefineFunction("env", "UnityEngine_GameObject__SetActive_this_SystemBoolean__SystemVoid", (Caller caller, int obj, int value) =>
             {
-                objects.RetriveObject<GameObject>(obj)?.SetActive(value > 0);
+                objects.RetriveObject<GameObject>(obj, caller)?.SetActive(value > 0);
             });
 
             linker.DefineFunction("env", "UnityEngine_GameObject__get_activeSelf_this__SystemBoolean", (Caller caller, int obj) =>
             {
-                return objects.RetriveObject<GameObject>(obj)?.activeSelf ?? false ? 1 : 0;
+                return objects.RetriveObject<GameObject>(obj, caller)?.activeSelf ?? false ? 1 : 0;
             });
 
             linker.DefineFunction("env", "UnityEngine_GameObject__Find_SystemString__UnityEngineGameObject", (Caller caller, int ptr) =>
             {
-                var str = caller.GetMemory("memory").ReadNullTerminatedString(store, ptr);
+                var str = objects.RetriveObject<string>(ptr, caller);
                 return objects.StoreObject(GameObject.Find(str));
             });
 
             linker.DefineFunction("env", "transform", (Caller caller, int obj) =>
             {
-                return objects.StoreObject(objects.RetriveObject<GameObject>(obj)?.transform);
+                return objects.StoreObject(objects.RetriveObject<GameObject>(obj, caller)?.transform);
             });
 
             linker.DefineFunction("env", "ABI_RC_Systems_MovementSystem_MovementSystem__Instance__ABI_RCSystemsMovementSystemMovementSystem", (Caller caller) =>
@@ -46,7 +46,21 @@ namespace WasmLoader.Refs
 
             linker.DefineFunction("env", "ABI_RC_Systems_MovementSystem_MovementSystem__TeleportTo_this_UnityEngineVector3_UnityEngineVector3_SystemBoolean__SystemVoid", (Caller caller, int instance, int vector, int rot, int rotAllAxis) =>
             {
-                objects.RetriveObject<MovementSystem>(instance)?.TeleportTo(objects.RetriveObject<Vector3>(vector), objects.RetriveObject<Vector3?>(rot), rotAllAxis > 0);
+                objects.RetriveObject<MovementSystem>(instance, caller)?.TeleportTo(objects.RetriveObject<Vector3>(vector, caller), objects.RetriveObject<Vector3?>(rot, caller), rotAllAxis > 0);
+            });
+
+            linker.DefineFunction("env", "System_Int32__ToString_this__SystemString", (Caller caller, int number) =>
+            {
+                return objects.StoreObject(number.ToString());
+            });
+
+            linker.DefineFunction("env", "System_String__Concat_SystemString_SystemString__SystemString", (Caller caller, int strP1, int strP2) =>
+            {
+                var str1 = objects.RetriveObject<string>(strP1, caller);
+                var str2 = objects.RetriveObject<string>(strP2, caller);
+                
+                
+                return objects.StoreObject(string.Concat(str1, str2));
             });
         }
     }

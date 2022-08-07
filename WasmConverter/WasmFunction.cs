@@ -26,26 +26,46 @@ namespace Converter
 
         public Stack<WasmDataType> stack = new Stack<WasmDataType>();
 
+        private List<(int, int)> branches = new List<(int, int)>();
 
         public void FixControlFlow()
         {
             var branchInstructions = Instructions.Where(x => x.Instruction == WasmInstructions.br
                 || x.Instruction == WasmInstructions.br_if).ToList();
-            var branchTargets = branchInstructions.Select(x => (uint)x.Operand)
-                .Distinct().OrderBy(x=>x).ToList();
 
-            Dictionary<uint, string> branchTargetLookup = new Dictionary<uint, string>();
-            
-            foreach (var target in branchTargets)
+            foreach (var target in branchInstructions.Where(x => (uint)x.Operand < x.Offset)
+                .Distinct())
             {
-                Instructions.Insert(0, new WasmInstruction(WasmInstructions.block, 9999, $"bl{target}"));
-                var index = Instructions.FindIndex(x => x.Offset == target);
-                Instructions.Insert(index, new WasmInstruction(WasmInstructions.end, 9999));
+                var index = Instructions.FindIndex(x => x.Offset == target.Offset);
+                var index2 = Instructions.FindIndex(x => x.Offset == (uint)target.Operand);
+                Instructions.Insert(index + 1, new WasmInstruction(WasmInstructions.end, 9999));
+                Instructions.Insert(index2 - 1, new WasmInstruction(WasmInstructions.loop, 9999, $"lp{target.Operand}"));
             }
+
+            foreach (var target in branchInstructions.Where(x => (uint)x.Operand > x.Offset).Distinct().OrderBy(x => (uint)x.Operand))
+            {
+                var index = Instructions.FindIndex(x => x.Offset == (uint)target.Operand);
+                var index2 = Instructions.FindIndex(x => x.Offset == target.Offset);
+                while (Instructions[index2 - 1].Instruction == WasmInstructions.get_local)
+                {
+                    index2--;
+                }
+                var res = branches.FindLast(x=>x.Item1 < index2 && x.Item2 > index2);
+                if (res.Item1 != 0)
+                    index2 = res.Item1;
+                branches.Add((index2, index + 1));
+                Instructions.Insert(index2, new WasmInstruction(WasmInstructions.block, 9999, $"bl{target.Operand}"));
+                Instructions.Insert(index + 1, new WasmInstruction(WasmInstructions.end, 9999));
+            }
+
+            
 
             foreach (var instr in branchInstructions)
             {
-                instr.Operand = $"bl{(uint)instr.Operand}";
+                if((uint)instr.Operand > instr.Offset)
+                    instr.Operand = $"bl{(uint)instr.Operand}";
+                else
+                    instr.Operand = $"lp{(uint)instr.Operand}";
             }
         }
         
