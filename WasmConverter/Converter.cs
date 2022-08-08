@@ -16,7 +16,8 @@ namespace Converter
             module.Functions.Add(func);
             func.Name = method.Name;
             func.ReturnType = GetWasmType(method.ReturnType);
-
+            func.Method = method;
+            
             foreach (var parameter in method.Parameters.Where(x => !x.IsHiddenThisParameter))
             {
                 func.Parameters.Add(GetWasmType(parameter.Type).Value);
@@ -142,28 +143,37 @@ namespace Converter
                     break;
 
                 case Code.Ldarg_0:
+                    //this  not used
+                    //func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "param0"));
+                    //func.stack.Push(func.Parameters[0]);
+                    break;
+                case Code.Ldarg_1:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "param0"));
                     func.stack.Push(func.Parameters[0]);
                     break;
-                case Code.Ldarg_1:
+                case Code.Ldarg_2:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "param1"));
                     func.stack.Push(func.Parameters[1]);
                     break;
-                case Code.Ldarg_2:
+                case Code.Ldarg_3:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "param2"));
                     func.stack.Push(func.Parameters[2]);
-                    break;
-                case Code.Ldarg_3:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "param3"));
-                    func.stack.Push(func.Parameters[3]);
                     break;
                 case Code.Ldarg:
                 case Code.Ldarg_S:
                     var Ldarg = (int)instruction.Operand;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"param{Ldarg}"));
-                    func.stack.Push(func.Parameters[Ldarg]);
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"param{Ldarg-1}"));
+                    func.stack.Push(func.Parameters[Ldarg-1]);
                     break;
-
+                case Code.Ldarga_S:
+                    var Ldarga_S = -1;
+                    if (instruction.Operand is Parameter)
+                        Ldarga_S = ((Parameter)instruction.Operand).Index;
+                    else
+                        Ldarga_S = (int)instruction.Operand; 
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"param{Ldarga_S - 1}"));
+                    func.stack.Push(func.Parameters[Ldarga_S - 1]);
+                    break;
                 case Code.Stloc_0:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, "local0"));
                     if (!func.Locals.ContainsKey("local0"))

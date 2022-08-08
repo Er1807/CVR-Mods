@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace Test
     {
         public void Teleport()
         {
-            MovementSystem.Instance.TeleportTo(new Vector3(93,87,-40));
+            MovementSystem.Instance.TeleportTo(new Vector3(93, 87, -40));
         }
 
         public void ToggleMirror()
@@ -49,32 +50,47 @@ namespace Test
             {
                 for (int j = 0; j < 5; j++)
                 {
-                    Logtest.Msg("Current number i is " + i+ " j is " + j);
+                    Logtest.Msg("Current number i is " + i + " j is " + j);
                 }
             }
         }
 
+        
+
+        //broken
         public void FizzBuzz()
         {
-            for (int i = 1; i <= 100; i++)
+            if (GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/").activeSelf)
             {
-                if (i % 3 == 0 && i % 5 == 0)
+                Logtest.Msg("Mirror Right is Visible");
+            }
+            else if (GameObject.Find("MirrorButtons/Mirrors/Mirrorleftp/").activeSelf)
+            {
+                Logtest.Msg("Mirror Left is Visible");
+
+            }
+            else
+            {
+                Logtest.Msg("No Mirror is active");
+            }
+        }
+
+        public void Test3()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 5; j++)
                 {
-                    Logtest.Msg("FizzBuzz");
-                }
-                else if (i % 3 == 0)
-                {
-                    Logtest.Msg("Fizz");
-                }
-                else if (i % 5 == 0)
-                {
-                    Logtest.Msg("Buzz");
-                }
-                else
-                {
-                    Logtest.Msg(""+i);
+                    TestFunction(i, j);
                 }
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public void TestFunction(int i, int j)
+        {
+            Logtest.Msg("Inside sep function");
+            Logtest.Msg("Current number i is " + i + " j is " + j);
         }
     }
 }

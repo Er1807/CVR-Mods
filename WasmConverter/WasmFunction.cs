@@ -21,13 +21,13 @@ namespace Converter
         public List<WasmDataType> Parameters = new List<WasmDataType>();
         public Dictionary<string, WasmDataType> Locals = new Dictionary<string, WasmDataType>();
         public List<WasmInstruction> Instructions = new List<WasmInstruction>();
-
+        public MethodDef Method;
 
 
         public Stack<WasmDataType> stack = new Stack<WasmDataType>();
 
         private List<(int, int)> branches = new List<(int, int)>();
-
+        
         public void FixControlFlow()
         {
             var branchInstructions = Instructions.Where(x => x.Instruction == WasmInstructions.br
@@ -50,7 +50,29 @@ namespace Converter
             DetectForLoops();
             DetectIfs();
 
+            FixLocalCalls();
 
+        }
+
+        private void FixLocalCalls()
+        {
+            foreach (var func in Instructions.Distinct().Where(x => x.Operand is MemberRef || x.Operand is MethodDef))
+            {
+                if (func.Operand is MemberRef member)
+                {
+                    if(member.DeclaringType == Method.DeclaringType)
+                    {
+                        func.Operand = member.Name;
+                    }
+                }
+                if (func.Operand is MethodDef method)
+                {
+                    if (method.DeclaringType == Method.DeclaringType)
+                    {
+                        func.Operand = method.Name.ToString();
+                    }
+                }
+            }
         }
 
         public void DetectIfs()
@@ -135,7 +157,12 @@ namespace Converter
         public string CreateWat()
         {
             var builder = new StringBuilder();
-            builder.AppendLine($"  (func ${Name} {BuildParamString(Parameters)} {BuildResultString(ReturnType)}");
+            builder.Append($"  (func ${Name}");
+            for (int i = 0; i < Parameters.Count; i++)
+            {
+                builder.Append($" (param $param{i} {Parameters[i]})");
+            }
+            builder.AppendLine($" {BuildResultString(ReturnType)}");
 
             foreach (var local in Locals)
             {
