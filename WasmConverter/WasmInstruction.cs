@@ -65,6 +65,7 @@ namespace Converter
                     return Instruction.ToString().Replace("_",".");
                 case WasmInstructions._return:
                     return "return";
+                    
                 case WasmInstructions.i32_gt_s:
                     return "i32.gt_s";
                 case WasmInstructions.i64_gt_s:
@@ -73,6 +74,7 @@ namespace Converter
                     return "i32.gt_u";
                 case WasmInstructions.i64_gt_u:
                     return "i64.gt_u";
+                    
                 case WasmInstructions.i32_lt_s:
                     return "i32.lt_s";
                 case WasmInstructions.i64_lt_s:
@@ -81,6 +83,15 @@ namespace Converter
                     return "i32.lt_u";
                 case WasmInstructions.i64_lt_u:
                     return "i64.lt_u";
+
+                case WasmInstructions.i32_rem_s:
+                    return "i32.rem_s";
+                case WasmInstructions.i64_rem_s:
+                    return "i64.rem_s";
+                case WasmInstructions.i32_rem_u:
+                    return "i32.rem_u";
+                case WasmInstructions.i64_rem_u:
+                    return "i64.rem_u";
                 default:
                     return Instruction.ToString();
             }

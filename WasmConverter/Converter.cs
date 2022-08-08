@@ -346,6 +346,40 @@ namespace Converter
                             break;
                     }
                     break;
+                case Code.Rem:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_rem_s, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.i32);
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_rem_s, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.i64);
+                            break;
+                    }
+                    break;
+                case Code.Rem_Un:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_rem_u, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.i32);
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_rem_u, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.i64);
+                            break;
+                    }
+                    break;
                 case Code.Ceq:
                     switch (func.stack.Peek())
                     {
@@ -463,6 +497,10 @@ namespace Converter
                     break;
                 case Code.Br_S:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.br, instruction.Offset, func.stack.Count, ((Instruction)instruction.Operand).Offset));
+                    break;
+                case Code.Pop:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.drop, instruction.Offset, func.stack.Count));
+                    func.stack.Pop();
                     break;
                 default:
                     Console.Error.WriteLine("Unkown opcode " + instruction.OpCode.Code);

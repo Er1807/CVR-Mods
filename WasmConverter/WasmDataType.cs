@@ -14,9 +14,10 @@ namespace Converter
     public enum WasmInstructions
     {
         i32_const, i64_const, f32_const, f64_const,
-        call, nop, _return,
+        call, nop, _return, drop,
         i32_add, i64_add, f32_add, f64_add,
         i32_sub, i64_sub, f32_sub, f64_sub,
+        i32_rem_s, i64_rem_s, i32_rem_u, i64_rem_u,
         i32_eq, i64_eq, f32_eq, f64_eq,
         i32_eqz, i64_eqz,
         i32_gt_s, i64_gt_s, f32_gt, f64_gt,
