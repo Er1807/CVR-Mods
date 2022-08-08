@@ -18,14 +18,7 @@ namespace WasmLoader
         private Store store;
         private Objectstore objects;
         private Module module;
-        private Action onApplicationStart;
-        private Action onApplicationLateStart;
-        private Action onUpdate;
-        private Action onLateUpdate;
-        private Action teleport;
-        private Action mirrottoggle1;
-        private Action mirrortoggle2;
-        private Action test;
+        private Instance instance;
 
         public static WasmLoaderMod Instance;
 
@@ -65,80 +58,64 @@ namespace WasmLoader
             new Log().Setup(linker, store, objects);
 
 
-            var instance = linker.Instantiate(store, module);
+            instance = linker.Instantiate(store, module);
 
-            onUpdate = instance.GetAction(store, "OnUpdate");
-            onLateUpdate = instance.GetAction(store, "OnLateUpdate");
-            teleport = instance.GetAction(store, "Teleport");
-            mirrottoggle1 = instance.GetAction(store, "ToggleMirror");
-            mirrortoggle2 = instance.GetAction(store, "ToggleMirror2");
-            test = instance.GetAction(store, "Test");
 
             LoggerInstance?.Msg("Loaded WASM");
 
         }
 
+        public void Excute(string method)
+        {
+            instance.GetAction(store, method)?.Invoke();
+        }
+
         public override void OnApplicationStart()
         {
             Setup();
-            if (onApplicationStart is null)
-            {
-                //Console.WriteLine("error: onApplicationStart export is missing");
-                return;
-            }
-
-            onApplicationStart();
+            Excute("OnApplicationStart");
         }
 
 
         public override void OnApplicationLateStart()
         {
-            if (onApplicationLateStart is null)
-            {
-                //Console.WriteLine("error: onApplicationLateStart export is missing");
-                return;
-            }
-
-            onApplicationLateStart();
+            Excute("OnApplicationLateStart");
         }
 
         public override void OnUpdate()
         {
-            
-            
+
+            Excute("OnUpdate");
+
             if (Input.GetKeyDown(KeyCode.P))
             {
-                teleport();
+                Excute("Teleport");
             }
             if (Input.GetKeyDown(KeyCode.O))
             {
-                mirrottoggle1();
+                Excute("ToggleMirror");
             }
             if (Input.GetKeyDown(KeyCode.I))
             {
-                mirrortoggle2();
+                Excute("ToggleMirror2");
             }
             if (Input.GetKeyDown(KeyCode.U))
             {
-                test();
+                Excute("Test");
             }
-
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+                Excute("Test2");
+            }
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                Excute("FizzBuzz");
+            }
         }
 
         public override void OnLateUpdate()
         {
-            if (onLateUpdate is null)
-            {
-                //Console.WriteLine("error: OnLateUpdate export is missing");
-                return;
-            }
-
-            onLateUpdate();
+            Excute("OnLateUpdate");
         }
-
-
-
-
-
     }
 }

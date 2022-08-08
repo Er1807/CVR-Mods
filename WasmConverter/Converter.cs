@@ -190,7 +190,11 @@ namespace Converter
                     break;
                 case Code.Stloc:
                 case Code.Stloc_S:
-                    var Stloc = (int)instruction.Operand;
+                    var Stloc = -1;
+                    if (instruction.Operand is Local)
+                        Stloc = ((Local)instruction.Operand).Index;
+                    else 
+                        Stloc = (int)instruction.Operand;
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, $"local{Stloc}"));
                     if (!func.Locals.ContainsKey($"local{Stloc}"))
                         func.Locals.Add($"local{Stloc}", func.stack.Peek());
@@ -214,7 +218,11 @@ namespace Converter
                     break;
                 case Code.Ldloc:
                 case Code.Ldloc_S:
-                    var Ldloc = (int)instruction.Operand;
+                    var Ldloc = -1;
+                    if (instruction.Operand is Local)
+                        Ldloc = ((Local)instruction.Operand).Index;
+                    else
+                        Ldloc = (int)instruction.Operand;
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"local{Ldloc}"));
                     func.stack.Push(func.Locals[$"local{Ldloc}"]);
                     break;

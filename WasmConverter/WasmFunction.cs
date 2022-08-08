@@ -98,11 +98,11 @@ namespace Converter
 
                 if (inst.Instruction == WasmInstructions.br
                     && Instructions[i + 1].Instruction == WasmInstructions.nop
-                    && Instructions.Any(x => x.Instruction == WasmInstructions.br_if && (uint)x.Operand == Instructions[i + 1].Offset))
+                    && Instructions.Any(x => x.Instruction == WasmInstructions.br_if && x.Operand is uint && (uint)x.Operand == Instructions[i + 1].Offset))
                 {
                     br = inst;
                     end = Instructions[Instructions.FindIndex(x => x.Offset == (uint)inst.Operand) - 1];
-                    brif = Instructions.Single(x => x.Instruction == WasmInstructions.br_if && (uint)x.Operand == Instructions[i + 1].Offset);
+                    brif = Instructions.Single(x => x.Instruction == WasmInstructions.br_if && x.Operand is uint && (uint)x.Operand == Instructions[i + 1].Offset);
                     end2 = Instructions[Instructions.IndexOf(brif) + 1];
 
                     Locals.Add($"for{counter}", WasmDataType.i32);

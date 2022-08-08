@@ -42,8 +42,39 @@ namespace Test
             {
                 Logtest.Msg("Current number is " + i);
             }
-            
+        }
+        public void Test2()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    Logtest.Msg("Current number i is " + i+ " j is " + j);
+                }
+            }
+        }
 
+        public void FizzBuzz()
+        {
+            for (int i = 1; i <= 100; i++)
+            {
+                if (i % 3 == 0 && i % 5 == 0)
+                {
+                    Logtest.Msg("FizzBuzz");
+                }
+                else if (i % 3 == 0)
+                {
+                    Logtest.Msg("Fizz");
+                }
+                else if (i % 5 == 0)
+                {
+                    Logtest.Msg("Buzz");
+                }
+                else
+                {
+                    Logtest.Msg(""+i);
+                }
+            }
         }
     }
 }

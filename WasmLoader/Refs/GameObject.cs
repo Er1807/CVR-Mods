@@ -62,6 +62,17 @@ namespace WasmLoader.Refs
                 
                 return objects.StoreObject(string.Concat(str1, str2));
             });
+
+            linker.DefineFunction("env", "System_String__Concat_SystemString_SystemString_SystemString_SystemString__SystemString", (Caller caller, int strP1, int strP2, int strP3, int strP4) =>
+            {
+                var str1 = objects.RetriveObject<string>(strP1, caller);
+                var str2 = objects.RetriveObject<string>(strP2, caller);
+                var str3 = objects.RetriveObject<string>(strP3, caller);
+                var str4 = objects.RetriveObject<string>(strP4, caller);
+
+
+                return objects.StoreObject(string.Concat(str1, str2, str3, str4));
+            });
         }
     }
 }
