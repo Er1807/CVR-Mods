@@ -30,71 +30,107 @@ namespace Converter
 
         public void FixControlFlow()
         {
-            var counter = 1;
             var branchInstructions = Instructions.Where(x => x.Instruction == WasmInstructions.br
                 || x.Instruction == WasmInstructions.br_if).ToList();
 
-            
-
-            foreach (var target in branchInstructions.Where(x => (uint)x.Operand < x.Offset)
-                .Distinct())
+            foreach (var inst in branchInstructions)
             {
-                var index = Instructions.FindIndex(x => x.Offset == target.Offset);
-                var index2 = Instructions.FindIndex(x => x.Offset == (uint)target.Operand);
-                Instructions.Insert(index + 1, new WasmInstruction(WasmInstructions.end, 9999));
-                Instructions.Insert(index2, new WasmInstruction(WasmInstructions.loop, 9999, $"lp{target.Operand}"));
-
-                if (Instructions[index2 - 1].Instruction == WasmInstructions.br)//loop
+                if ((uint)inst.Operand < inst.Offset)
                 {
-                    Locals.Add($"for{counter}", WasmDataType.i32);
-                    Instructions.Insert(0, new WasmInstruction(WasmInstructions.i32_const, 9999, 1));
-                    Instructions.Insert(1, new WasmInstruction(WasmInstructions.set_local, 9999, $"for{counter}"));
+                    var index = Instructions.FindLastIndex(x => x.Offset == inst.Offset);
+                    Instructions.Insert(index + 1, new WasmInstruction(WasmInstructions.end, 9999, 9999));
+                }
+                else
+                {
+                    var index = Instructions.FindLastIndex(x => x.Offset == (uint)inst.Operand);
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.end, 9999, 9999));
+                }
+            }
 
-                    Instructions.Insert(index2 + 3, new WasmInstruction(WasmInstructions.get_local, 9999, $"for{counter}"));
-                    Instructions.Insert(index2 + 4, new WasmInstruction(WasmInstructions.i32_const, 9999, 0));
-                    Instructions.Insert(index2 + 5, new WasmInstruction(WasmInstructions.set_local, 9999, $"for{counter}"));
-                    Instructions[index2 + 1].Instruction = WasmInstructions.br_if;
-                    Instructions.Insert(index2 + 6, Instructions[index2 + 1]);
-                    Instructions.RemoveAt(index2 + 1);
+            DetectForLoops();
+            DetectIfs();
+
+
+        }
+
+        public void DetectIfs()
+        {
+            WasmInstruction br = null;
+            WasmInstruction end = null;
+
+            for (int i = 0; i < Instructions.Count; i++)
+            {
+                WasmInstruction inst = Instructions[i];
+                
+                if ((inst.Instruction == WasmInstructions.br || inst.Instruction == WasmInstructions.br_if) && inst.Operand is uint)
+                {
+                    br = inst;
+                    end = Instructions[Instructions.FindIndex(x => x.Offset == (uint)inst.Operand) - 1];
+
+                    var brIndex = Instructions.IndexOf(br);
+                    var endIndex = Instructions.IndexOf(end);
+                    while (Instructions[brIndex].StackSizeBefore != 0)
+                    {
+                        brIndex--;
+                    }
+                    var res = branches.FindLast(x => x.Item1 < brIndex && x.Item2 > brIndex);
+                    if (res.Item1 != 0)
+                        brIndex = res.Item1;
+                    branches.Add((brIndex, endIndex + 1));
+                    Instructions.Insert(brIndex, new WasmInstruction(WasmInstructions.block, 9999, 9999, $"bl{inst.Operand}"));
+                    br.Operand = $"bl{inst.Operand}";
+                }
+            }
+            
+        }
+
+        public void DetectForLoops()
+        {
+            var counter = 1;
+            WasmInstruction br = null;
+            WasmInstruction end = null;
+            WasmInstruction brif = null;
+            WasmInstruction end2 = null;
+
+            for (int i = 0; i < Instructions.Count; i++)
+            {
+                WasmInstruction inst = Instructions[i];
+
+                if (inst.Instruction == WasmInstructions.br
+                    && Instructions[i + 1].Instruction == WasmInstructions.nop
+                    && Instructions.Any(x => x.Instruction == WasmInstructions.br_if && (uint)x.Operand == Instructions[i + 1].Offset))
+                {
+                    br = inst;
+                    end = Instructions[Instructions.FindIndex(x => x.Offset == (uint)inst.Operand) - 1];
+                    brif = Instructions.Single(x => x.Instruction == WasmInstructions.br_if && (uint)x.Operand == Instructions[i + 1].Offset);
+                    end2 = Instructions[Instructions.IndexOf(brif) + 1];
+
+                    Locals.Add($"for{counter}", WasmDataType.i32);
+                    Instructions.Insert(0, new WasmInstruction(WasmInstructions.i32_const, 9999,0, 1));
+                    Instructions.Insert(1, new WasmInstruction(WasmInstructions.set_local, 9999,1, $"for{counter}"));
+
+                    //loop $lp5
+                    //block $bl34
+                    //get_local $for1
+                    //i32.const 0
+                    //set_local $for1
+                    //br_if $bl34
+                    var index = Instructions.IndexOf(br);
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.set_local, 9999,9999, $"for{counter}"));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.i32_const, 9999, 9999, 0));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.get_local, 9999, 9999, $"for{counter}"));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.block, 9999, 9999, $"bl{br.Operand}"));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.loop, 9999, 9999, $"lp{brif.Operand}"));
+                    br.Instruction = WasmInstructions.br_if;
+                    br.Operand = $"bl{br.Operand}";
+                    brif.Operand = $"lp{brif.Operand}";
+
                     counter++;
                 }
-
-                index2 = Instructions.FindIndex(x => x.Offset == (uint)target.Operand);
-            
             }
 
-            foreach (var target in branchInstructions.Where(x => (uint)x.Operand > x.Offset).Distinct().OrderBy(x => (uint)x.Operand))
-            {
-                var index = Instructions.FindIndex(x => x.Offset == (uint)target.Operand);
-                var index2 = Instructions.FindIndex(x => x.Offset == target.Offset);
-                while (Instructions[index2 - 1].Instruction == WasmInstructions.get_local)
-                {
-                    index2--;
-                }
-                if(Instructions[index2 - 4].Instruction == WasmInstructions.loop)
-                {
-                    index2 -= 4;
-                    index2++;
-                }
-                var res = branches.FindLast(x => x.Item1 < index2 && x.Item2 > index2);
-                if (res.Item1 != 0)
-                    index2 = res.Item1;
-                branches.Add((index2, index + 1));
-                Instructions.Insert(index2, new WasmInstruction(WasmInstructions.block, 9999, $"bl{target.Operand}"));
-                Instructions.Insert(index + 1, new WasmInstruction(WasmInstructions.end, 9999));
-            }
-
-
-
-            foreach (var instr in branchInstructions)
-            {
-                if((uint)instr.Operand > instr.Offset)
-                    instr.Operand = $"bl{(uint)instr.Operand}";
-                else
-                    instr.Operand = $"lp{(uint)instr.Operand}";
-            }
         }
-        
+
 
         public string CreateWat()
         {

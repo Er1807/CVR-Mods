@@ -6,20 +6,22 @@ namespace Converter
 {
     public class WasmInstruction
     {
-        public WasmInstruction(WasmInstructions instruction, uint offset, object operand = null)
+        public WasmInstruction(WasmInstructions instruction, uint offset, int stackSizeBefore, object operand = null)
         {
             Instruction = instruction;
             Offset = offset;
+            StackSizeBefore = stackSizeBefore;
             Operand = operand;
         }
 
         public WasmInstructions Instruction;
         public uint Offset; //il offset
+        public int StackSizeBefore;
         public object Operand;
 
         public override string ToString()
         {
-            return $"{Offset}: {Instruction} {Operand}";
+            return $"{Offset}:({StackSizeBefore}) {Instruction} {Operand}";
         }
         public string ToInstructionString()
         {
