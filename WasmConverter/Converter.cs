@@ -29,15 +29,9 @@ namespace Converter
             var instructions = method.Body.Instructions;
             for (int i = 0; i < instructions.Count; i++)
             {
-                /*if (instructions[i].OpCode == OpCodes.Stloc_0 && instructions[i + 1].OpCode == OpCodes.Ldloc_0)
-                {
-                    instructions.RemoveAt(i);
-                    instructions.RemoveAt(i);
-                }
-                else*/
                 if (instructions[i].OpCode == OpCodes.Ldloca_S
-             && instructions[i + 1].OpCode == OpCodes.Initobj && instructions[i + 1].Operand.ToString().StartsWith("System.Nullable")
-             && instructions[i + 2].OpCode == OpCodes.Ldloc_0)
+                     && instructions[i + 1].OpCode == OpCodes.Initobj && instructions[i + 1].Operand.ToString().StartsWith("System.Nullable")
+                     && instructions[i + 2].OpCode == OpCodes.Ldloc_0)
                 {
                     instructions.RemoveAt(i + 2);
                     instructions.RemoveAt(i);
@@ -48,6 +42,21 @@ namespace Converter
             {
                 TranslateInstruction(instruction, func);
             }
+
+#if DEBUG
+            Console.WriteLine(func.Name);
+            foreach (var item in func.Parameters)
+            {
+                Console.WriteLine("Param " + item);
+            }
+            Console.WriteLine("Retr " + func.ReturnType);
+            foreach (var item in func.Instructions)
+            {
+                Console.WriteLine("Inst:" + item);
+            }
+            Console.WriteLine();
+#endif
+
             func.FixControlFlow();
             return func;
         }
@@ -206,7 +215,7 @@ namespace Converter
                     if (!func.Locals.ContainsKey($"temp{func.stack.Peek()}"))
                         func.Locals.Add($"temp{func.stack.Peek()}", func.stack.Peek());
                     func.stack.Push(func.stack.Peek());
-                    
+
                     break;
 
                 case Code.Call:
