@@ -12,6 +12,12 @@ namespace Test
 {
     public class Class1
     {
+        private GameObject obj;
+        public void Setup()
+        {
+            obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
+        }
+        
         public void Teleport()
         {
             MovementSystem.Instance.TeleportTo(new Vector3(93, 87, -40));
@@ -19,7 +25,6 @@ namespace Test
 
         public void ToggleMirror()
         {
-            var obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
             var state = obj.activeSelf;
             state = !state;
             obj.SetActive(state);

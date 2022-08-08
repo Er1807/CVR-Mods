@@ -11,15 +11,17 @@ namespace Converter
     {
         public List<WasmFunction> Functions = new List<WasmFunction>();
         public Dictionary<string, int> Strings = new Dictionary<string, int>();
+        public Dictionary<string, WasmDataType> Fields = new Dictionary<string, WasmDataType>();
         public int MemoryPtr = 4;
         
+
         public string CreateWat()
         {
             var builder = new StringBuilder();
             builder.AppendLine("(module");
             foreach (var str in Strings)
             {
-                builder.Append($"  (data (i32.const {str.Value}) \"{str.Key}\\00\")\n");
+                builder.AppendLine($"  (data (i32.const {str.Value}) \"{str.Key}\\00\")");
             }
             //int at 0
             //data
@@ -40,6 +42,11 @@ namespace Converter
                     }
                     
                     
+                }
+
+                foreach (var field in Fields)
+                {
+                    builder.AppendLine($"  (global ${field.Key} (mut {field.Value}) ({field.Value}.const 0))");
                 }
                 if (func is MethodDef method)
                 {

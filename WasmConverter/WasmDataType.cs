@@ -25,6 +25,7 @@ namespace Converter
         i32_lt_s, i64_lt_s, f32_lt, f64_lt,
         i32_lt_u, i64_lt_u,
         get_local, set_local, tee_local,
+        get_global, set_global,
         br, br_if, block, loop, end
     }
 }

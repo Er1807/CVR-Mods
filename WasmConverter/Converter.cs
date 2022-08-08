@@ -17,7 +17,9 @@ namespace Converter
             func.Name = method.Name;
             func.ReturnType = GetWasmType(method.ReturnType);
             func.Method = method;
+
             
+
             foreach (var parameter in method.Parameters.Where(x => !x.IsHiddenThisParameter))
             {
                 func.Parameters.Add(GetWasmType(parameter.Type).Value);
@@ -253,6 +255,13 @@ namespace Converter
                 case Code.Call:
                 case Code.Callvirt:
                 case Code.Ldsfld:
+                case Code.Ldfld:
+                    if (instruction.Operand is FieldDef fieldDef && fieldDef.DeclaringType == func.Method.DeclaringType)
+                    {
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, fieldDef.Name.ToString()));
+                        func.stack.Push(func.Module.Fields[fieldDef.Name]); 
+                        break;
+                    }
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, instruction.Operand));
                     var method = instruction.Operand as MethodDef;
                     var member = instruction.Operand as MemberRef;
@@ -277,6 +286,15 @@ namespace Converter
                     {
                         func.stack.Push(type.Value);
                     }
+                    break;
+                case Code.Stfld:
+                    if (instruction.Operand is FieldDef fieldDef2 && fieldDef2.DeclaringType == func.Method.DeclaringType)
+                    {
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.set_global, instruction.Offset, func.stack.Count, fieldDef2.Name.ToString()));
+                        func.stack.Pop();
+                        break;
+                    }
+                    Console.Error.WriteLine("Unkown opcode op " + instruction.OpCode.Code);
                     break;
                 case Code.Newobj:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, instruction.Operand));
