@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\3rdParty\ml\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\3rdParty\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -56,6 +59,9 @@
       <HintPath>..\3rdParty\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\3rdParty\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="Wasmtime.Framework">
       <HintPath>..\Wasmtime.Framework.dll</HintPath>
       <Private>False</Private>
@@ -68,6 +74,8 @@
     <Compile Include="Refs\Log.cs" />
     <Compile Include="Refs\GameObject.cs" />
     <Compile Include="Refs\IRef.cs" />
+    <Compile Include="WasmBehavior.cs" />
+    <Compile Include="WasmInteractableAction.cs" />
     <Compile Include="WasmLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

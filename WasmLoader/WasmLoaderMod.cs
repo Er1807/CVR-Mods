@@ -4,6 +4,10 @@ using WasmLoader;
 using WasmLoader.Refs;
 using UnityEngine;
 using Wasmtime;
+using ABI.CCK.Components;
+using System.Collections.Generic;
+using System.Reflection;
+using HarmonyLib;
 
 [assembly: MelonInfo(typeof(WasmLoaderMod), "WasmLoader", "1.0.1", "Eric van Fandenfart")]
 [assembly: MelonGame]
@@ -17,7 +21,7 @@ namespace WasmLoader
         private Linker linker;
         private Store store;
         private Objectstore objects;
-        private Module module;
+        private Wasmtime.Module module;
         private Instance instance;
 
         public static WasmLoaderMod Instance;
@@ -50,7 +54,7 @@ namespace WasmLoader
                 engine = null;
             }
             engine = new Engine();
-            module = Module.FromTextFile(engine, "memory.wat");
+            module = Wasmtime.Module.FromTextFile(engine, "memory.wat");
             linker = new Linker(engine);
             store = new Store(engine);
             objects = new Objectstore(store);
@@ -74,8 +78,24 @@ namespace WasmLoader
         {
             Setup();
             Excute("OnApplicationStart");
+
+            var action = new CVRInteractableAction();
+            action.actionType = CVRInteractableAction.ActionRegister.OnGrab;
+            var innt = new CVRInteractable();
+            innt.actions.Add(action);
         }
 
+        public void SetupHarmony()
+        {
+            HarmonyInstance.Patch(typeof(CVRInteractable).GetMethod(nameof(CVRInteractable.OnEnable), BindingFlags.Instance | BindingFlags.Public), prefix: new HarmonyMethod(typeof(WasmLoaderMod).GetMethod("ConsumeSamples", BindingFlags.Static | BindingFlags.Public)));
+        }
+
+        public void SetupGameobject(GameObject obj, Instance wasm)
+        {
+
+            var interactable = obj.AddComponent<CVRInteractable>();
+            
+        }
 
         public override void OnApplicationLateStart()
         {
