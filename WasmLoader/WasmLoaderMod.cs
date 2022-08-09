@@ -15,127 +15,87 @@ using HarmonyLib;
 namespace WasmLoader
 {
 
+    public class WasmInstance
+    {
+        public Engine engine;
+        public Linker linker;
+        public Store store;
+        public Objectstore objects;
+        public Wasmtime.Module module;
+        public Instance instance;
+        internal WasmBehavior_Internal behavior;
+    }
+
     public class WasmLoaderMod : MelonMod
     {
-        private Engine engine;
-        private Linker linker;
-        private Store store;
-        private Objectstore objects;
-        private Wasmtime.Module module;
-        private Instance instance;
-
         public static WasmLoaderMod Instance;
 
+        public Dictionary<CVRInteractable, WasmInstance> WasmInstances = new Dictionary<CVRInteractable, WasmInstance>();
         public WasmLoaderMod()
         {
             Instance = this;
+            //WasmLoader.WasmLoaderMod.Instance.SetupGameobject(GameObject.Find("cvrhubfin/cvrlogo"), WasmLoader.WasmLoaderMod.Instance.GetWasmInstance(System.IO.File.ReadAllText("memory.wat")));
+            
         }
 
-        public void Setup()
+        public void UnloadWasmInstance(WasmInstance instance)
         {
-            if (store != null)
-            {
-                store.Dispose();
-                store = null;
-            }
-            if (linker != null)
-            {
-                linker.Dispose();
-                linker = null;
-            }
-            if (module != null)
-            {
-                module.Dispose();
-                module = null;
-            }
-            if (engine != null)
-            {
-                engine.Dispose();
-                engine = null;
-            }
-            engine = new Engine();
-            module = Wasmtime.Module.FromTextFile(engine, "memory.wat");
-            linker = new Linker(engine);
-            store = new Store(engine);
-            objects = new Objectstore(store);
+            instance.store.Dispose();
+            instance.linker.Dispose();
+            instance.module.Dispose();
+            instance.engine.Dispose();
+        }
+
+
+        public WasmInstance GetWasmInstance(string wasmCode)
+        {
+            var engine = new Engine();
+            var module = Wasmtime.Module.FromText(engine, Guid.NewGuid().ToString(), wasmCode);
+            var linker = new Linker(engine);
+            var store = new Store(engine);
+            var objects = new Objectstore(store);
             new GameObject_Ref().Setup(linker, store, objects);
             new Log().Setup(linker, store, objects);
 
+            
 
-            instance = linker.Instantiate(store, module);
-
+            var instance = linker.Instantiate(store, module);
+            
 
             LoggerInstance?.Msg("Loaded WASM");
-
+            return new WasmInstance()
+            {
+                engine = engine,
+                linker = linker,
+                store = store,
+                objects = objects,
+                module = module,
+                instance = instance
+            };
         }
 
-        public void Excute(string method)
+        public void SetupGameobject(GameObject obj, WasmInstance wasm)
         {
-            instance.GetAction(store, method)?.Invoke();
+
+            var interactable = obj.AddComponent<CVRInteractable>();
+            interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnGrab });
+            interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnDrop });
+            interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnInteractUp });
+            interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnInteractDown });
+            var behavior = obj.AddComponent<WasmBehavior_Internal>();
+            behavior.Instance = wasm;
+            wasm.behavior = behavior;
+            WasmInstances.Add(interactable, wasm);
         }
 
         public override void OnApplicationStart()
         {
-            Setup();
-            Excute("OnApplicationStart");
-
-            var action = new CVRInteractableAction();
-            action.actionType = CVRInteractableAction.ActionRegister.OnGrab;
-            var innt = new CVRInteractable();
-            innt.actions.Add(action);
+            Patches.SetupHarmony();
         }
-
-        public void SetupHarmony()
-        {
-            HarmonyInstance.Patch(typeof(CVRInteractable).GetMethod(nameof(CVRInteractable.OnEnable), BindingFlags.Instance | BindingFlags.Public), prefix: new HarmonyMethod(typeof(WasmLoaderMod).GetMethod("ConsumeSamples", BindingFlags.Static | BindingFlags.Public)));
-        }
-
-        public void SetupGameobject(GameObject obj, Instance wasm)
-        {
-
-            var interactable = obj.AddComponent<CVRInteractable>();
-            
-        }
-
-        public override void OnApplicationLateStart()
-        {
-            Excute("OnApplicationLateStart");
-        }
-
+        
         public override void OnUpdate()
         {
-
-            Excute("OnUpdate");
-
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                Excute("Teleport");
-            }
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                Excute("ToggleMirror");
-            }
-            if (Input.GetKeyDown(KeyCode.I))
-            {
-                Excute("ToggleMirror2");
-            }
-            if (Input.GetKeyDown(KeyCode.U))
-            {
-                Excute("Test");
-            }
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                Excute("Test2");
-            }
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                Excute("FizzBuzz");
-            }
-        }
-
-        public override void OnLateUpdate()
-        {
-            Excute("OnLateUpdate");
+            
         }
     }
 }

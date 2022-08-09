@@ -44,15 +44,17 @@ namespace Converter
                     
                 }
 
-                foreach (var field in Fields)
-                {
-                    builder.AppendLine($"  (global ${field.Key} (mut {field.Value}) ({field.Value}.const 0))");
-                }
+                
                 if (func is MethodDef method)
                 {
                     var name = WasmInstruction.ConvertMethod(method.DeclaringType.FullName, method.Name, method.HasThis, method.GetParams(), method.ReturnType);
                     builder.AppendLine($"  (import \"env\" \"{name}\"(func ${name} {WasmFunction.BuildParamString(method.GetParams().Select(x => Converter.GetWasmType(x).Value).ToList(), true)} {WasmFunction.BuildResultString(Converter.GetWasmType(method.ReturnType))}))");
                 }
+            }
+
+            foreach (var field in Fields)
+            {
+                builder.AppendLine($"  (global ${field.Key} (mut {field.Value}) ({field.Value}.const 0))");
             }
 
             foreach (var function in Functions)

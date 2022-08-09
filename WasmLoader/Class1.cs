@@ -10,16 +10,18 @@ using WasmLoader;
 
 namespace Test
 {
-    public class Class1
+    public class Class1 : WasmBehavior
     {
         private GameObject obj;
-        public void Setup()
+        public override void Start()
         {
             obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
+            Logtest.Msg("Initialied W# Instance");
         }
-        
-        public void Teleport()
+
+        public override void InteractDown()
         {
+            Logtest.Msg("Teleported on InteractDown");
             MovementSystem.Instance.TeleportTo(new Vector3(93, 87, -40));
         }
 

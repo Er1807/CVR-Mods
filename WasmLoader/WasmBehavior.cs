@@ -21,8 +21,11 @@ namespace WasmLoader
         public virtual void OnTriggerEnter(Collision collision) { }
         public virtual void OnTriggerExit(Collision other) { }
         public virtual void OnTriggerStay(Collision collisionInfo) { }
-        public virtual void OnInteract() { }
+        public virtual void InteractDown() { }
+        public virtual void InteractUp() { }
         public virtual void OnPlayerJoined() { }
         public virtual void OnPlayerLeft() { }
+        public virtual void Grab() { }
+        public virtual void Drop() { }
     }
 }
