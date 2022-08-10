@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 using Wasmtime;
 
 namespace WasmLoader.Refs
@@ -63,6 +64,16 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(string.Concat(str1, str2));
             });
 
+            linker.DefineFunction("env", "System_String__Concat_SystemString_SystemString_SystemString__SystemString", (Caller caller, int strP1, int strP2, int strP3) =>
+            {
+                var str1 = objects.RetriveObject<string>(strP1, caller);
+                var str2 = objects.RetriveObject<string>(strP2, caller);
+                var str3 = objects.RetriveObject<string>(strP3, caller);
+
+
+                return objects.StoreObject(string.Concat(str1, str2, str3));
+            });
+            
             linker.DefineFunction("env", "System_String__Concat_SystemString_SystemString_SystemString_SystemString__SystemString", (Caller caller, int strP1, int strP2, int strP3, int strP4) =>
             {
                 var str1 = objects.RetriveObject<string>(strP1, caller);
@@ -72,7 +83,17 @@ namespace WasmLoader.Refs
 
 
                 return objects.StoreObject(string.Concat(str1, str2, str3, str4));
+            }); 
+            
+            linker.DefineFunction("env", "UnityEngine_UI_Text__set_text_this_SystemString__SystemVoid", (Caller caller, int text, int strP) =>
+            {
+                var test = objects.RetriveObject<Text>(text, caller);
+                var str = objects.RetriveObject<string>(strP, caller);
+                test.text = str;
+
+               
             });
         }
+        
     }
 }

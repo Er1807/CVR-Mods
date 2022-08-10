@@ -61,6 +61,11 @@ namespace Converter
             {
                 builder.Append($"  (export \"{function.Name}\" (func ${function.Name}))\n");
             }
+            foreach (var field in Fields)
+            {
+               
+                builder.AppendLine($"  (export \"{field.Key}\"(global ${field.Key}))");
+            }
             builder.AppendLine("  (memory (export \"memory\") 1 2)");
 
             foreach (var func in Functions)

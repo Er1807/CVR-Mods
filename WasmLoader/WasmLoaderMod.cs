@@ -8,6 +8,8 @@ using ABI.CCK.Components;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using ABI_RC.Core;
+using UnityEngine.UI;
 
 [assembly: MelonInfo(typeof(WasmLoaderMod), "WasmLoader", "1.0.1", "Eric van Fandenfart")]
 [assembly: MelonGame]
@@ -87,10 +89,12 @@ namespace WasmLoader
             wasm.behavior = behavior;
             WasmInstances.Add(interactable, wasm);
         }
-
+        
         public override void OnApplicationStart()
         {
             Patches.SetupHarmony();
+            var arr = (HashSet<Type>) typeof(CVRTools).GetField("componentWhiteList", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+            arr.Add(typeof(WasmLoaderTest));
         }
         
         public override void OnUpdate()

@@ -287,6 +287,16 @@ namespace Converter
                         func.stack.Push(type.Value);
                     }
                     break;
+                case Code.Ldflda:
+                    if (instruction.Operand is FieldDef fieldDefa && fieldDefa.DeclaringType == func.Method.DeclaringType)
+                    {
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, fieldDefa.Name.ToString()));
+                        func.stack.Push(func.Module.Fields[fieldDefa.Name]);
+                        break;
+                    }
+                    Console.Error.WriteLine("Missing ldflda");
+                    break;
+
                 case Code.Stfld:
                     if (instruction.Operand is FieldDef fieldDef2 && fieldDef2.DeclaringType == func.Method.DeclaringType)
                     {

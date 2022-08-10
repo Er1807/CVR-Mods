@@ -38,7 +38,7 @@ namespace WasmLoader
         {
             if (!WasmLoaderMod.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
-            instance.behavior.InteractDown();
+            instance.behavior.InteractUp();
         }
     }
 }

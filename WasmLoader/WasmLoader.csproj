@@ -62,12 +62,19 @@
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>..\3rdParty\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\3rdParty\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\3rdParty\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
     <Reference Include="Wasmtime.Framework">
       <HintPath>..\Wasmtime.Framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class1 - Kopieren.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Objectstore.cs" />
@@ -80,6 +87,7 @@
     <Compile Include="WasmInteractableAction.cs" />
     <Compile Include="WasmLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WasmLoaderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="wasmtime.dll">
