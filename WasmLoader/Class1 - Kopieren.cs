@@ -1,4 +1,5 @@
-﻿using ABI_RC.Systems.MovementSystem;
+﻿using ABI_RC.Core.Player;
+using ABI_RC.Systems.MovementSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,20 @@ namespace Test
             Counter = Counter + 1;
             obj.text = "Button was pressed " + Counter + " Times";
             Logtest.Msg("Incremented Counter");
+        }
+        public override void OnPlayerJoined(CVRPlayerEntity player)
+        {
+            var t = obj.text;
+            t = t + "Joined: " + player.Username + "\n";
+            obj.text = t;
+            Logtest.Msg("Joined: " + player.Username);
+        }
+        public override void OnPlayerLeft(CVRPlayerEntity player)
+        {
+            var t = obj.text;
+            t = t + "Left: " + player.Username + "\n";
+            obj.text = t;
+            Logtest.Msg("Left: " + player.Username);
         }
 
     }

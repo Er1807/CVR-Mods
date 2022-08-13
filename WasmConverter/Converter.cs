@@ -259,13 +259,13 @@ namespace Converter
                     if (instruction.Operand is FieldDef fieldDef && fieldDef.DeclaringType == func.Method.DeclaringType)
                     {
                         func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, fieldDef.Name.ToString()));
-                        func.stack.Push(func.Module.Fields[fieldDef.Name]); 
+                        func.stack.Push(GetWasmType(func.Module.Fields[fieldDef.Name]).Value); 
                         break;
                     }
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, instruction.Operand));
                     var method = instruction.Operand as MethodDef;
                     var member = instruction.Operand as MemberRef;
-                    if ((member?.HasThis ?? false) || (method?.HasThis ?? false))
+                    if ((member?.HasThis ?? false) || (method?.HasThis ?? false) || (member?.IsFieldRef ?? false))
                     {
                         func.stack.Pop();
                     }
@@ -291,7 +291,7 @@ namespace Converter
                     if (instruction.Operand is FieldDef fieldDefa && fieldDefa.DeclaringType == func.Method.DeclaringType)
                     {
                         func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, fieldDefa.Name.ToString()));
-                        func.stack.Push(func.Module.Fields[fieldDefa.Name]);
+                        func.stack.Push(GetWasmType(func.Module.Fields[fieldDefa.Name]).Value);
                         break;
                     }
                     Console.Error.WriteLine("Missing ldflda");

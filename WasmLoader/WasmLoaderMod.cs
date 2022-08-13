@@ -36,8 +36,6 @@ namespace WasmLoader
         public WasmLoaderMod()
         {
             Instance = this;
-            //WasmLoader.WasmLoaderMod.Instance.SetupGameobject(GameObject.Find("cvrhubfin/cvrlogo"), WasmLoader.WasmLoaderMod.Instance.GetWasmInstance(System.IO.File.ReadAllText("memory.wat")));
-            
         }
 
         public void UnloadWasmInstance(WasmInstance instance)
@@ -94,7 +92,7 @@ namespace WasmLoader
         {
             Patches.SetupHarmony();
             var arr = (HashSet<Type>) typeof(CVRTools).GetField("componentWhiteList", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-            arr.Add(typeof(WasmLoaderTest));
+            arr.Add(typeof(WasmLoaderBehavior));
         }
         
         public override void OnUpdate()

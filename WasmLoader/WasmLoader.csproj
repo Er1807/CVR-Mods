@@ -87,7 +87,7 @@
     <Compile Include="WasmInteractableAction.cs" />
     <Compile Include="WasmLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WasmLoaderTest.cs" />
+    <Compile Include="WasmLoaderBehavior.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="wasmtime.dll">

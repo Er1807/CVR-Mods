@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ABI_RC.Core.Player;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,8 +24,8 @@ namespace WasmLoader
         public virtual void OnTriggerStay(Collision collisionInfo) { }
         public virtual void InteractDown() { }
         public virtual void InteractUp() { }
-        public virtual void OnPlayerJoined() { }
-        public virtual void OnPlayerLeft() { }
+        public virtual void OnPlayerJoined(CVRPlayerEntity player) { }
+        public virtual void OnPlayerLeft(CVRPlayerEntity player) { }
         public virtual void Grab() { }
         public virtual void Drop() { }
     }

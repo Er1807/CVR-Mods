@@ -11,7 +11,7 @@ namespace Converter
     {
         public List<WasmFunction> Functions = new List<WasmFunction>();
         public Dictionary<string, int> Strings = new Dictionary<string, int>();
-        public Dictionary<string, WasmDataType> Fields = new Dictionary<string, WasmDataType>();
+        public Dictionary<string, TypeSig> Fields = new Dictionary<string, TypeSig>();
         public int MemoryPtr = 4;
         
 
@@ -35,6 +35,11 @@ namespace Converter
                         name = WasmInstruction.ConvertMethod(member.Class.FullName, member.Name, false, member.GetParams(), member.ReturnType ?? member?.FieldSig.Type);
                         builder.AppendLine($"  (import \"env\" \"{name}\"(func ${name} {WasmFunction.BuildParamString(member.GetParams().Select(x => Converter.GetWasmType(x).Value).ToList(), true)} {WasmFunction.BuildResultString(Converter.GetWasmType(member.DeclaringType.FullName))}))");
                     }
+                    else if (member.IsFieldRef)
+                    {
+                        name = WasmInstruction.ConvertMethod(member.Class.FullName, member.Name, member.HasThis, member.GetParams(), member.ReturnType ?? member?.FieldSig.Type);
+                        builder.AppendLine($"  (import \"env\" \"{name}\"(func ${name} {WasmFunction.BuildParamString(new List<WasmDataType>() { WasmDataType.i32 }, true, member.HasThis)} {WasmFunction.BuildResultString(Converter.GetWasmType(member.ReturnType ?? member.FieldSig?.Type))}))");
+                    }
                     else
                     {
                         name = WasmInstruction.ConvertMethod(member.Class.FullName, member.Name, member.HasThis, member.GetParams(), member.ReturnType ?? member?.FieldSig.Type);
@@ -44,7 +49,6 @@ namespace Converter
                     
                 }
 
-                
                 if (func is MethodDef method)
                 {
                     var name = WasmInstruction.ConvertMethod(method.DeclaringType.FullName, method.Name, method.HasThis, method.GetParams(), method.ReturnType);
@@ -54,7 +58,7 @@ namespace Converter
 
             foreach (var field in Fields)
             {
-                builder.AppendLine($"  (global ${field.Key} (mut {field.Value}) ({field.Value}.const 0))");
+                builder.AppendLine($"  (global ${field.Key} (mut {Converter.GetWasmType(field.Value)}) ({Converter.GetWasmType(field.Value)}.const 0))");
             }
 
             foreach (var function in Functions)

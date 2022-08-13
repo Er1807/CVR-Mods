@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ABI_RC.Core.Player;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace WasmLoader
         {
             instance.instance.GetAction(instance.store, method)?.Invoke();
         }
-        public void Excute<T>(WasmInstance instance, string method, T parameter)
+        public void Execute<T>(WasmInstance instance, string method, T parameter)
         {
             var paramAsId = instance.objects.StoreObject(parameter);
             instance.instance.GetAction<int>(instance.store, method)?.Invoke(paramAsId);
@@ -47,41 +48,29 @@ namespace WasmLoader
         }
         public void OnCollisionEnter(Collision collision)
         {
-            Excute(Instance, nameof(OnCollisionEnter), collision);
+            Execute(Instance, nameof(OnCollisionEnter), collision);
 
         }
         public void OnCollisionExit(Collision other)
         {
-            Excute(Instance, nameof(OnCollisionExit), other);
+            Execute(Instance, nameof(OnCollisionExit), other);
         }
         public void OnCollisionStay(Collision collisionInfo)
         {
-            Excute(Instance, nameof(OnCollisionStay), collisionInfo);
+            Execute(Instance, nameof(OnCollisionStay), collisionInfo);
         }
         public void OnTriggerEnter(Collision collision)
         {
-            Excute(Instance, nameof(OnTriggerEnter), collision);
+            Execute(Instance, nameof(OnTriggerEnter), collision);
         }
         public void OnTriggerExit(Collision other)
         {
-            Excute(Instance, nameof(OnTriggerExit), other);
+            Execute(Instance, nameof(OnTriggerExit), other);
         }
         public void OnTriggerStay(Collision collisionInfo)
         {
-            Excute(Instance, nameof(OnTriggerStay), collisionInfo);
+            Execute(Instance, nameof(OnTriggerStay), collisionInfo);
         }
-        
-
-        //Not yet
-        public void OnPlayerJoined()
-        {
-            Execute(Instance, nameof(OnPlayerJoined));
-        }
-        public void OnPlayerLeft()
-        {
-            Execute(Instance, nameof(OnPlayerLeft));
-        }
-
         //Via Patches
 
         public void Grab()
@@ -100,6 +89,16 @@ namespace WasmLoader
         public void InteractDown()
         {
             Execute(Instance, nameof(InteractDown));
+        }
+
+        public void OnPlayerJoined(CVRPlayerEntity player)
+        {
+            Execute(Instance, nameof(OnPlayerJoined), player);
+        }  
+        
+        public void OnPlayerLeft(CVRPlayerEntity player)
+        {
+            Execute(Instance, nameof(OnPlayerLeft), player);
         }
     }
 }

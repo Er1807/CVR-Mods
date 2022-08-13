@@ -19,8 +19,7 @@ namespace Converter
 
             foreach (var field in type.Fields)
             {
-                WasmDataType? wasmType = Converter.GetWasmType(field.FieldType);
-                wasmModule.Fields.Add(field.Name, wasmType.Value);
+                wasmModule.Fields.Add(field.Name, field.FieldType);
             }
 
             foreach (var method in type.Methods.Where(x => !x.IsConstructor))
@@ -28,7 +27,18 @@ namespace Converter
                 var mem = new Converter().Convert(wasmModule, method);
             }
             Console.WriteLine(wasmModule.CreateWat());
-            
+
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            foreach (var item in wasmModule.Fields)
+            {
+
+                Console.Write($"{item.Value}:{item.Key}|");
+            }
+
             Console.ReadLine();
         }
     }

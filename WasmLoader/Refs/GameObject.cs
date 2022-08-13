@@ -1,4 +1,5 @@
-﻿using ABI_RC.Systems.MovementSystem;
+﻿using ABI_RC.Core.Player;
+using ABI_RC.Systems.MovementSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,16 +84,27 @@ namespace WasmLoader.Refs
 
 
                 return objects.StoreObject(string.Concat(str1, str2, str3, str4));
-            }); 
-            
+            });
+
             linker.DefineFunction("env", "UnityEngine_UI_Text__set_text_this_SystemString__SystemVoid", (Caller caller, int text, int strP) =>
             {
                 var test = objects.RetriveObject<Text>(text, caller);
                 var str = objects.RetriveObject<string>(strP, caller);
                 test.text = str;
-
-               
             });
+
+            linker.DefineFunction("env", "UnityEngine_UI_Text__get_text_this__SystemString", (Caller caller, int text) =>
+            {
+                var test = objects.RetriveObject<Text>(text, caller);
+               return objects.StoreObject(test.text);
+            });
+
+            linker.DefineFunction("env", "ABI_RC_Core_Player_CVRPlayerEntity__Username__SystemString", (Caller caller, int player) =>
+            {
+                var test = objects.RetriveObject<CVRPlayerEntity>(player, caller);
+                return objects.StoreObject(test?.Username);
+            }); 
+            
         }
         
     }
