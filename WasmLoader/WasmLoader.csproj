@@ -82,6 +82,7 @@
     <Compile Include="Refs\Log.cs" />
     <Compile Include="Refs\GameObject.cs" />
     <Compile Include="Refs\IRef.cs" />
+    <Compile Include="Refs\String.cs" />
     <Compile Include="WasmBehavior_Internal.cs" />
     <Compile Include="WasmBehavior.cs" />
     <Compile Include="WasmInteractableAction.cs" />

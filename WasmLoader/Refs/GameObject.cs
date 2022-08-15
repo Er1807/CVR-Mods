@@ -1,6 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.MovementSystem;
-using System;
+    
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,8 +60,8 @@ namespace WasmLoader.Refs
             {
                 var str1 = objects.RetriveObject<string>(strP1, caller);
                 var str2 = objects.RetriveObject<string>(strP2, caller);
-                
-                
+
+
                 return objects.StoreObject(string.Concat(str1, str2));
             });
 
@@ -74,14 +74,13 @@ namespace WasmLoader.Refs
 
                 return objects.StoreObject(string.Concat(str1, str2, str3));
             });
-            
+
             linker.DefineFunction("env", "System_String__Concat_SystemString_SystemString_SystemString_SystemString__SystemString", (Caller caller, int strP1, int strP2, int strP3, int strP4) =>
             {
                 var str1 = objects.RetriveObject<string>(strP1, caller);
                 var str2 = objects.RetriveObject<string>(strP2, caller);
                 var str3 = objects.RetriveObject<string>(strP3, caller);
                 var str4 = objects.RetriveObject<string>(strP4, caller);
-
 
                 return objects.StoreObject(string.Concat(str1, str2, str3, str4));
             });
@@ -96,16 +95,27 @@ namespace WasmLoader.Refs
             linker.DefineFunction("env", "UnityEngine_UI_Text__get_text_this__SystemString", (Caller caller, int text) =>
             {
                 var test = objects.RetriveObject<Text>(text, caller);
-               return objects.StoreObject(test.text);
+                return objects.StoreObject(test.text);
             });
 
-            linker.DefineFunction("env", "ABI_RC_Core_Player_CVRPlayerEntity__Username__SystemString", (Caller caller, int player) =>
+            linker.DefineFunction("env", "ABI_RC_Core_Player_CVRPlayerEntity__Username__SyystemString", (Caller caller, int player) =>
             {
                 var test = objects.RetriveObject<CVRPlayerEntity>(player, caller);
                 return objects.StoreObject(test?.Username);
-            }); 
-            
+            });
+
+
+            linker.DefineFunction("env", "System_String__get_Length_this__SystemInt32", (Caller caller, System.Int32 parameter_this) => {
+                var resolved_this = objects.RetriveObject<System.String>(parameter_this, caller);
+                var result = resolved_this.Length;
+                return result;
+            });
+
+            linker.DefineFunction("env", "System_String__get_Length_this__SystemInt32", (Caller caller, System.Int32 parameter_this) => {
+                var resolved_this = objects.RetriveObject<System.String>(parameter_this, caller);
+                var result = resolved_this.Length;
+                return result;
+            });
         }
-        
-    }
+        }
 }
