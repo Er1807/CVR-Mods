@@ -1,0 +1,19 @@
+{
+  "_id": 68,
+  "name": "MuteTTS",
+  "modversion": "1.1.1",
+  "gameversion": "2022r166p1",
+  "loaderversion": "v0.5.4",
+  "modtype": "Mod",
+  "author": "Eric van Fandenfart",
+  "description": "Allows you to use TTS directly in CVR. Only works on Windows. The Button is in Settings -> Implementation",
+  "searchtags": [
+    "Mute", "TTS", "Speech", "Voice"
+  ],
+  "requirements": [
+  ],
+  "downloadlink": "https://github.com/Er1807/CVR-Mods/releases/download/MuteTTS1.1.1/MuteTTS.dll",
+  "sourcelink": "https://github.com/Er1807/CVR-Mods/tree/main/MuteTTS",
+  "changelog": "Removed bug that needed VRC",
+  "embedcolor": "7F60CA"
+}
