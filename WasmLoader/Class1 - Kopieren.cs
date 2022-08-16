@@ -19,6 +19,7 @@ namespace Test
         public override void Start()
         {
             Counter = 0;
+            obj = GameObject.Find("Canvas/Text").GetComponent(typeof(Text)) as Text;
             Logtest.Msg("Initialied Counter W# Instance");
         }
 
@@ -31,14 +32,14 @@ namespace Test
         public override void OnPlayerJoined(CVRPlayerEntity player)
         {
             var t = obj.text;
-            t = t + "Joined: " + player.Username + "\n";
+            t = t + "Joined: " + player.Username+Environment.NewLine;
             obj.text = t;
             Logtest.Msg("Joined: " + player.Username);
         }
         public override void OnPlayerLeft(CVRPlayerEntity player)
         {
             var t = obj.text;
-            t = t + "Left: " + player.Username + "\n";
+            t = t + "Left: " + player.Username + Environment.NewLine;
             obj.text = t;
             Logtest.Msg("Left: " + player.Username);
         }

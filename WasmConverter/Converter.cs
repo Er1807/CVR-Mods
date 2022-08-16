@@ -256,6 +256,8 @@ namespace Converter
                 case Code.Callvirt:
                 case Code.Ldsfld:
                 case Code.Ldfld:
+                    if (instruction.Operand is MemberRef m && m.Name == "GetTypeFromHandle")
+                        return;
                     if (instruction.Operand is FieldDef fieldDef && fieldDef.DeclaringType == func.Method.DeclaringType)
                     {
                         func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, fieldDef.Name.ToString()));
@@ -297,6 +299,11 @@ namespace Converter
                     Console.Error.WriteLine("Missing ldflda");
                     break;
 
+                case Code.Ldtoken:
+                    var ldtoken = instruction.Operand as TypeRef;
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, ldtoken.FullName.Replace(".","_")+"__Type"));
+                    func.stack.Push(WasmDataType.i32);
+                    break;
                 case Code.Stfld:
                     if (instruction.Operand is FieldDef fieldDef2 && fieldDef2.DeclaringType == func.Method.DeclaringType)
                     {
@@ -323,6 +330,7 @@ namespace Converter
                 case Code.Ret:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions._return, instruction.Offset, func.stack.Count));
                     break;
+                case Code.Isinst:
                 case Code.Nop:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.nop, instruction.Offset, func.stack.Count));
                     break;

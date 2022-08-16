@@ -25,7 +25,7 @@ namespace Converter
             }
             //int at 0
             //data
-            foreach (var func in Functions.SelectMany(x=>x.Instructions).Select(x=>x.Operand).Distinct().Where(x=>x is MemberRef || x is MethodDef))
+            foreach (var func in Functions.SelectMany(x=>x.Instructions).Where(x=>x.Instruction == WasmInstructions.call).Select(x=>x.Operand).Distinct())
             {
                 if(func is MemberRef member)
                 {
@@ -53,6 +53,11 @@ namespace Converter
                 {
                     var name = WasmInstruction.ConvertMethod(method.DeclaringType.FullName, method.Name, method.HasThis, method.GetParams(), method.ReturnType);
                     builder.AppendLine($"  (import \"env\" \"{name}\"(func ${name} {WasmFunction.BuildParamString(method.GetParams().Select(x => Converter.GetWasmType(x).Value).ToList(), true)} {WasmFunction.BuildResultString(Converter.GetWasmType(method.ReturnType))}))");
+                }
+                if (func is string str)
+                {
+                    
+                    builder.AppendLine($"  (import \"env\" \"{str}\"(func ${str} (result i32)))");
                 }
             }
 

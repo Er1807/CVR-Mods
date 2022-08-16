@@ -13,7 +13,7 @@ namespace WasmLoader
         public Dictionary<int, object> objects = new Dictionary<int, object>();
         public Dictionary<object, int> reverseObjects = new Dictionary<object, int>();
         public int Counter = 10000;
-        public int NullCounter = 9999;
+        public int NullCounter = 0;
         public Objectstore(Store store)
         {
             objects[NullCounter] = null;

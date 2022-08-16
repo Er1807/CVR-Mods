@@ -10,6 +10,7 @@ using System.Reflection;
 using HarmonyLib;
 using ABI_RC.Core;
 using UnityEngine.UI;
+using System.Linq;
 
 [assembly: MelonInfo(typeof(WasmLoaderMod), "WasmLoader", "1.0.1", "Eric van Fandenfart")]
 [assembly: MelonGame]
@@ -54,10 +55,13 @@ namespace WasmLoader
             var linker = new Linker(engine);
             var store = new Store(engine);
             var objects = new Objectstore(store);
-            new GameObject_Ref().Setup(linker, store, objects);
-            new Log().Setup(linker, store, objects);
 
-            
+            foreach (var item in Assembly.GetExecutingAssembly().GetTypes().Where(x => typeof(IRef).IsAssignableFrom(x) && typeof(IRef) != x))
+            {
+                var t = (Activator.CreateInstance(item) as IRef);
+                t.Setup(linker, store, objects);
+                Console.WriteLine(t.ToString());
+            }
 
             var instance = linker.Instantiate(store, module);
             
@@ -74,8 +78,23 @@ namespace WasmLoader
             };
         }
 
+        public void ClearInstances()
+        {
+            foreach (var item in WasmInstances.ToArray())
+            {
+                if((item.Key == null && !ReferenceEquals(item.Key, null))
+                    || (item.Key.gameObject == null && !ReferenceEquals(item.Key.gameObject, null)))
+                {
+                    WasmInstances.Remove(item.Key);
+                    UnloadWasmInstance(item.Value);
+                }
+            }
+        }
+
         public void SetupGameobject(GameObject obj, WasmInstance wasm)
         {
+
+            ClearInstances();
 
             var interactable = obj.AddComponent<CVRInteractable>();
             interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnGrab });
@@ -93,11 +112,6 @@ namespace WasmLoader
             Patches.SetupHarmony();
             var arr = (HashSet<Type>) typeof(CVRTools).GetField("componentWhiteList", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
             arr.Add(typeof(WasmLoaderBehavior));
-        }
-        
-        public override void OnUpdate()
-        {
-            
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +22,7 @@ namespace WasmLoader
         {
             try
             {
-                var instance = WasmLoaderMod.Instance.GetWasmInstance(WasmCode);
+                var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(WasmCode)));
 
                 foreach (var item in AttributesGameObject.GetAsList())
                 {

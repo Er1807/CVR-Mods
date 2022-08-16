@@ -26,11 +26,14 @@ namespace Converter
             {
                 var mem = new Converter().Convert(wasmModule, method);
             }
-            Console.WriteLine(wasmModule.CreateWat());
+            var str = wasmModule.CreateWat();
+            Console.WriteLine(str);
 
 
             Console.WriteLine();
             Console.WriteLine();
+
+            Console.WriteLine(Convert.ToBase64String(Encoding.UTF8.GetBytes(str)));
             Console.WriteLine();
             Console.WriteLine();
             foreach (var item in wasmModule.Fields)
