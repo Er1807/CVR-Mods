@@ -226,6 +226,7 @@ namespace MuteTTS
             ViewManager.Instance.openMenuKeyboard(currentValue);
         }
 
+        //https://github.com/SDraw/ml_mods_cvr/blob/master/ml_fpt/resources/menu.js
         public IEnumerator WaitForMainMenuView()
         {
             while (ViewManager.Instance == null)
