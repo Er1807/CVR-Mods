@@ -1,4 +1,5 @@
-﻿using Dissonance.Audio.Capture;
+﻿using ABI_RC.Core.InteractionSystem;
+using Dissonance.Audio.Capture;
 using HarmonyLib;
 using MelonLoader;
 using MuteTTS;
@@ -33,7 +34,9 @@ namespace MuteTTS
 
         //MuteTTS.MuteTTSMod.Instance.GetVoice("test")
         public static MuteTTSMod Instance;
-        
+
+        public static Action<string> OnKeyboardSubmitted;
+
         public override void OnApplicationStart()
         {
             //MuteTTS.MuteTTSMod.Instance.useVoiceSetting.Value = 1;
@@ -51,7 +54,7 @@ namespace MuteTTS
             TTSVolume = category.CreateEntry("TTS Volume", 1f, description: "Value between 0 and 1");
             TTSSpeed = category.CreateEntry("TTS Speed", 1f);
 
-            MelonCoroutines.Start(WaitForUi());
+            MelonCoroutines.Start(WaitForMainMenuView());
 
             ExtractExecutable();
 
@@ -168,21 +171,6 @@ namespace MuteTTS
             return startInfo;
         }
 
-        /*private void CreateTextPopup()
-        {
-            var controller = VRCPlayer.field_Internal_Static_VRCPlayer_0.GetComponent<GamelikeInputController>();
-            controller.enabled = false;
-
-            BuiltinUiUtils.ShowInputPopup("MuteTTS", "", InputField.InputType.Standard, false, "Send", (message, _, _2) =>
-            {
-                controller.enabled = true;
-                GetVoice(message);
-            },
-            () => controller.enabled = true
-            );
-
-        }*/
-
         public AudioSource CreateAudioSource()
         {
             GameObject obj = new GameObject("MuteTTS");
@@ -226,25 +214,53 @@ namespace MuteTTS
             }
 
         }
-        private IEnumerator WaitForUi()
+
+        public void OpenTTSInput()
         {
-            while (GameObject.Find("UserInterface") == null)
-                yield return null;
-            var userInterface = GameObject.Find("UserInterface").transform;
-
-            while (userInterface.Find("Canvas_QuickMenu(Clone)/Container/Window/MicButton") == null)
-                yield return null;
-
-            //micToggle = userInterface.Find("Canvas_QuickMenu(Clone)/Container/Window/MicButton").GetComponent<Toggle>();
+            OpenKeyboard("", (str) => GetVoice(str));
         }
 
-        /*private UnityEngine.Audio.AudioMixerGroup GetVoiceAudioMixerGroup()
+        public static void OpenKeyboard(string currentValue, Action<string> callback)
         {
-            UnityEngine.Audio.AudioMixerGroup defaultAudioMixer = VRCAudioManager.Method_Public_Static_AudioMixerGroup_0(); // Default audio mixer
-            Il2CppReferenceArray<UnityEngine.Audio.AudioMixerGroup> audioMixers = VRCAudioManager.field_Private_Static_VRCAudioManager_0.field_Public_AudioMixer_0.FindMatchingGroups("Voice");
-            //            if (audioMixers.Length > 0)
-            //                MelonLogger.Msg("Found Voice Audio Mixer");
-            return (audioMixers.Length > 0) ? audioMixers.First<UnityEngine.Audio.AudioMixerGroup>() : defaultAudioMixer;
-        }*/
+            OnKeyboardSubmitted = callback;
+            ViewManager.Instance.openMenuKeyboard(currentValue);
+        }
+
+        public IEnumerator WaitForMainMenuView()
+        {
+            while (ViewManager.Instance == null)
+                yield return null;
+            while (ViewManager.Instance.gameMenuView == null)
+                yield return null;
+            while (ViewManager.Instance.gameMenuView.Listener == null)
+                yield return null;
+
+            ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
+            {
+                ViewManager.Instance.gameMenuView.View.RegisterForEvent("MelonMod_MuteTTS_Action", new Action(OpenTTSInput));
+            };
+
+            ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
+            {
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(@"﻿{
+    var l_block = document.createElement('div');
+            l_block.innerHTML = `<h2> MuteTTS </h2><div class=""action-btn"" onclick=""engine.trigger('MelonMod_MuteTTS_Action');"">MuteTTS</div>`;
+        document.getElementById('settings-implementation').appendChild(l_block);
+    }");
+            };
+        }
+    }
+
+    [HarmonyPatch(typeof(ViewManager))]
+    class ViewManagerPatches
+    {
+        [HarmonyPatch("SendToWorldUi")]
+        [HarmonyPostfix]
+        static void SendToWorldUi(string value)
+        {
+            MuteTTSMod.OnKeyboardSubmitted?.Invoke(value);
+
+            MuteTTSMod.OnKeyboardSubmitted = null;
+        }
     }
 }

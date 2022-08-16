@@ -35,6 +35,18 @@
       <HintPath>..\3rdParty\ml\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\3rdParty\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="cohtml.Net">
+      <HintPath>..\3rdParty\Managed\cohtml.Net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Cohtml.Runtime">
+      <HintPath>..\3rdParty\Managed\Cohtml.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="DissonanceVoip">
       <HintPath>..\3rdParty\Managed\DissonanceVoip.dll</HintPath>
       <Private>False</Private>
@@ -51,6 +63,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\3rdParty\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\3rdParty\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -61,6 +77,10 @@
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\3rdParty\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\3rdParty\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
