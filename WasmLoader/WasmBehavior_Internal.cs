@@ -15,11 +15,13 @@ namespace WasmLoader
         public void Execute(WasmInstance instance, string method)
         {
             instance.instance.GetAction(instance.store, method)?.Invoke();
+            instance.CleanUpLocals();
         }
         public void Execute<T>(WasmInstance instance, string method, T parameter)
         {
             var paramAsId = instance.objects.StoreObject(parameter);
             instance.instance.GetAction<int>(instance.store, method)?.Invoke(paramAsId);
+            instance.CleanUpLocals();
         }
         
         public void Start()

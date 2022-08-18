@@ -7,9 +7,7 @@ using Wasmtime;
 using ABI.CCK.Components;
 using System.Collections.Generic;
 using System.Reflection;
-using HarmonyLib;
 using ABI_RC.Core;
-using UnityEngine.UI;
 using System.Linq;
 
 [assembly: MelonInfo(typeof(WasmLoaderMod), "WasmLoader", "1.0.1", "Eric van Fandenfart")]
@@ -26,7 +24,34 @@ namespace WasmLoader
         public Objectstore objects;
         public Wasmtime.Module module;
         public Instance instance;
-        internal WasmBehavior_Internal behavior;
+        public WasmBehavior_Internal behavior;
+
+        public List<Global> exports = new List<Global>();
+
+        public void InitMemoryManagment()
+        {
+            foreach (var export in module.Exports)
+            {
+                var global = instance.GetGlobal(store, export.Name);
+                if(global != null && global.Kind == ValueKind.Int32)
+                    exports.Add(global);
+            }
+            //WasmLoaderMod.Instance.LoggerInstance.Msg("Got globals " + exports);
+        }
+
+        public void CleanUpLocals()
+        {
+            foreach (var key in objects.objects.Keys.ToList())
+            {
+                if (key == objects.NullCounter)
+                    continue;
+                if (!exports.Any(x => key.Equals(x.GetValue(store))))
+                {
+                    objects.objects.Remove(key);
+                    //WasmLoaderMod.Instance.LoggerInstance.Msg("Deleting " + key);
+                }
+            }
+        }
     }
 
     public class WasmLoaderMod : MelonMod
@@ -64,8 +89,8 @@ namespace WasmLoader
             }
 
             var instance = linker.Instantiate(store, module);
-            
 
+            
             LoggerInstance?.Msg("Loaded WASM");
             return new WasmInstance()
             {

@@ -11,7 +11,6 @@ namespace WasmLoader
     {
         private readonly Store store;
         public Dictionary<int, object> objects = new Dictionary<int, object>();
-        public Dictionary<object, int> reverseObjects = new Dictionary<object, int>();
         public int Counter = 10000;
         public int NullCounter = 0;
         public Objectstore(Store store)
@@ -44,15 +43,10 @@ namespace WasmLoader
             if (obj == null)
                 return NullCounter;
 
-            if (reverseObjects.ContainsKey(obj))
-            {
-                return reverseObjects[obj];
-            }
 
             Counter++;
 
             objects[Counter] = obj;
-            reverseObjects[obj] = Counter;
             return Counter;
         }
     }
