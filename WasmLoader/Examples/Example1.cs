@@ -10,7 +10,7 @@ using WasmLoader;
 
 namespace Test
 {
-    public class Class1 : WasmBehavior
+    public class Example1 : WasmBehavior
     {
         private GameObject obj;
         public override void Start()

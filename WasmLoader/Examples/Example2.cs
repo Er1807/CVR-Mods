@@ -12,7 +12,7 @@ using WasmLoader;
 
 namespace Test
 {
-    public class Class2 : WasmBehavior
+    public class Example2 : WasmBehavior
     {
         private Text obj;
         private int Counter;

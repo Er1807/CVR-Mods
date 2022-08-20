@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Test;
 using UnityEngine;
 
 namespace LinkerCreator
@@ -12,7 +13,7 @@ namespace LinkerCreator
     {
         public static void Main(string[] args)
         {
-            GenerateClass(typeof(int));
+            GenerateClass(typeof(ListGameobject));
         }
 
         private static void GenerateClass(Type type)

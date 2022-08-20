@@ -31,7 +31,11 @@ namespace Converter
                 return $"    {OpCodeToText()} ${ConvertMethod(member.Class.FullName, member.Name, member.HasThis, member.GetParams(), member.ReturnType ?? member.FieldSig?.Type)}";
             }
             if (Operand is MethodDef method)
+            {
+                if (method.Name == ".ctor")
+                    return $"    {OpCodeToText()} ${ConvertMethod(method.DeclaringType.FullName, method.Name, false, method.GetParams(), method.ReturnType ?? method.DeclaringType.ToTypeSig())}";
                 return $"    {OpCodeToText()} ${ConvertMethod(method.DeclaringType.FullName, method.Name, method.HasThis, method.GetParams(), method.ReturnType)}";
+            }
 
             if (Operand is string str)
                 return $"    {OpCodeToText()} ${str}";

@@ -25,7 +25,7 @@ namespace WasmLoader
         public Wasmtime.Module module;
         public Instance instance;
         public WasmBehavior_Internal behavior;
-
+        public GameObject gameObject;
         public List<Global> exports = new List<Global>();
 
         public void InitMemoryManagment()
@@ -33,7 +33,7 @@ namespace WasmLoader
             foreach (var export in module.Exports)
             {
                 var global = instance.GetGlobal(store, export.Name);
-                if(global != null && global.Kind == ValueKind.Int32)
+                if (global != null && global.Kind == ValueKind.Int32)
                     exports.Add(global);
             }
             //WasmLoaderMod.Instance.LoggerInstance.Msg("Got globals " + exports);
@@ -87,27 +87,34 @@ namespace WasmLoader
                 t.Setup(linker, store, objects);
                 Console.WriteLine(t.ToString());
             }
+            var wasminstance = new WasmInstance();
+
+            linker.DefineFunction("env", "WasmLoader_WasmBehavior__CurrentGameObject_this__UnityEngineGameObject", (Caller caller) =>
+            {
+                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_WasmBehavior__CurrentGameObject_this__UnityEngineGameObject");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                return objects.StoreObject(wasminstance.gameObject);
+            });
 
             var instance = linker.Instantiate(store, module);
 
-            
+
             LoggerInstance?.Msg("Loaded WASM");
-            return new WasmInstance()
-            {
-                engine = engine,
-                linker = linker,
-                store = store,
-                objects = objects,
-                module = module,
-                instance = instance
-            };
+            wasminstance.engine = engine;
+            wasminstance.linker = linker;
+            wasminstance.store = store;
+            wasminstance.objects = objects;
+            wasminstance.module = module;
+            wasminstance.instance = instance;
+            return wasminstance;
         }
 
         public void ClearInstances()
         {
             foreach (var item in WasmInstances.ToArray())
             {
-                if((item.Key == null && !ReferenceEquals(item.Key, null))
+                if ((item.Key == null && !ReferenceEquals(item.Key, null))
                     || (item.Key.gameObject == null && !ReferenceEquals(item.Key.gameObject, null)))
                 {
                     WasmInstances.Remove(item.Key);
@@ -131,11 +138,11 @@ namespace WasmLoader
             wasm.behavior = behavior;
             WasmInstances.Add(interactable, wasm);
         }
-        
+
         public override void OnApplicationStart()
         {
             Patches.SetupHarmony();
-            var arr = (HashSet<Type>) typeof(CVRTools).GetField("componentWhiteList", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+            var arr = (HashSet<Type>)typeof(CVRTools).GetField("componentWhiteList", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
             arr.Add(typeof(WasmLoaderBehavior));
         }
     }

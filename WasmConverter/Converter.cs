@@ -267,6 +267,11 @@ namespace Converter
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, instruction.Operand));
                     var method = instruction.Operand as MethodDef;
                     var member = instruction.Operand as MemberRef;
+                    if(method?.Name == "CurrentGameObject")
+                    {
+                        func.stack.Push(WasmDataType.i32);
+                        break;
+                    }
                     if ((member?.HasThis ?? false) || (method?.HasThis ?? false) || (member?.IsFieldRef ?? false))
                     {
                         func.stack.Pop();
@@ -301,7 +306,12 @@ namespace Converter
 
                 case Code.Ldtoken:
                     var ldtoken = instruction.Operand as TypeRef;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, ldtoken.FullName.Replace(".","_")+"__Type"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, ldtoken.FullName.Replace(".", "_") + "__Type"));
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Ldftn:
+                    var Ldftn = instruction.Operand as MethodDef;
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, Allocate(Ldftn.Name, func)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Stfld:
@@ -316,10 +326,16 @@ namespace Converter
                 case Code.Newobj:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, instruction.Operand));
 
-                    foreach (var item in ((MemberRef)instruction.Operand).GetParams())
-                    {
-                        func.stack.Pop();
-                    }
+                    if(instruction.Operand is MemberRef)
+                        foreach (var item in ((MemberRef)instruction.Operand).GetParams())
+                        {
+                            func.stack.Pop();
+                        }
+                    if (instruction.Operand is MethodDef)
+                        foreach (var item in ((MethodDef)instruction.Operand).GetParams())
+                        {
+                            func.stack.Pop();
+                        }
                     func.stack.Push(WasmDataType.i32);
 
                     break;

@@ -40,6 +40,15 @@ namespace WasmLoader.Refs
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
                 return objects.StoreObject(typeof(UnityEngine.UI.Text));
             });
+            
+            linker.DefineFunction("env", "ABI_CCK_Components_CVRVideoPlayer__Type", (Caller caller) =>
+            {
+                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("ABI_CCK_Components_CVRVideoPlayer__Type");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                return objects.StoreObject(typeof(ABI.CCK.Components.CVRVideoPlayer));
+            });
+
 
             linker.DefineFunction("env", "System_Object__GetType_this__SystemType", (Caller caller, System.Int32 parameter_this) =>
             {
@@ -52,6 +61,11 @@ namespace WasmLoader.Refs
 #endif
                 var result = resolved_this?.GetType();
                 return objects.StoreObject(result);
+            });
+
+            linker.DefineFunction("env", "ABI_CCK_Components_CVRVideoPlayer__SetUrl_this_SystemString__SystemVoid", (Caller caller, int instance, int str) =>
+            {
+                objects.RetriveObject<ABI.CCK.Components.CVRVideoPlayer>(instance, caller)?.SetUrl(objects.RetriveObject<string>(str, caller));
             });
 
             linker.DefineFunction("env", "ABI_RC_Systems_MovementSystem_MovementSystem__Instance__ABI_RCSystemsMovementSystemMovementSystem", (Caller caller) =>

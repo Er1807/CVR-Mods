@@ -78,11 +78,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1 - Kopieren.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="Examples\Play.cs" />
+    <Compile Include="Examples\Search.cs" />
+    <Compile Include="Examples\Example2.cs" />
+    <Compile Include="Examples\Example1.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Objectstore.cs" />
     <Compile Include="Patches.cs" />
+    <Compile Include="Refs\TestListGameobject_Ref.cs" />
     <Compile Include="Refs\SystemInt32_Ref.cs" />
     <Compile Include="Refs\UnityEngineGameObject_Ref.cs" />
     <Compile Include="Refs\Log.cs" />

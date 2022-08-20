@@ -51,6 +51,12 @@ namespace Converter
 
                 if (func is MethodDef method)
                 {
+                    if (method.Name == ".ctor")
+                    {
+                        var namectr = WasmInstruction.ConvertMethod(method.DeclaringType.FullName, method.Name, false, method.GetParams(), method.ReturnType ?? method?.DeclaringType.ToTypeSig());
+                        builder.AppendLine($"  (import \"env\" \"{namectr}\"(func ${namectr} {WasmFunction.BuildParamString(method.GetParams().Select(x => Converter.GetWasmType(x).Value).ToList(), true)} {WasmFunction.BuildResultString(Converter.GetWasmType(method.DeclaringType.FullName))}))");
+                        continue;
+                    }
                     var name = WasmInstruction.ConvertMethod(method.DeclaringType.FullName, method.Name, method.HasThis, method.GetParams(), method.ReturnType);
                     builder.AppendLine($"  (import \"env\" \"{name}\"(func ${name} {WasmFunction.BuildParamString(method.GetParams().Select(x => Converter.GetWasmType(x).Value).ToList(), true)} {WasmFunction.BuildResultString(Converter.GetWasmType(method.ReturnType))}))");
                 }

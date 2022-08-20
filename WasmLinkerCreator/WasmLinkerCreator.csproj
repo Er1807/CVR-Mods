@@ -63,5 +63,11 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WasmLoader\WasmLoader.csproj">
+      <Project>{b09f6951-4d6c-4977-88c0-1c8863eed47c}</Project>
+      <Name>WasmLoader</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

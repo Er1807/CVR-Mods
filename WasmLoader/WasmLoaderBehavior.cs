@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using Wasmtime;
 
 namespace WasmLoader
 {
@@ -23,6 +24,7 @@ namespace WasmLoader
             try
             {
                 var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(WasmCode)));
+                instance.gameObject = gameObject;
                 instance.InitMemoryManagment();
                 foreach (var item in AttributesGameObject.GetAsList())
                 {
