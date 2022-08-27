@@ -165,15 +165,9 @@ namespace WasmLoader
             // iterate root objects and do something
             foreach (var gameObject in rootObjects)
             {
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Test1 " + gameObject.name);
-                if (gameObject.GetComponent<PlayerDescriptor>() != null)
-                    continue;
-
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Test2 " + gameObject.name);
-                if (gameObject.GetComponentInChildren<CVRAssetInfo>() != null)
+                if (gameObject.GetComponent<PlayerDescriptor>() != null || gameObject.GetComponentInChildren<CVRAssetInfo>() != null)
                     continue;
                 
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Test3 " + gameObject.name);
                 foreach (var wasmLoader in gameObject.GetComponentsInChildren<WasmLoaderBehavior>())
                 {
                     InitializeWasm(wasmLoader, WasmType.World);
