@@ -27,11 +27,11 @@ namespace Converter
                     DeclaringType = value.DeclaringType.ToTypeSig()
                 };
             }
-
+            
             return new WasmExternFunctionOperand() {
                 HasThis = value.HasThis,
                 FunctionName = ConvertMethod(value.DeclaringType.FullName, value.Name, value.HasThis, value.Parameters.Select(x => x.Type).ToList(), value.MethodSig.GetRetType()),
-                Params = value.GetParams() ?? new List<TypeSig>(),
+                Params = value.Parameters.Select(x => x.Type).ToList() ?? new List<TypeSig>(),
                 ReturnValue = value.MethodSig.GetRetType(),
                 DeclaringType = value.DeclaringType.ToTypeSig()
             }; 
@@ -49,11 +49,14 @@ namespace Converter
                     DeclaringType = value.DeclaringType.ToTypeSig()
                 };
             }
+            var list = value.GetParams().ToList();
+            if (value.HasThis) 
+               list.Insert(0, value.DeclaringType.ToTypeSig());
                 return new WasmExternFunctionOperand()
             {
                 HasThis = value.HasThis,
                 FunctionName = ConvertMethod(value.DeclaringType.FullName, value.Name, value.HasThis, value.GetParams().ToList(), value.MethodSig.GetRetType()),
-                Params = value.GetParams() ?? new List<TypeSig>(),
+                Params = list,
                 ReturnValue = value.MethodSig.GetRetType(),
                 DeclaringType = value.DeclaringType.ToTypeSig()
             };

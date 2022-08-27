@@ -25,11 +25,10 @@ namespace Converter
             }
             //int at 0
             //data
-            foreach (var func in Functions.SelectMany(x=>x.Instructions).Where(x=>x.Instruction == WasmInstructions.call).Select(x=>x.Operand).Distinct())
+            foreach (var function in Functions.SelectMany(x => x.Instructions).Where(x => x.Instruction == WasmInstructions.call && x.Operand is WasmExternFunctionOperand).Select(x => x.Operand as WasmExternFunctionOperand).GroupBy(x => x.FunctionName).Select(x => x.First()))
             {
-                if(func is WasmExternFunctionOperand function) {
-                    builder.AppendLine($"  (import {function.FunctionName})");
-                        }
+                builder.AppendLine($@"  (import ""env"" ""{function.FunctionName}"" (func ${function.FunctionName} {WasmFunction.BuildParamString(function.Params.Select(x => Converter.GetWasmType(x).Value).ToList(), true)} {WasmFunction.BuildResultString(Converter.GetWasmType(function.ReturnValue.FullName))}))");
+
                 /*if (func is MethodDef method)
                 {
                     if (method.Name == ".ctor")
@@ -92,7 +91,7 @@ namespace Converter
             }
             foreach (var field in Fields)
             {
-               
+
                 builder.AppendLine($"  (export \"{field.Key}\"(global ${field.Key}))");
             }
             builder.AppendLine("  (memory (export \"memory\") 1 2)");
