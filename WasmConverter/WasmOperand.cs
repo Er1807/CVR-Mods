@@ -9,7 +9,7 @@ namespace Converter
 {
     public abstract class WasmOperand
     {
-        public static WasmStringOperand FromString(string value) { return new WasmStringOperand() { Value = value }; }
+        public static WasmStringOperand FromString(string value) { return new WasmStringOperand() { StrValue = value }; }
         public static WasmIntOperand FromInt(int value) { return new WasmIntOperand() { Value = value }; }
         public static WasmLongOperand FromLong(long value) { return new WasmLongOperand() { Value = value }; }
         public static WasmFloatOperand FromFloat(float value) { return new WasmFloatOperand() { Value = value }; }
@@ -117,7 +117,8 @@ namespace Converter
 
     public class WasmStringOperand : WasmOperand
     {
-        public string Value;
+        public string StrValue;
+        public int Value;
         public override string ToString() => Value.ToString();
     }
 

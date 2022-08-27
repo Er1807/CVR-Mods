@@ -598,18 +598,6 @@ namespace Converter
             return WasmDataType.i32;
         }
 
-        public int Allocate(string str, WasmFunction func)
-        {
-            if (func.Module.Strings.ContainsKey(str))
-            {
-                return func.Module.Strings[str];
-            }
-            else
-            {
-                func.Module.Strings.Add(str, func.Module.MemoryPtr);
-                func.Module.MemoryPtr += str.Length + 1;
-                return func.Module.Strings[str];
-            }
-        }
+        
     }
 }

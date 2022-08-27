@@ -106,5 +106,19 @@ namespace Converter
             return builder.ToString();
         }
 
+        public int Allocate(string str)
+        {
+            if (Strings.ContainsKey(str))
+            {
+                return Strings[str];
+            }
+            else
+            {
+                Strings.Add(str, MemoryPtr);
+                MemoryPtr += str.Length + 1;
+                return Strings[str];
+            }
+        }
+
     }
 }

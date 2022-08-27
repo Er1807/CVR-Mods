@@ -26,6 +26,12 @@ namespace Converter
             {
                 var mem = new Converter().Convert(wasmModule, method);
             }
+
+            foreach (var stringOperand in wasmModule.Functions.SelectMany(x => x.Instructions).Where(x=>x.Operand is WasmStringOperand).Select(x => x.Operand as WasmStringOperand))
+            {
+                stringOperand.Value = wasmModule.Allocate(stringOperand.StrValue);
+            }
+
             var str = wasmModule.CreateWat();
             Console.WriteLine(str);
 
