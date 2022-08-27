@@ -1,17 +1,25 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.InteractionSystem;
+using ABI_RC.Core.IO;
 using ABI_RC.Core.Player;
 using HarmonyLib;
+using MelonLoader;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using WasmLoader.Refs;
 
 namespace WasmLoader
 {
     public class Patches
     {
-        
+
         public static void SetupHarmony()
         {
             WasmLoaderMod.Instance.HarmonyInstance.Patch(typeof(CVRInteractable).GetMethod(nameof(CVRInteractable.Grab), BindingFlags.Instance | BindingFlags.Public), prefix: new HarmonyMethod(typeof(Patches).GetMethod(nameof(Grab), BindingFlags.Static | BindingFlags.Public)));
@@ -19,7 +27,9 @@ namespace WasmLoader
             WasmLoaderMod.Instance.HarmonyInstance.Patch(typeof(CVRInteractable).GetMethod(nameof(CVRInteractable.InteractDown), BindingFlags.Instance | BindingFlags.Public), prefix: new HarmonyMethod(typeof(Patches).GetMethod(nameof(InteractDown), BindingFlags.Static | BindingFlags.Public)));
             WasmLoaderMod.Instance.HarmonyInstance.Patch(typeof(CVRInteractable).GetMethod(nameof(CVRInteractable.InteractUp), BindingFlags.Instance | BindingFlags.Public), prefix: new HarmonyMethod(typeof(Patches).GetMethod(nameof(InteractUp), BindingFlags.Static | BindingFlags.Public)));
 
-             }
+        }
+
+
 
         public static void Grab(CVRInteractable __instance)
         {
@@ -60,8 +70,8 @@ namespace WasmLoader
             {
                 instance.behavior.OnPlayerJoined(player);
             }
-            
-            
+
+
         }
 
         public static void UserLeavePatch(CVRPlayerEntity player)
@@ -69,6 +79,147 @@ namespace WasmLoader
             foreach (var instance in WasmLoaderMod.Instance.WasmInstances.Values)
             {
                 instance.behavior.OnPlayerLeft(player);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CVRObjectLoader))]
+    internal class LoadingPatches
+    {
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(CVRObjectLoader.InstantiateAvatar))]
+        public static void InstantiateAvatarPostfix(IEnumerator __result, string instTarget)
+        {
+            WasmLoaderMod.Instance.LoggerInstance.Msg("Avatar started loading. Waiting for finish");
+            MelonCoroutines.Start(WaitForAvatarLoaded(__result, instTarget));
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(CVRObjectLoader.InstantiateProp))]
+        public static void InstantiatePropPostfix(IEnumerator __result, string instTarget)
+        {
+            WasmLoaderMod.Instance.LoggerInstance.Msg("Prop started loading. Waiting for finish");
+            MelonCoroutines.Start(WaitForPropLoaded(__result, instTarget));
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(CVRObjectLoader.LoadIntoWorld))]
+        public static void LoadIntoWorldPostfix()
+        {
+            WasmLoaderMod.Instance.LoggerInstance.Msg("World started loading. Waiting for finish");
+
+            MelonCoroutines.Start(WaitForWorldLoaded());
+        }
+
+        public static IEnumerator WaitForAvatarLoaded(IEnumerator __result, string instTarget)
+        {
+            while (AvatarQueueSystem.Instance.activeCoroutines.Any(x => x.function == __result))
+            {
+                yield return new WaitForSeconds(0.2f); ;
+            }
+            WasmLoaderMod.Instance.LoggerInstance.Msg("Avatar finished loading. Applying Wasm");
+            //Initialize Avatar
+            var player = GameObject.Find($"{instTarget}/[PlayerAvatar]/_CVRAvatar(Clone)");
+            if (player != null)
+            {
+
+                foreach (var wasmLoader in player.GetComponentsInChildren<WasmLoaderBehavior>())
+                {
+                    InitializeWasm(wasmLoader, WasmType.Avatar);
+                }
+            }
+
+        }
+
+        public static IEnumerator WaitForPropLoaded(IEnumerator __result, string instTarget)
+        {
+            yield return new WaitForSeconds(0.2f);
+            while (PropQueueSystem.Instance.activeCoroutines.Any(x => x.function == __result))
+            {
+                yield return new WaitForSeconds(0.2f);
+            }
+            //Initialize Prop
+            WasmLoaderMod.Instance.LoggerInstance.Msg("Prop finished loading. Applying Wasm");
+            var prop = GameObject.Find($"{instTarget}/_CVRSpawnable(Clone)");
+            if (prop != null)
+            {
+                foreach (var wasmLoader in prop.GetComponentsInChildren<WasmLoaderBehavior>())
+                {
+                    InitializeWasm(wasmLoader, WasmType.Prop);
+                }
+            }
+
+        }
+        public static IEnumerator WaitForWorldLoaded()
+        {
+            while (CVRObjectLoader.Instance.IsLoadingWorldToJoin)
+            {
+                yield return new WaitForSeconds(0.2f); ;
+            }
+
+            WasmLoaderMod.Instance.LoggerInstance.Msg("World finished loading. Applying Wasm");
+            //Initialize World
+            Scene scene = SceneManager.GetActiveScene();
+            var rootObjects = scene.GetRootGameObjects();
+
+            // iterate root objects and do something
+            foreach (var gameObject in rootObjects)
+            {
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Test1 " + gameObject.name);
+                if (gameObject.GetComponent<PlayerDescriptor>() != null)
+                    continue;
+
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Test2 " + gameObject.name);
+                if (gameObject.GetComponentInChildren<CVRAssetInfo>() != null)
+                    continue;
+                
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Test3 " + gameObject.name);
+                foreach (var wasmLoader in gameObject.GetComponentsInChildren<WasmLoaderBehavior>())
+                {
+                    InitializeWasm(wasmLoader, WasmType.World);
+                }
+            }
+        }
+
+        private static void InitializeWasm(WasmLoaderBehavior wasmLoader, WasmType type)
+        {
+
+            WasmLoaderMod.Instance.LoggerInstance.Msg("LoadingPatches WasmBehavior on " + wasmLoader.gameObject.name);
+            try
+            {
+                var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(wasmLoader.WasmCode)), type);
+                instance.gameObject = wasmLoader.gameObject;
+                instance.InitMemoryManagment();
+                //Not working yet
+                foreach (var item in wasmLoader.AttributesGameObject.GetAsList())
+                {
+                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
+                }
+                foreach (var item in wasmLoader.AttributesTransform.GetAsList())
+                {
+                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
+                }
+                foreach (var item in wasmLoader.AttributesString.GetAsList())
+                {
+                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
+                }
+                foreach (var item in wasmLoader.AttributesText.GetAsList())
+                {
+                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
+                }
+                foreach (var item in wasmLoader.AttributesInt.GetAsList())
+                {
+                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
+                }
+                foreach (var item in wasmLoader.AttributesBool.GetAsList())
+                {
+                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
+                }
+                WasmLoaderMod.Instance.SetupGameobject(wasmLoader.gameObject, instance);
+            }
+            catch (Exception ex)
+            {
+                WasmLoaderMod.Instance.LoggerInstance.Error(ex);
             }
         }
     }

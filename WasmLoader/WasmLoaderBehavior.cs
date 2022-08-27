@@ -18,46 +18,6 @@ namespace WasmLoader
         public DictionaryStringText AttributesText = new DictionaryStringText();
         public DictionaryStringInt AttributesInt = new DictionaryStringInt();
         public DictionaryStringBool AttributesBool = new DictionaryStringBool();
-
-        public void Start()
-        {
-            try
-            {
-                var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(WasmCode)), Refs.WasmType.World);
-                instance.gameObject = gameObject;
-                instance.InitMemoryManagment();
-                foreach (var item in AttributesGameObject.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in AttributesTransform.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in AttributesString.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in AttributesText.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in AttributesInt.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in AttributesBool.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-
-                WasmLoaderMod.Instance.SetupGameobject(gameObject, instance);
-            }
-            catch (Exception ex)
-            {
-                WasmLoaderMod.Instance.LoggerInstance.Error(ex);
-            }
-        }
     }
 
     [Serializable]

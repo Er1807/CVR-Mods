@@ -73,7 +73,7 @@ namespace WasmLoader
         }
 
 
-        public WasmInstance GetWasmInstance(string wasmCode)
+        public WasmInstance GetWasmInstance(string wasmCode, WasmType wasmType)
         {
             var engine = new Engine();
             var module = Wasmtime.Module.FromText(engine, Guid.NewGuid().ToString(), wasmCode);
@@ -84,7 +84,7 @@ namespace WasmLoader
             foreach (var item in Assembly.GetExecutingAssembly().GetTypes().Where(x => typeof(IRef).IsAssignableFrom(x) && typeof(IRef) != x))
             {
                 var t = (Activator.CreateInstance(item) as IRef);
-                t.Setup(linker, store, objects);
+                t.Setup(linker, store, objects, wasmType);
                 Console.WriteLine(t.ToString());
             }
             var wasminstance = new WasmInstance();
