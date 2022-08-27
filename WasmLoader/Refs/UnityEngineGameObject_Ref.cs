@@ -4,7 +4,7 @@ namespace WasmLoader.Refs
 {
     public class UnityEngineGameObject_Ref : IRef
     {
-        public void Setup(Linker linker, Store store, Objectstore objects)
+        public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
         {
             linker.DefineFunction("env", "UnityEngine_GameObject__Type", (Caller caller) => {
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");

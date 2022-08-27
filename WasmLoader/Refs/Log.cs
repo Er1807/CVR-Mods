@@ -11,7 +11,7 @@ namespace WasmLoader.Refs
     internal class Log : IRef
     {
         static MelonLogger.Instance logger = new MelonLogger.Instance("WebAssembly", ConsoleColor.DarkGreen);
-        public void Setup(Linker linker, Store store, Objectstore objects)
+        public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
         {
             linker.DefineFunction("env", "WasmLoader_Logtest__Msg_SystemString__SystemVoid", (Caller caller, int ptr) =>
             {

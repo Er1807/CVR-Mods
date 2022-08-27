@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 using Wasmtime;
 namespace WasmLoader.Refs
 {
-    internal interface IRef
+    public enum WasmType
     {
-        void Setup(Linker linker, Store store, Objectstore objects);
+        World, Avatar, User, Prop
+    }
+
+    public interface IRef
+    {
+        void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType);
     }
 }

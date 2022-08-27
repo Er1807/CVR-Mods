@@ -24,7 +24,7 @@ namespace LinkerCreator
             Console.WriteLine("using Wasmtime;");
             Console.WriteLine("namespace WasmLoader.Refs {");
             Console.WriteLine($"public class {className} : IRef {{");
-            Console.WriteLine("public void Setup(Linker linker, Store store, Objectstore objects) {");
+            Console.WriteLine("public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType) {");
 
             Console.WriteLine($@"linker.DefineFunction(""env"", ""{type.FullName.Replace(".", "_")}__Type"", (Caller caller) => {{");
 

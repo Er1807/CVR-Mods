@@ -4,7 +4,7 @@ namespace WasmLoader.Refs
 {
     public class SystemInt32_Ref : IRef
     {
-        public void Setup(Linker linker, Store store, Objectstore objects)
+        public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
         {
             linker.DefineFunction("env", "System_Int32__Type", (Caller caller) => {
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");

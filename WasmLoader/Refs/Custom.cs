@@ -13,7 +13,7 @@ namespace WasmLoader.Refs
 {
     public class Custom_Ref : IRef
     {
-        public void Setup(Linker linker, Store store, Objectstore objects)
+        public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
         {
 
 

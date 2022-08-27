@@ -23,7 +23,7 @@ namespace WasmLoader
         {
             try
             {
-                var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(WasmCode)));
+                var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(WasmCode)), Refs.WasmType.World);
                 instance.gameObject = gameObject;
                 instance.InitMemoryManagment();
                 foreach (var item in AttributesGameObject.GetAsList())

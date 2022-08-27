@@ -4,7 +4,7 @@ namespace WasmLoader.Refs
 {
     public class TestListGameobject_Ref : IRef
     {
-        public void Setup(Linker linker, Store store, Objectstore objects)
+        public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
         {
             linker.DefineFunction("env", "Test_ListGameobject__Type", (Caller caller) => {
                 return objects.StoreObject(typeof(Test.ListGameobject));

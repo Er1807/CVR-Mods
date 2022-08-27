@@ -4,7 +4,7 @@ namespace WasmLoader.Refs
 {
     public class SystemString_Ref : IRef
     {
-        public void Setup(Linker linker, Store store, Objectstore objects)
+        public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
         {
             linker.DefineFunction("env", "System_String__Join_SystemString_SystemString[]__SystemString", (Caller caller, System.Int32 separator, System.Int32 value) => {
                 var resolved_separator = objects.RetriveObject<System.String>(separator, caller);
