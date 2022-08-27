@@ -83,64 +83,64 @@ namespace Converter
             switch (instruction.OpCode.Code)
             {
                 case Code.Ldc_R4:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_const, instruction.Offset, func.stack.Count, instruction.Operand));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_const, instruction.Offset, func.stack.Count, WasmOperand.FromFloat((float)instruction.Operand)));
                     func.stack.Push(WasmDataType.f32);
                     break;
                 case Code.Ldc_R8:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_const, instruction.Offset, func.stack.Count, instruction.Operand));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_const, instruction.Offset, func.stack.Count, WasmOperand.FromDouble((double)instruction.Operand)));
                     func.stack.Push(WasmDataType.f64);
                     break;
                 case Code.Ldc_I8:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_const, instruction.Offset, func.stack.Count, instruction.Operand));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_const, instruction.Offset, func.stack.Count, WasmOperand.FromLong((long)instruction.Operand)));
                     func.stack.Push(WasmDataType.i64);
                     break;
                 case Code.Ldc_I4:
                 case Code.Ldc_I4_S:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, instruction.Operand));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt((int)instruction.Operand)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldstr:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, Allocate((string)instruction.Operand, func)));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromString((string)instruction.Operand)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_M1:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, -1));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(-1)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_0:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 0));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(0)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_1:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 1));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(1)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_2:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 2));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(2)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_3:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 3));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(3)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_4:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 4));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(4)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_5:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 5));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(5)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_6:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 6));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(6)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_7:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 7));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(7)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldc_I4_8:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 8));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(8)));
                     func.stack.Push(WasmDataType.i32);
                     break;
 
@@ -150,21 +150,21 @@ namespace Converter
                     //func.stack.Push(func.Parameters[0]);
                     break;
                 case Code.Ldarg_1:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "param0"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromParamField("param0")));
                     func.stack.Push(func.Parameters[0]);
                     break;
                 case Code.Ldarg_2:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "param1"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromParamField("param1")));
                     func.stack.Push(func.Parameters[1]);
                     break;
                 case Code.Ldarg_3:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "param2"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromParamField("param2")));
                     func.stack.Push(func.Parameters[2]);
                     break;
                 case Code.Ldarg:
                 case Code.Ldarg_S:
                     var Ldarg = (int)instruction.Operand;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"param{Ldarg-1}"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromParamField($"param{Ldarg - 1}")));
                     func.stack.Push(func.Parameters[Ldarg-1]);
                     break;
                 case Code.Ldarga_S:
@@ -173,29 +173,29 @@ namespace Converter
                         Ldarga_S = ((Parameter)instruction.Operand).Index;
                     else
                         Ldarga_S = (int)instruction.Operand; 
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"param{Ldarga_S - 1}"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromParamField($"param{Ldarga_S - 1}")));
                     func.stack.Push(func.Parameters[Ldarga_S - 1]);
                     break;
                 case Code.Stloc_0:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, "local0"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local0")));
                     if (!func.Locals.ContainsKey("local0"))
                         func.Locals.Add($"local0", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Stloc_1:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, "local1"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local1")));
                     if (!func.Locals.ContainsKey("local1"))
                         func.Locals.Add($"local1", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Stloc_2:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, "local2"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local2")));
                     if (!func.Locals.ContainsKey("local2"))
                         func.Locals.Add($"local2", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Stloc_3:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, "local3"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local3")));
                     if (!func.Locals.ContainsKey("local3"))
                         func.Locals.Add($"local3", func.stack.Peek());
                     func.stack.Pop();
@@ -207,25 +207,25 @@ namespace Converter
                         Stloc = ((Local)instruction.Operand).Index;
                     else 
                         Stloc = (int)instruction.Operand;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, $"local{Stloc}"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"local{Stloc}") ));
                     if (!func.Locals.ContainsKey($"local{Stloc}"))
                         func.Locals.Add($"local{Stloc}", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Ldloc_0:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "local0"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local0")));
                     func.stack.Push(func.Locals["local0"]);
                     break;
                 case Code.Ldloc_1:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "local1"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local1")));
                     func.stack.Push(func.Locals["local1"]);
                     break;
                 case Code.Ldloc_2:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "local2"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local2")));
                     func.stack.Push(func.Locals["local2"]);
                     break;
                 case Code.Ldloc_3:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, "local3"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local3")));
                     func.stack.Push(func.Locals["local3"]);
                     break;
                 case Code.Ldloc:
@@ -235,17 +235,17 @@ namespace Converter
                         Ldloc = ((Local)instruction.Operand).Index;
                     else
                         Ldloc = (int)instruction.Operand;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"local{Ldloc}"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"local{Ldloc}") ));
                     func.stack.Push(func.Locals[$"local{Ldloc}"]);
                     break;
                 case Code.Ldloca_S:
                     var Ldlocas = (Local)instruction.Operand;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"local{Ldlocas.Index}"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"local{Ldlocas.Index}")));
                     func.stack.Push(func.Locals[$"local{Ldlocas.Index}"]);
                     break;
                 case Code.Dup:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.tee_local, instruction.Offset, func.stack.Count, $"temp{func.stack.Peek()}"));
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, $"temp{func.stack.Peek()}"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.tee_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"temp{func.stack.Peek()}")));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"temp{func.stack.Peek()}")));
                     if (!func.Locals.ContainsKey($"temp{func.stack.Peek()}"))
                         func.Locals.Add($"temp{func.stack.Peek()}", func.stack.Peek());
                     func.stack.Push(func.stack.Peek());
@@ -260,44 +260,49 @@ namespace Converter
                         return;
                     if (instruction.Operand is FieldDef fieldDef && fieldDef.DeclaringType == func.Method.DeclaringType)
                     {
-                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, fieldDef.Name.ToString()));
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, WasmOperand.FromGlobalField(fieldDef.Name.ToString())));
                         func.stack.Push(GetWasmType(func.Module.Fields[fieldDef.Name]).Value); 
                         break;
                     }
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, instruction.Operand));
                     var method = instruction.Operand as MethodDef;
                     var member = instruction.Operand as MemberRef;
-                    if(method?.Name == "CurrentGameObject")
-                    {
-                        func.stack.Push(WasmDataType.i32);
-                        break;
-                    }
-                    if ((member?.HasThis ?? false) || (method?.HasThis ?? false) || (member?.IsFieldRef ?? false))
-                    {
-                        func.stack.Pop();
-                    }
 
-                    if (member != null)
-                        for (int i = 0; i < (member?.GetParamCount() ?? method.GetParamCount()); i++)
+                    if(method != null && method.DeclaringType.FullName == func.Module.declaringType.FullName)
+                    {
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, WasmOperand.FromLocalFunction(method.Name)));
+                        for (int i = 0; i < method.Parameters.Count -1 ; i++)
                         {
                             func.stack.Pop();
                         }
+                        if (method.ReturnType != null && method.ReturnType.FullName != "System.Void")
+                            func.stack.Push(GetWasmType(method.ReturnType).Value);
 
-                    var type = GetWasmType(member?.ReturnType ?? method?.ReturnType);
-                    if (type.HasValue)
-                    {
-                        func.stack.Push(type.Value);
+                        return;
                     }
-                    type = GetWasmType(member?.FieldSig?.Type);
-                    if (type.HasValue)
+
+                    WasmExternFunctionOperand externFunction = null;
+                    if (member != null)
+                        externFunction = WasmOperand.FromExtern(member);
+                    else if (method != null)
+                        externFunction = WasmOperand.FromExtern(method);
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, externFunction));
+
+                    foreach (var item in externFunction.Params)
                     {
-                        func.stack.Push(type.Value);
+                        func.stack.Pop();
+                    }
+                    if (externFunction.ReturnValue != null && externFunction.ReturnValue.FullName != "System.Void")
+                        func.stack.Push(GetWasmType(externFunction.ReturnValue).Value);
+
+                    if (method?.Name == "CurrentGameObject"){
+                        func.stack.Push(WasmDataType.i32);
+                        break;
                     }
                     break;
                 case Code.Ldflda:
                     if (instruction.Operand is FieldDef fieldDefa && fieldDefa.DeclaringType == func.Method.DeclaringType)
                     {
-                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, fieldDefa.Name.ToString()));
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count,WasmOperand.FromGlobalField(fieldDefa.Name.ToString())));
                         func.stack.Push(GetWasmType(func.Module.Fields[fieldDefa.Name]).Value);
                         break;
                     }
@@ -306,41 +311,43 @@ namespace Converter
 
                 case Code.Ldtoken:
                     var ldtoken = instruction.Operand as TypeRef;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, ldtoken.FullName.Replace(".", "_") + "__Type"));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand() { FunctionName = ldtoken.FullName.Replace(".", "_") + "__Type" } ));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldftn:
                     var Ldftn = instruction.Operand as MethodDef;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, Allocate(Ldftn.Name, func)));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromString(Ldftn.Name)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Stfld:
                     if (instruction.Operand is FieldDef fieldDef2 && fieldDef2.DeclaringType == func.Method.DeclaringType)
                     {
-                        func.Instructions.Add(new WasmInstruction(WasmInstructions.set_global, instruction.Offset, func.stack.Count, fieldDef2.Name.ToString()));
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.set_global, instruction.Offset, func.stack.Count, WasmOperand.FromGlobalField(fieldDef2.Name.ToString())));
                         func.stack.Pop();
                         break;
                     }
                     Console.Error.WriteLine("Unkown opcode op " + instruction.OpCode.Code);
                     break;
                 case Code.Newobj:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, instruction.Operand));
+                    var method2 = instruction.Operand as MethodDef;
+                    var member2 = instruction.Operand as MemberRef;
+                    WasmExternFunctionOperand externFunction2 = null;
+                    if (member2 != null)
+                        externFunction2 = WasmOperand.FromExtern(member2);
+                    else if (method2 != null)
+                        externFunction2 = WasmOperand.FromExtern(method2);
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, externFunction2));
 
-                    if(instruction.Operand is MemberRef)
-                        foreach (var item in ((MemberRef)instruction.Operand).GetParams())
-                        {
-                            func.stack.Pop();
-                        }
-                    if (instruction.Operand is MethodDef)
-                        foreach (var item in ((MethodDef)instruction.Operand).GetParams())
-                        {
-                            func.stack.Pop();
-                        }
-                    func.stack.Push(WasmDataType.i32);
+                    foreach (var item in externFunction2.Params)
+                    {
+                        func.stack.Pop();
+                    }
+                    if (externFunction2.ReturnValue != null && externFunction2.ReturnValue.FullName != "System.Void")
+                        func.stack.Push(GetWasmType(externFunction2.ReturnValue).Value);
 
                     break;
                 case Code.Initobj:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 0));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(0)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ret:
@@ -534,31 +541,31 @@ namespace Converter
                     switch (func.stack.Peek())
                     {
                         case WasmDataType.i32:
-                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, 0));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(0)));
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_eq, instruction.Offset, func.stack.Count+1));
                             break;
                         case WasmDataType.i64:
-                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_const, instruction.Offset, func.stack.Count, 0));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_const, instruction.Offset, func.stack.Count, WasmOperand.FromLong(0)));
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_eq, instruction.Offset, func.stack.Count+1));
                             break;
                         case WasmDataType.f32:
-                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_const, instruction.Offset, func.stack.Count, 0));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_const, instruction.Offset, func.stack.Count, WasmOperand.FromFloat(0)));
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_eq, instruction.Offset, func.stack.Count+1));
                             break;
                         case WasmDataType.f64:
-                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_const, instruction.Offset, func.stack.Count, 0));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_const, instruction.Offset, func.stack.Count, WasmOperand.FromDouble(0)));
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_eq, instruction.Offset, func.stack.Count+1));
                             break;
                     }
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, func.stack.Count, ((Instruction)instruction.Operand).Offset));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, func.stack.Count, WasmOperand.FromLong(((Instruction)instruction.Operand).Offset)));
                     func.stack.Pop();
                     break;
                 case Code.Brtrue_S:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, func.stack.Count, ((Instruction)instruction.Operand).Offset));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, func.stack.Count, WasmOperand.FromLong(((Instruction)instruction.Operand).Offset)));
                     func.stack.Pop();
                     break;
                 case Code.Br_S:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br, instruction.Offset, func.stack.Count, ((Instruction)instruction.Operand).Offset));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br, instruction.Offset, func.stack.Count, WasmOperand.FromLong(((Instruction)instruction.Operand).Offset)));
                     break;
                 case Code.Pop:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.drop, instruction.Offset, func.stack.Count));

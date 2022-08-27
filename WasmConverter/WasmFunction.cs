@@ -35,14 +35,14 @@ namespace Converter
 
             foreach (var inst in branchInstructions)
             {
-                if ((uint)inst.Operand < inst.Offset)
+                if ((inst.Operand as WasmLongOperand).AsUInt < inst.Offset)
                 {
                     var index = Instructions.FindLastIndex(x => x.Offset == inst.Offset);
                     Instructions.Insert(index + 1, new WasmInstruction(WasmInstructions.end, 9999, 9999));
                 }
                 else
                 {
-                    var index = Instructions.FindLastIndex(x => x.Offset == (uint)inst.Operand);
+                    var index = Instructions.FindLastIndex(x => x.Offset == (inst.Operand as WasmLongOperand).AsUInt);
                     Instructions.Insert(index, new WasmInstruction(WasmInstructions.end, 9999, 9999));
                 }
             }
@@ -50,29 +50,6 @@ namespace Converter
             DetectForLoops();
             DetectIfs();
 
-            FixLocalCalls();
-
-        }
-
-        private void FixLocalCalls()
-        {
-            foreach (var func in Instructions.Distinct().Where(x => x.Operand is MemberRef || x.Operand is MethodDef))
-            {
-                if (func.Operand is MemberRef member)
-                {
-                    if(member.DeclaringType == Method.DeclaringType)
-                    {
-                        func.Operand = member.Name;
-                    }
-                }
-                if (func.Operand is MethodDef method)
-                {
-                    if (method.DeclaringType == Method.DeclaringType)
-                    {
-                        func.Operand = method.Name.ToString();
-                    }
-                }
-            }
         }
 
         public void DetectIfs()
@@ -84,10 +61,10 @@ namespace Converter
             {
                 WasmInstruction inst = Instructions[i];
                 
-                if ((inst.Instruction == WasmInstructions.br || inst.Instruction == WasmInstructions.br_if) && inst.Operand is uint)
+                if ((inst.Instruction == WasmInstructions.br || inst.Instruction == WasmInstructions.br_if) && inst.Operand is WasmLongOperand)
                 {
                     br = inst;
-                    end = Instructions[Instructions.FindIndex(x => x.Offset == (uint)inst.Operand) - 1];
+                    end = Instructions[Instructions.FindIndex(x => x.Offset == (inst.Operand as WasmLongOperand).AsUInt) - 1];
 
                     var brIndex = Instructions.IndexOf(br);
                     var endIndex = Instructions.IndexOf(end);
@@ -99,8 +76,8 @@ namespace Converter
                     if (res.Item1 != 0)
                         brIndex = res.Item1;
                     branches.Add((brIndex, endIndex + 1));
-                    Instructions.Insert(brIndex, new WasmInstruction(WasmInstructions.block, 9999, 9999, $"bl{inst.Operand}"));
-                    br.Operand = $"bl{inst.Operand}";
+                    Instructions.Insert(brIndex, new WasmInstruction(WasmInstructions.block, 9999, 9999, WasmOperand.FromStaticStringmField($"bl{inst.Operand}")));
+                    br.Operand = WasmOperand.FromStaticStringmField($"bl{inst.Operand}");
                 }
             }
             
@@ -120,16 +97,16 @@ namespace Converter
 
                 if (inst.Instruction == WasmInstructions.br
                     && Instructions[i + 1].Instruction == WasmInstructions.nop
-                    && Instructions.Any(x => x.Instruction == WasmInstructions.br_if && x.Operand is uint && (uint)x.Operand == Instructions[i + 1].Offset))
+                    && Instructions.Any(x => x.Instruction == WasmInstructions.br_if && x.Operand is WasmLongOperand && (x.Operand as WasmLongOperand).AsUInt == Instructions[i + 1].Offset))
                 {
                     br = inst;
-                    end = Instructions[Instructions.FindIndex(x => x.Offset == (uint)inst.Operand) - 1];
-                    brif = Instructions.Single(x => x.Instruction == WasmInstructions.br_if && x.Operand is uint && (uint)x.Operand == Instructions[i + 1].Offset);
+                    end = Instructions[Instructions.FindIndex(x => x.Offset == (inst.Operand as WasmLongOperand).AsUInt) - 1];
+                    brif = Instructions.Single(x => x.Instruction == WasmInstructions.br_if && x.Operand is WasmLongOperand && (x.Operand as WasmLongOperand).AsUInt == Instructions[i + 1].Offset);
                     end2 = Instructions[Instructions.IndexOf(brif) + 1];
 
                     Locals.Add($"for{counter}", WasmDataType.i32);
-                    Instructions.Insert(0, new WasmInstruction(WasmInstructions.i32_const, 9999,0, 1));
-                    Instructions.Insert(1, new WasmInstruction(WasmInstructions.set_local, 9999,1, $"for{counter}"));
+                    Instructions.Insert(0, new WasmInstruction(WasmInstructions.i32_const, 9999,0, WasmOperand.FromInt(1)));
+                    Instructions.Insert(1, new WasmInstruction(WasmInstructions.set_local, 9999,1, WasmOperand.FromStaticStringmField($"for{counter}")));
 
                     //loop $lp5
                     //block $bl34
@@ -138,14 +115,14 @@ namespace Converter
                     //set_local $for1
                     //br_if $bl34
                     var index = Instructions.IndexOf(br);
-                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.set_local, 9999,9999, $"for{counter}"));
-                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.i32_const, 9999, 9999, 0));
-                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.get_local, 9999, 9999, $"for{counter}"));
-                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.block, 9999, 9999, $"bl{br.Operand}"));
-                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.loop, 9999, 9999, $"lp{brif.Operand}"));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.set_local, 9999,9999, WasmOperand.FromStaticStringmField($"for{counter}")));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.i32_const, 9999, 9999, WasmOperand.FromInt(0)));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.get_local, 9999, 9999, WasmOperand.FromStaticStringmField($"for{counter}")));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.block, 9999, 9999, WasmOperand.FromStaticStringmField($"bl{br.Operand}")));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.loop, 9999, 9999, WasmOperand.FromStaticStringmField($"lp{brif.Operand}")));
                     br.Instruction = WasmInstructions.br_if;
-                    br.Operand = $"bl{br.Operand}";
-                    brif.Operand = $"lp{brif.Operand}";
+                    br.Operand = WasmOperand.FromStaticStringmField($"bl{br.Operand}");
+                    brif.Operand = WasmOperand.FromStaticStringmField($"lp{brif.Operand}");
 
                     counter++;
                 }

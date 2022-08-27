@@ -6,7 +6,7 @@ namespace Converter
 {
     public class WasmInstruction
     {
-        public WasmInstruction(WasmInstructions instruction, uint offset, int stackSizeBefore, object operand = null)
+        public WasmInstruction(WasmInstructions instruction, uint offset, int stackSizeBefore, WasmOperand operand = null)
         {
             Instruction = instruction;
             Offset = offset;
@@ -17,7 +17,7 @@ namespace Converter
         public WasmInstructions Instruction;
         public uint Offset; //il offset
         public int StackSizeBefore;
-        public object Operand;
+        public WasmOperand Operand;
 
         public override string ToString()
         {
@@ -25,20 +25,17 @@ namespace Converter
         }
         public string ToInstructionString()
         {
-            if (Operand is MemberRef member) {
-                if (member.Name == ".ctor")
-                    return $"    {OpCodeToText()} ${ConvertMethod(member.Class.FullName, member.Name, false, member.GetParams(), member.ReturnType ?? member.FieldSig?.Type)}";
-                return $"    {OpCodeToText()} ${ConvertMethod(member.Class.FullName, member.Name, member.HasThis, member.GetParams(), member.ReturnType ?? member.FieldSig?.Type)}";
-            }
-            if (Operand is MethodDef method)
+            if (Operand is WasmExternFunctionOperand
+               || Operand is WasmLocalFieldOperand
+               || Operand is WasmParamFieldOperand
+               || Operand is WasmGlobalFieldOperand
+               || Operand is WasmLocalFieldOperand
+               || Operand is WasmStaticStringOperand
+               || Operand is WasmLocalFunctionOperand)
             {
-                if (method.Name == ".ctor")
-                    return $"    {OpCodeToText()} ${ConvertMethod(method.DeclaringType.FullName, method.Name, false, method.GetParams(), method.ReturnType ?? method.DeclaringType.ToTypeSig())}";
-                return $"    {OpCodeToText()} ${ConvertMethod(method.DeclaringType.FullName, method.Name, method.HasThis, method.GetParams(), method.ReturnType)}";
+                return $"    {OpCodeToText()} ${Operand}";
             }
 
-            if (Operand is string str)
-                return $"    {OpCodeToText()} ${str}";
             return $"    {OpCodeToText()} {Operand}";
         }
 
@@ -66,10 +63,10 @@ namespace Converter
                 case WasmInstructions.i64_eqz:
                 case WasmInstructions.f32_gt:
                 case WasmInstructions.f64_gt:
-                    return Instruction.ToString().Replace("_",".");
+                    return Instruction.ToString().Replace("_", ".");
                 case WasmInstructions._return:
                     return "return";
-                    
+
                 case WasmInstructions.i32_gt_s:
                     return "i32.gt_s";
                 case WasmInstructions.i64_gt_s:
@@ -78,7 +75,7 @@ namespace Converter
                     return "i32.gt_u";
                 case WasmInstructions.i64_gt_u:
                     return "i64.gt_u";
-                    
+
                 case WasmInstructions.i32_lt_s:
                     return "i32.lt_s";
                 case WasmInstructions.i64_lt_s:
@@ -101,36 +98,6 @@ namespace Converter
             }
         }
 
-        public static string ConvertMethod(string className, string methodName, bool hasThis, IList<TypeSig> parameters, TypeSig returnType)
-        {
-            return $"{className.Replace(".", "_")}__{methodName.Replace(".", "")}{GetParamStr(hasThis, parameters, returnType)}";
-        }
 
-        public static string GetParamStr(bool hasThis, IList<TypeSig> parameters, TypeSig returnType)
-        {
-            StringBuilder builder = new StringBuilder();
-
-            if (hasThis)
-                builder.Append("_this");
-
-            foreach (var item in parameters)
-            {
-                if (item.FullName.StartsWith("System.Nullable`1<"))
-                    builder.Append("_" + item.FullName.Replace("System.Nullable`1<", "").Replace(">", "").Replace(".", ""));
-                else
-                    builder.Append($"_{item.FullName.Replace(".", "")}");
-
-            }
-
-            if (returnType != null)
-            {
-                if (returnType.FullName.StartsWith("System.Nullable`1<"))
-                    builder.Append("__" + returnType.FullName.Replace("System.Nullable`1<", "").Replace(">", "").Replace(".", ""));
-                else
-                    builder.Append($"__{returnType.FullName.Replace(".", "")}");
-            }
-
-            return builder.ToString();
-        }
     }
 }

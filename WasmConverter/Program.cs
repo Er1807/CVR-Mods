@@ -16,7 +16,7 @@ namespace Converter
             ModuleDefMD module = ModuleDefMD.Load(args[0], modCtx);
             var type = module.Types.SingleOrDefault(x => x.FullName == args[1]);
             WasmModule wasmModule = new WasmModule();
-
+            wasmModule.declaringType = type.ToTypeSig();
             foreach (var field in type.Fields)
             {
                 wasmModule.Fields.Add(field.Name, field.FieldType);
