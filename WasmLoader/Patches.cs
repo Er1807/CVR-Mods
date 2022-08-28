@@ -94,23 +94,6 @@ namespace WasmLoader
             MelonCoroutines.Start(WaitForAvatarLoaded(__result, instTarget));
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(nameof(CVRObjectLoader.InstantiateProp))]
-        public static void InstantiatePropPostfix(IEnumerator __result, string instTarget)
-        {
-            WasmLoaderMod.Instance.LoggerInstance.Msg("Prop started loading. Waiting for finish");
-            MelonCoroutines.Start(WaitForPropLoaded(__result, instTarget));
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(nameof(CVRObjectLoader.LoadIntoWorld))]
-        public static void LoadIntoWorldPostfix()
-        {
-            WasmLoaderMod.Instance.LoggerInstance.Msg("World started loading. Waiting for finish");
-
-            MelonCoroutines.Start(WaitForWorldLoaded());
-        }
-
         public static IEnumerator WaitForAvatarLoaded(IEnumerator __result, string instTarget)
         {
             while (AvatarQueueSystem.Instance.activeCoroutines.Any(x => x.function == __result))
@@ -131,6 +114,13 @@ namespace WasmLoader
 
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(CVRObjectLoader.InstantiateProp))]
+        public static void InstantiatePropPostfix(IEnumerator __result, string instTarget)
+        {
+            WasmLoaderMod.Instance.LoggerInstance.Msg("Prop started loading. Waiting for finish");
+            MelonCoroutines.Start(WaitForPropLoaded(__result, instTarget));
+        }
         public static IEnumerator WaitForPropLoaded(IEnumerator __result, string instTarget)
         {
             yield return new WaitForSeconds(0.2f);
@@ -148,8 +138,20 @@ namespace WasmLoader
                     InitializeWasm(wasmLoader, WasmType.Prop);
                 }
             }
-
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(CVRObjectLoader.LoadIntoWorld))]
+        public static void LoadIntoWorldPostfix()
+        {
+            WasmLoaderMod.Instance.LoggerInstance.Msg("World started loading. Waiting for finish");
+
+            MelonCoroutines.Start(WaitForWorldLoaded());
+        }
+
+        
+
+        
         public static IEnumerator WaitForWorldLoaded()
         {
             while (CVRObjectLoader.Instance.IsLoadingWorldToJoin)

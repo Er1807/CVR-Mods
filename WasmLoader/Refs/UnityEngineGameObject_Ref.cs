@@ -6,14 +6,16 @@ namespace WasmLoader.Refs
     {
         public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
         {
-            linker.DefineFunction("env", "UnityEngine_GameObject__Type", (Caller caller) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__Type", (Caller caller) =>
+            {
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__Type");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
                 return objects.StoreObject(typeof(UnityEngine.GameObject));
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_tag_this__SystemString", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_tag_this__SystemString", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -25,7 +27,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__set_tag_this_SystemString__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__set_tag_this_SystemString__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_value = objects.RetriveObject<System.String>(value, caller);
 #if Debug
@@ -39,7 +42,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__CompareTag_this_SystemString__SystemBoolean", (Caller caller, System.Int32 parameter_this, System.Int32 tag) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__CompareTag_this_SystemString__SystemBoolean", (Caller caller, System.Int32 parameter_this, System.Int32 tag) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_tag = objects.RetriveObject<System.String>(tag, caller);
 #if Debug
@@ -53,7 +57,8 @@ namespace WasmLoader.Refs
                 return result ?? false ? 1 : 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__FindGameObjectWithTag_SystemString__UnityEngineGameObject", (Caller caller, System.Int32 tag) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__FindGameObjectWithTag_SystemString__UnityEngineGameObject", (Caller caller, System.Int32 tag) =>
+            {
                 var resolved_tag = objects.RetriveObject<System.String>(tag, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -62,10 +67,14 @@ namespace WasmLoader.Refs
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
 #endif
                 var result = UnityEngine.GameObject.FindGameObjectWithTag(resolved_tag);
-                return objects.StoreObject(result);
+                if (result?.IsAllowed(wasmType) ?? false)
+                    return objects.StoreObject(result);
+
+                return objects.StoreObject(null);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__FindGameObjectsWithTag_SystemString__UnityEngineGameObject[]", (Caller caller, System.Int32 tag) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__FindGameObjectsWithTag_SystemString__UnityEngineGameObject[]", (Caller caller, System.Int32 tag) =>
+            {
                 var resolved_tag = objects.RetriveObject<System.String>(tag, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -77,151 +86,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessageUpwards_this_SystemString_SystemObject_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 value, System.Int32 options) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-                var resolved_value = objects.RetriveObject<System.Object>(value, caller);
-                var resolved_options = objects.RetriveObject<UnityEngine.SendMessageOptions>(options, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_options);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__SendMessageUpwards_this_SystemString_SystemObject_UnityEngineSendMessageOptions__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.SendMessageUpwards(resolved_methodName, resolved_value, resolved_options);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessageUpwards_this_SystemString_SystemObject__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 value) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-                var resolved_value = objects.RetriveObject<System.Object>(value, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__SendMessageUpwards_this_SystemString_SystemObject__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.SendMessageUpwards(resolved_methodName, resolved_value);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessageUpwards_this_SystemString__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__SendMessageUpwards_this_SystemString__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.SendMessageUpwards(resolved_methodName);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessage_this_SystemString_SystemObject_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 value, System.Int32 options) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-                var resolved_value = objects.RetriveObject<System.Object>(value, caller);
-                var resolved_options = objects.RetriveObject<UnityEngine.SendMessageOptions>(options, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_options);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__SendMessage_this_SystemString_SystemObject_UnityEngineSendMessageOptions__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.SendMessage(resolved_methodName, resolved_value, resolved_options);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessage_this_SystemString_SystemObject__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 value) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-                var resolved_value = objects.RetriveObject<System.Object>(value, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__SendMessage_this_SystemString_SystemObject__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.SendMessage(resolved_methodName, resolved_value);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessage_this_SystemString__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__SendMessage_this_SystemString__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.SendMessage(resolved_methodName);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__BroadcastMessage_this_SystemString_SystemObject_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 parameter, System.Int32 options) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-                var resolved_parameter = objects.RetriveObject<System.Object>(parameter, caller);
-                var resolved_options = objects.RetriveObject<UnityEngine.SendMessageOptions>(options, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_parameter);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_options);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__BroadcastMessage_this_SystemString_SystemObject_UnityEngineSendMessageOptions__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.BroadcastMessage(resolved_methodName, resolved_parameter, resolved_options);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__BroadcastMessage_this_SystemString_SystemObject__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 parameter) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-                var resolved_parameter = objects.RetriveObject<System.Object>(parameter, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_parameter);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__BroadcastMessage_this_SystemString_SystemObject__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.BroadcastMessage(resolved_methodName, resolved_parameter);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__BroadcastMessage_this_SystemString__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName) => {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_methodName);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__BroadcastMessage_this_SystemString__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
-#endif
-                resolved_this?.BroadcastMessage(resolved_methodName);
-
-            });
-
-            linker.DefineFunction("env", "UnityEngine_GameObject__Find_SystemString__UnityEngineGameObject", (Caller caller, System.Int32 name) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__Find_SystemString__UnityEngineGameObject", (Caller caller, System.Int32 name) =>
+            {
                 var resolved_name = objects.RetriveObject<System.String>(name, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -230,10 +96,14 @@ namespace WasmLoader.Refs
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
 #endif
                 var result = UnityEngine.GameObject.Find(resolved_name);
-                return objects.StoreObject(result);
+                if (result?.IsAllowed(wasmType) ?? false)
+                    return objects.StoreObject(result);
+
+                return objects.StoreObject(null);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_scene_this__UnityEngineSceneManagementScene", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_scene_this__UnityEngineSceneManagementScene", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -245,7 +115,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_sceneCullingMask_this__SystemUInt64", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_sceneCullingMask_this__SystemUInt64", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -257,7 +128,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_gameObject_this__UnityEngineGameObject", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_gameObject_this__UnityEngineGameObject", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -269,7 +141,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__CreatePrimitive_UnityEnginePrimitiveType__UnityEngineGameObject", (Caller caller, System.Int32 type) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__CreatePrimitive_UnityEnginePrimitiveType__UnityEngineGameObject", (Caller caller, System.Int32 type) =>
+            {
                 var resolved_type = objects.RetriveObject<UnityEngine.PrimitiveType>(type, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -281,7 +154,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponent_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponent_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 #if Debug
@@ -295,7 +169,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponent_this_SystemString__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponent_this_SystemString__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.String>(type, caller);
 #if Debug
@@ -309,7 +184,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentInChildren_this_SystemType_SystemBoolean__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type, System.Int32 includeInactive) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentInChildren_this_SystemType_SystemBoolean__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type, System.Int32 includeInactive) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 
@@ -325,7 +201,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentInChildren_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentInChildren_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 #if Debug
@@ -339,7 +216,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentInParent_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentInParent_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 type) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 #if Debug
@@ -353,7 +231,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponents_this_SystemType__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponents_this_SystemType__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 #if Debug
@@ -367,7 +246,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInChildren_this_SystemType__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInChildren_this_SystemType__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 #if Debug
@@ -381,7 +261,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInChildren_this_SystemType_SystemBoolean__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type, System.Int32 includeInactive) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInChildren_this_SystemType_SystemBoolean__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type, System.Int32 includeInactive) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 
@@ -397,7 +278,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInParent_this_SystemType__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInParent_this_SystemType__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 #if Debug
@@ -411,7 +293,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInParent_this_SystemType_SystemBoolean__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type, System.Int32 includeInactive) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInParent_this_SystemType_SystemBoolean__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type, System.Int32 includeInactive) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_type = objects.RetriveObject<System.Type>(type, caller);
 
@@ -427,7 +310,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__FindWithTag_SystemString__UnityEngineGameObject", (Caller caller, System.Int32 tag) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__FindWithTag_SystemString__UnityEngineGameObject", (Caller caller, System.Int32 tag) =>
+            {
                 var resolved_tag = objects.RetriveObject<System.String>(tag, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -439,7 +323,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessageUpwards_this_SystemString_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 options) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessageUpwards_this_SystemString_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 options) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
                 var resolved_options = objects.RetriveObject<UnityEngine.SendMessageOptions>(options, caller);
@@ -455,7 +340,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessage_this_SystemString_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 options) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__SendMessage_this_SystemString_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 options) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
                 var resolved_options = objects.RetriveObject<UnityEngine.SendMessageOptions>(options, caller);
@@ -471,7 +357,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__BroadcastMessage_this_SystemString_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 options) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__BroadcastMessage_this_SystemString_UnityEngineSendMessageOptions__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 methodName, System.Int32 options) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_methodName = objects.RetriveObject<System.String>(methodName, caller);
                 var resolved_options = objects.RetriveObject<UnityEngine.SendMessageOptions>(options, caller);
@@ -487,7 +374,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__AddComponent_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 componentType) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__AddComponent_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 componentType) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
                 var resolved_componentType = objects.RetriveObject<System.Type>(componentType, caller);
 #if Debug
@@ -501,7 +389,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_transform_this__UnityEngineTransform", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_transform_this__UnityEngineTransform", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -513,7 +402,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_layer_this__SystemInt32", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_layer_this__SystemInt32", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -525,7 +415,8 @@ namespace WasmLoader.Refs
                 return result ?? 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__set_layer_this_SystemInt32__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__set_layer_this_SystemInt32__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 
 #if Debug
@@ -539,7 +430,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_active_this__SystemBoolean", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_active_this__SystemBoolean", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -551,7 +443,8 @@ namespace WasmLoader.Refs
                 return result ?? false ? 1 : 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__set_active_this_SystemBoolean__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__set_active_this_SystemBoolean__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 
 #if Debug
@@ -565,7 +458,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__SetActive_this_SystemBoolean__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__SetActive_this_SystemBoolean__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 
 #if Debug
@@ -579,7 +473,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_activeSelf_this__SystemBoolean", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_activeSelf_this__SystemBoolean", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -591,7 +486,8 @@ namespace WasmLoader.Refs
                 return result ?? false ? 1 : 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_activeInHierarchy_this__SystemBoolean", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_activeInHierarchy_this__SystemBoolean", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -603,7 +499,8 @@ namespace WasmLoader.Refs
                 return result ?? false ? 1 : 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__SetActiveRecursively_this_SystemBoolean__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 state) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__SetActiveRecursively_this_SystemBoolean__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 state) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 
 #if Debug
@@ -617,7 +514,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__get_isStatic_this__SystemBoolean", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__get_isStatic_this__SystemBoolean", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -629,7 +527,8 @@ namespace WasmLoader.Refs
                 return result ?? false ? 1 : 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_GameObject__set_isStatic_this_SystemBoolean__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) => {
+            linker.DefineFunction("env", "UnityEngine_GameObject__set_isStatic_this_SystemBoolean__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
 
 #if Debug
@@ -643,7 +542,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_Object__GetInstanceID_this__SystemInt32", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_Object__GetInstanceID_this__SystemInt32", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.Object>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -655,7 +555,8 @@ namespace WasmLoader.Refs
                 return result ?? 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_Object__GetHashCode_this__SystemInt32", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_Object__GetHashCode_this__SystemInt32", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.Object>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -667,7 +568,8 @@ namespace WasmLoader.Refs
                 return result ?? 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_Object__Equals_this_SystemObject__SystemBoolean", (Caller caller, System.Int32 parameter_this, System.Int32 other) => {
+            linker.DefineFunction("env", "UnityEngine_Object__Equals_this_SystemObject__SystemBoolean", (Caller caller, System.Int32 parameter_this, System.Int32 other) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.Object>(parameter_this, caller);
                 var resolved_other = objects.RetriveObject<System.Object>(other, caller);
 #if Debug
@@ -681,7 +583,8 @@ namespace WasmLoader.Refs
                 return result ?? false ? 1 : 0;
             });
 
-            linker.DefineFunction("env", "UnityEngine_Object__get_name_this__SystemString", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_Object__get_name_this__SystemString", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.Object>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -693,7 +596,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_Object__set_name_this_SystemString__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) => {
+            linker.DefineFunction("env", "UnityEngine_Object__set_name_this_SystemString__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.Object>(parameter_this, caller);
                 var resolved_value = objects.RetriveObject<System.String>(value, caller);
 #if Debug
@@ -707,7 +611,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_Object__get_hideFlags_this__UnityEngineHideFlags", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_Object__get_hideFlags_this__UnityEngineHideFlags", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.Object>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -719,7 +624,8 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "UnityEngine_Object__set_hideFlags_this_UnityEngineHideFlags__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) => {
+            linker.DefineFunction("env", "UnityEngine_Object__set_hideFlags_this_UnityEngineHideFlags__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 value) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.Object>(parameter_this, caller);
                 var resolved_value = objects.RetriveObject<UnityEngine.HideFlags>(value, caller);
 #if Debug
@@ -733,7 +639,8 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "UnityEngine_Object__ToString_this__SystemString", (Caller caller, System.Int32 parameter_this) => {
+            linker.DefineFunction("env", "UnityEngine_Object__ToString_this__SystemString", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<UnityEngine.Object>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
