@@ -1,18 +1,11 @@
 ﻿using ABI.CCK.Components;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using WasmLoader;
+using WasmLoader.TypeWrappers;
 
 namespace Test
 {
-    public class ListGameobject
-    {
-        private List<GameObject> list = new List<GameObject>();
-        public void Add(GameObject obj) => list.Add(obj);
-        public int Count => list.Count;
-        public GameObject Get(int i) => list[i];
-    }
 
     public class Search : WasmBehavior
     {

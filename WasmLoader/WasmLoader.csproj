@@ -78,6 +78,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TypeWrappers\ListGameobject.cs" />
     <Compile Include="Examples\Play.cs" />
     <Compile Include="Examples\Search.cs" />
     <Compile Include="Examples\Example2.cs" />

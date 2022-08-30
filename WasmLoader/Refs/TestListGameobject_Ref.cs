@@ -7,11 +7,11 @@ namespace WasmLoader.Refs
         public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
         {
             linker.DefineFunction("env", "Test_ListGameobject__Type", (Caller caller) => {
-                return objects.StoreObject(typeof(Test.ListGameobject));
+                return objects.StoreObject(typeof(TypeWrappers.ListGameobject));
             });
 
             linker.DefineFunction("env", "Test_ListGameobject__Add_this_UnityEngineGameObject__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 obj) => {
-                var resolved_this = objects.RetriveObject<Test.ListGameobject>(parameter_this, caller);
+                var resolved_this = objects.RetriveObject<TypeWrappers.ListGameobject>(parameter_this, caller);
                 var resolved_obj = objects.RetriveObject<UnityEngine.GameObject>(obj, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -25,7 +25,7 @@ namespace WasmLoader.Refs
             });
 
             linker.DefineFunction("env", "Test_ListGameobject__get_Count_this__SystemInt32", (Caller caller, System.Int32 parameter_this) => {
-                var resolved_this = objects.RetriveObject<Test.ListGameobject>(parameter_this, caller);
+                var resolved_this = objects.RetriveObject<TypeWrappers.ListGameobject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
@@ -37,7 +37,7 @@ namespace WasmLoader.Refs
             });
 
             linker.DefineFunction("env", "Test_ListGameobject__Get_this_SystemInt32__UnityEngineGameObject", (Caller caller, System.Int32 parameter_this, System.Int32 i) => {
-                var resolved_this = objects.RetriveObject<Test.ListGameobject>(parameter_this, caller);
+                var resolved_this = objects.RetriveObject<TypeWrappers.ListGameobject>(parameter_this, caller);
 
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");

@@ -13,7 +13,7 @@ namespace LinkerCreator
     {
         public static void Main(string[] args)
         {
-            GenerateClass(typeof(ListGameobject));
+            GenerateClass(typeof(WasmLoader.TypeWrappers.ListGameobject));
         }
 
         private static void GenerateClass(Type type)

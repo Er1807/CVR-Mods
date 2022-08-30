@@ -80,8 +80,8 @@ namespace WasmLoader
             var linker = new Linker(engine);
             var store = new Store(engine);
             var objects = new Objectstore(store);
-
-            foreach (var item in Assembly.GetExecutingAssembly().GetTypes().Where(x => typeof(IRef).IsAssignableFrom(x) && typeof(IRef) != x))
+            
+            foreach (var item in AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).Where(x => typeof(IRef).IsAssignableFrom(x) && typeof(IRef) != x))
             {
                 var t = (Activator.CreateInstance(item) as IRef);
                 t.Setup(linker, store, objects, wasmType);
