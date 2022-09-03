@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using System.IO;
 using UnityEngine;
 using ABI_RC.Core.Player;
+using ActionMenu;
 
 [assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "1.4.2", "Eric van Fandenfart")]
 [assembly: MelonGame]
@@ -70,6 +71,8 @@ namespace FreezeFrame
             var freeze = LoadImage("freeze");
             freeze.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
+            API.OnOnGlobalMenuLoaded += API_OnOnGlobalMenuLoaded;
+            
             var category = MelonPreferences.CreateCategory("FreezeFrame");
             freezeType = category.CreateEntry("FreezeType", FreezeType.PerformanceFreeze, display_name: "Freeze Type", description: "Full Freeze is more accurate and copys everything but is less performant");
             recordBlendshapes = category.CreateEntry("recordBlendshapes", true, display_name: "Record Blendshapes", description: "Blendshape Recording can quite limit the performance you can disable it here");
@@ -77,38 +80,48 @@ namespace FreezeFrame
             saveAnimations = category.CreateEntry("saveAnimations", true, display_name: "Save Animations on freeze animations", description: "If anaimations are saved they can be later exported (uses more ram)");
             smoothLoopingDuration = category.CreateEntry("smoothLoopingDuration", 0.2f, "Smoothing Duration", "Duration of loop smoothing");
 
-
-            MelonCoroutines.Start(WaitForUIInit());
+            
         }
-        /*
-        private void CreateActionMenu()
+        private bool InitializedActionMenu = false;
+        private void API_OnOnGlobalMenuLoaded(Menus menus)
         {
-            MelonLogger.Msg("Freeze Frame Menu Opened");
-            CustomSubMenu.AddButton("Delete Last", DeleteLast, LoadImage("delete last"));
-            CustomSubMenu.AddButton("Delete First", () => Delete(0), LoadImage("delete first"));
-            CustomSubMenu.AddButton("Freeze Self", CreateSelf, LoadImage("freeze"));
-            CustomSubMenu.AddToggle("Record", animationModule.Recording, (state) =>
-            {
-                if (state) animationModule.StartRecording(Player.prop_Player_0);
-                else animationModule.StopRecording();
-            }, LoadImage("record"));
+            if (InitializedActionMenu)
+                return;
+            
+            LoggerInstance.Msg("Adding menu items");
+            menus["FreezeFrame"] = new List<MenuItem>() {
+                MenuItemWrapper("Delete Last", DeleteLast, "delete last"),
+                MenuItemWrapper("Delete First", () => Delete(0), "delete first"),
+                MenuItemWrapper("Freeze Self", CreateSelf, "freeze"),
+                MenuItemWrapper("Record", () => AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StartRecording(), "record"),
+                MenuItemWrapper("Record Stop", () => AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StopRecording(), "record"),
+                MenuItemWrapper("Resync Animations", Resync, "resync"),
+                new MenuItem() { name = "Advanced", action = new ItemAction() { type = "menu", menu = "FreezeFrame-Advanced" }, icon = "advanced" },
+            };
 
-            CustomSubMenu.AddButton("Resync Animations", Resync, LoadImage("resync"));
-            CustomSubMenu.AddSubMenu("Advanced", delegate
-            {
-                CustomSubMenu.AddButton("Freeze Self (5s)", () => DelayedSelf = DateTime.Now.AddSeconds(5), LoadImage("freeze 5sec"));
-                CustomSubMenu.AddButton("Delete All", Delete, LoadImage("delete all"));
-                CustomSubMenu.AddButton("Freeze All", Create, LoadImage("freeze all"));
-                CustomSubMenu.AddButton("Freeze All (5s)", () => DelayedAll = DateTime.Now.AddSeconds(5), LoadImage("freeze all 5sec"));
-                CustomSubMenu.AddToggle("Record Time Limit", animationModule.Recording, (state) =>
-                {
-                    if (state) animationModule.StartRecording(Player.prop_Player_0);
-                    else animationModule.StopRecording(isMain: true);
-                }, LoadImage("record"));
-                CustomSubMenu.AddToggle("Delete Mode", deleteMode, SwitchDeleteMode, LoadImage("delete mode")); ;
-            }, LoadImage("advanced"));
+            menus["FreezeFrame-Advanced"] = new List<MenuItem>() {
+                MenuItemWrapper("Freeze Self (5s)", () => DelayedSelf = DateTime.Now.AddSeconds(5), "freeze 5sec"),
+                MenuItemWrapper("Delete All", Delete, "delete all"),
+                MenuItemWrapper("Freeze All", Create, "freeze all"),
+                MenuItemWrapper("Freeze All (5s)", () => DelayedAll = DateTime.Now.AddSeconds(5), "freeze all 5sec"),
+                //MenuItemWrapper("Record Time Limit", () => LoggerInstance.Msg("hello world")),
+                //MenuItemWrapper("Delete Mode", () => LoggerInstance.Msg("hello world"), "delete mode")
+
+            };
+
+
+            //Register in Main menu
+            menus["main"].Add(new MenuItem() { name = "FreezeFrame", action = new ItemAction() { type = "menu", menu = "FreezeFrame" } });
+
+            InitializedActionMenu = true;
         }
-        */
+
+        public MenuItem MenuItemWrapper(string name, Action action, string icon = null)
+        {
+            return new MenuItem() { name = name, action = ActionMenuMod.BuildCallbackMenuItem(name.Replace(" ", ""), action), icon = icon };
+        }
+
+ 
         private void SwitchDeleteMode(bool state)
         {
             deleteMode = state;
@@ -143,16 +156,6 @@ namespace FreezeFrame
                 {
                     item.Stop();
                 }
-        }
-
-        private IEnumerator WaitForUIInit()
-        {
-            //while (VRCUiManager.prop_VRCUiManager_0 == null)
-            //    yield return null;
-            while (GameObject.Find("UserInterface").transform.Find("Canvas_QuickMenu(Clone)/Container/Window/QMParent") == null)
-                yield return null;
-
-            //LoadUI();
         }
 
         public static List<AssetBundle> StillLoaded = new List<AssetBundle>();

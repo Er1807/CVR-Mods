@@ -45,7 +45,7 @@ namespace FreezeFrame
         public float CurrentTime;
         private bool _recording = false;
 
-        public void StartRecording(PlayerDescriptor player, bool calledByRemote = false)
+        public void StartRecording(bool calledByRemote = false)
         {
             AnimationsCache.Clear();
             _recording = true;
