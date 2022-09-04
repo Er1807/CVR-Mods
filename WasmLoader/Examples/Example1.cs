@@ -61,9 +61,19 @@ namespace Test
             }
         }
 
-        
-
         //broken
+        public void ifelsif()
+        {
+            if (GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/").activeSelf)
+            {
+                Logtest.Msg("Mirror Right is Visible");
+            }
+            else if (GameObject.Find("MirrorButtons/Mirrors/Mirrorleftp/").activeSelf)
+            {
+                Logtest.Msg("Mirror Left is Visible");
+            }
+        }
+
         public void ifelseelse()
         {
             if (GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/").activeSelf)

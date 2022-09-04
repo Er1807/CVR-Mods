@@ -60,10 +60,19 @@ namespace Converter
                             var remainingBlock = remaining[j];
                             if(remainingBlock.LastInstruction == WasmInstructions.br_if)
                             {
-                                var elseifEnd = remaining.IndexOf(remaining.Single(x => x.FirstOffset == (remainingBlock.LastOperand as WasmLongOperand).AsUInt)) - 1;
-                                ifBlock.Cases.Add((remaining.Take(j + 1).ToList(), remaining.Skip(j + 1).Take(elseifEnd - j - 1).ToList()));
-                                remaining.RemoveRange(0, elseifEnd + 1);
-                                j = 0;
+                                if (remaining.Last().FirstOffset < (remainingBlock.LastOperand as WasmLongOperand).AsUInt)
+                                {//else
+                                    ifBlock.Cases.Add((remaining.Take(j + 1).ToList(), remaining.Skip(j + 1).ToList()));
+                                    remaining.Clear();
+                                    j = 0;
+                                }
+                                else
+                                {
+                                    var elseifEnd = remaining.IndexOf(remaining.Single(x => x.FirstOffset == (remainingBlock.LastOperand as WasmLongOperand).AsUInt)) - 1;
+                                    ifBlock.Cases.Add((remaining.Take(j + 1).ToList(), remaining.Skip(j + 1).Take(elseifEnd - j - 1).ToList()));
+                                    remaining.RemoveRange(0, elseifEnd + 1);
+                                    j = 0;
+                                }
                             }
                         }
                         if(remaining.Count != 0)
