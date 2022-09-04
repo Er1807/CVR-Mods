@@ -49,13 +49,35 @@ namespace Converter
                     }
                     else
                     {
+                        var actualEnd = blocks.IndexOf(blocks.Single(x => x.FirstOffset == (blocks[EndOfIf].LastOperand as WasmLongOperand).AsUInt)) - 1;
                         //Not yet working
-
                         var ifBlock = new IfBlock();
                         ifBlock.Cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i - 1).ToList()));
 
+                        var remaining = blocks.Skip(EndOfIf + 1).Take(actualEnd - EndOfIf).ToList();
+                        for (int j = 0; j < remaining.Count; j++)
+                        {
+                            var remainingBlock = remaining[j];
+                            if(remainingBlock.LastInstruction == WasmInstructions.br_if)
+                            {
+                                var elseifEnd = remaining.IndexOf(remaining.Single(x => x.FirstOffset == (remainingBlock.LastOperand as WasmLongOperand).AsUInt)) - 1;
+                                ifBlock.Cases.Add((remaining.Take(j + 1).ToList(), remaining.Skip(j + 1).Take(elseifEnd - j - 1).ToList()));
+                                remaining.RemoveRange(0, elseifEnd + 1);
+                                j = 0;
+                            }
+                        }
+                        if(remaining.Count != 0)
+                        {
+                            ifBlock.Cases.Add((null, remaining));
+                            remaining.Clear();
+                        }
+
                         blocks.Insert(i, ifBlock);
-                        blocks.RemoveRange(i + 1, EndOfIf - i);
+                        blocks.RemoveRange(i + 1, actualEnd - i);
+                        foreach (var ifcase in ifBlock.Cases)
+                        {
+                            RebuildSubBlock(ifcase.Item2);
+                        }
                     }
                 }
             }
@@ -113,6 +135,10 @@ namespace Converter
                     blocks.Add(new ZeroStackBlock(wasmFunction.Instructions.Skip(lastIndex).Take(i - lastIndex).ToList()));
                     lastIndex = i;
                 }
+            }
+            if(wasmFunction.Instructions.Last().Instruction == WasmInstructions._return)//wtf. why is the return not added
+            {
+                blocks.Add(new ZeroStackBlock(new List<WasmInstruction>() { wasmFunction.Instructions.Last() }));
             }
             blocks.RemoveAt(0);
             wasmFunction.Blocks = blocks;
