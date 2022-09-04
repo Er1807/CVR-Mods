@@ -63,15 +63,9 @@ namespace Converter
         }
     }
 
-    public class WhileBlock : Block
+    public class ForBlock : Block //is also a while block
     {
-        public List<WasmInstruction> Instructions { get; set; } = new List<WasmInstruction>();
-        public List<WasmInstruction> Condition { get; set; } = new List<WasmInstruction>();
-    }
-
-    public class ForBlock : Block
-    {
-        private readonly int Counter;
+        public readonly int Counter;
 
         public ForBlock(int counter, List<Block> instructions, List<Block> increment, List<Block> check)
         {
@@ -141,6 +135,6 @@ namespace Converter
     }
     public class IfBlock : Block
     {
-        public List<(List<WasmInstruction>, List<WasmInstruction>)> Cases { get; set; } = new List<(List<WasmInstruction>, List<WasmInstruction>)>();
+        public List<(List<Block>, List<Block>)> Cases { get; set; } = new List<(List<Block>, List<Block>)>();
     }
 }

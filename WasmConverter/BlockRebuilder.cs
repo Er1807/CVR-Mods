@@ -25,6 +25,40 @@ namespace Converter
         public void RebuildSubBlock(List<Block> blocks)
         {
             BuildForBlocks(blocks);
+            BuildIfBlocks(blocks);
+        }
+
+        private void BuildIfBlocks(List<Block> blocks)
+        {
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                ZeroStackBlock block = blocks[i] as ZeroStackBlock;
+                if (block == null)
+                    continue;
+
+                if (block.LastInstruction == WasmInstructions.br_if)
+                {
+                    var EndOfIf = blocks.IndexOf(blocks.Single(x => x.FirstOffset == (block.LastOperand as WasmLongOperand).AsUInt)) - 1;
+                    if (blocks[EndOfIf].FirstInstruction != WasmInstructions.br)//simple if
+                    {
+                        var ifBlock = new IfBlock();
+                        ifBlock.Cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i).ToList()));
+
+                        blocks.Insert(i, ifBlock);
+                        blocks.RemoveRange(i + 1, EndOfIf - i + 1);
+                    }
+                    else
+                    {
+                        //Not yet working
+
+                        var ifBlock = new IfBlock();
+                        ifBlock.Cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i - 1).ToList()));
+
+                        blocks.Insert(i, ifBlock);
+                        blocks.RemoveRange(i + 1, EndOfIf - i);
+                    }
+                }
+            }
         }
 
         private void BuildForBlocks(List<Block> blocks)
@@ -46,7 +80,7 @@ namespace Converter
                     int end = blocks.IndexOf(brif);
 
                     if (end < start)
-                        continue;//elseif whatever
+                        continue;//elseif whatever ignore
 
                     int startInstructionBlock = i + 2;//nop ignored
 

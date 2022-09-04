@@ -12,6 +12,16 @@ namespace Test
 {
     public class Example1 : WasmBehavior
     {
+        public void ifF()
+        {
+            var obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
+            obj.SetActive(!obj.activeSelf);
+            if (obj.activeSelf)
+                Logtest.Msg("Mirror is now Visible");
+            Logtest.Msg("Method Done");
+
+        }
+        
         public void ifelse()
         {
             var obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
@@ -29,6 +39,15 @@ namespace Test
             for (int i = 0; i < 10; i++)
             {
                 Logtest.Msg("Current number is " + i);
+            }
+        }
+        public void While()
+        {
+            int i = 10;
+            while(i %3 !=0)
+            {
+                Logtest.Msg("Current number is " + i);
+                i++;
             }
         }
         public void DoubleFor()
