@@ -50,7 +50,7 @@ namespace Converter
                     else
                     {
                         var actualEnd = blocks.IndexOf(blocks.Single(x => x.FirstOffset == (blocks[EndOfIf].LastOperand as WasmLongOperand).AsUInt)) - 1;
-                        //Not yet working
+
                         var ifBlock = new IfBlock();
                         ifBlock.Cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i - 1).ToList()));
 
