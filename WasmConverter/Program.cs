@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using dnlib.DotNet;
-using dnlib.DotNet.Emit;
 
 namespace Converter
 {
     internal class Program
     {
+
         static void Main(string[] args)
         {
             ModuleContext modCtx = ModuleDef.CreateModuleContext();
@@ -27,7 +25,7 @@ namespace Converter
                 var mem = new Converter().Convert(wasmModule, method);
             }
 
-            foreach (var stringOperand in wasmModule.Functions.SelectMany(x => x.Instructions).Where(x=>x.Operand is WasmStringOperand).Select(x => x.Operand as WasmStringOperand))
+            foreach (var stringOperand in wasmModule.Functions.SelectMany(x => x.Instructions).Where(x => x.Operand is WasmStringOperand).Select(x => x.Operand as WasmStringOperand))
             {
                 stringOperand.Value = wasmModule.Allocate(stringOperand.StrValue);
             }
@@ -49,6 +47,7 @@ namespace Converter
             }
 
             Console.ReadLine();
+
         }
     }
 }

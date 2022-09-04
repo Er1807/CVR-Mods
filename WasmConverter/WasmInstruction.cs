@@ -13,6 +13,10 @@ namespace Converter
             StackSizeBefore = stackSizeBefore;
             Operand = operand;
         }
+        // Only used for blocks
+        public WasmInstruction()
+        {
+        }
 
         public WasmInstructions Instruction;
         public uint Offset; //il offset
@@ -23,7 +27,7 @@ namespace Converter
         {
             return $"{Offset}:({StackSizeBefore}) {Instruction} {Operand}";
         }
-        public string ToInstructionString()
+        public virtual string ToInstructionString()
         {
             if (Operand is WasmExternFunctionOperand
                || Operand is WasmLocalFieldOperand

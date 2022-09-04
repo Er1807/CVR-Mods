@@ -59,8 +59,8 @@ namespace Converter
             }
             Console.WriteLine();
 #endif
-
-            func.FixControlFlow();
+            new BlockRebuilder(func).Rebuild();
+            //func.FixControlFlow();
 #if DEBUG
             Console.WriteLine("After Controlflow fix");
             Console.WriteLine(func.Name);
@@ -69,9 +69,9 @@ namespace Converter
                 Console.WriteLine("Param " + item);
             }
             Console.WriteLine("Retr " + func.ReturnType);
-            foreach (var item in func.Instructions)
+            foreach (var item in func.Blocks)
             {
-                Console.WriteLine("Inst:" + item);
+                Console.WriteLine("Block:" + item);
             }
             Console.WriteLine();
 #endif
@@ -96,7 +96,7 @@ namespace Converter
                     break;
                 case Code.Ldc_I4:
                 case Code.Ldc_I4_S:
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt((int)instruction.Operand)));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt((sbyte)instruction.Operand)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldstr:

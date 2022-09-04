@@ -12,27 +12,7 @@ namespace Test
 {
     public class Example1 : WasmBehavior
     {
-        private GameObject obj;
-        public override void Start()
-        {
-            obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
-            Logtest.Msg("Initialied W# Instance");
-        }
-
-        public override void InteractDown()
-        {
-            Logtest.Msg("Teleported on InteractDown");
-            MovementSystem.Instance.TeleportTo(new Vector3(93, 87, -40));
-        }
-
-        public void ToggleMirror()
-        {
-            var state = obj.activeSelf;
-            state = !state;
-            obj.SetActive(state);
-        }
-
-        public void ToggleMirror2()
+        public void ifelse()
         {
             var obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
             obj.SetActive(!obj.activeSelf);
@@ -44,14 +24,14 @@ namespace Test
 
         }
 
-        public void Test()
+        public void For()
         {
             for (int i = 0; i < 10; i++)
             {
                 Logtest.Msg("Current number is " + i);
             }
         }
-        public void Test2()
+        public void DoubleFor()
         {
             for (int i = 0; i < 10; i++)
             {
@@ -65,7 +45,7 @@ namespace Test
         
 
         //broken
-        public void FizzBuzz()
+        public void ifelseelse()
         {
             if (GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/").activeSelf)
             {
@@ -82,7 +62,7 @@ namespace Test
             }
         }
 
-        public void Test3()
+        public void NoInlining()
         {
             for (int i = 0; i < 10; i++)
             {

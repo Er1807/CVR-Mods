@@ -21,6 +21,7 @@ namespace Converter
         public List<WasmDataType> Parameters = new List<WasmDataType>();
         public Dictionary<string, WasmDataType> Locals = new Dictionary<string, WasmDataType>();
         public List<WasmInstruction> Instructions = new List<WasmInstruction>();
+        public List<Block> Blocks = new List<Block>();
         public MethodDef Method;
 
 
