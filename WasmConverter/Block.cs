@@ -54,7 +54,7 @@ namespace Converter
         public override string ToInstructionString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("Block: ZeroStack");
+            stringBuilder.AppendLine("    ;;Block: ZeroStack");
             foreach (var item in Instructions)
             {
                 stringBuilder.AppendLine(item.ToInstructionString());
@@ -67,12 +67,13 @@ namespace Converter
     {
         public readonly int Counter;
 
-        public ForBlock(int counter, List<Block> instructions, List<Block> increment, List<Block> check)
+        public ForBlock(int counter, List<Block> instructions, List<Block> increment, List<Block> check, Block checkJump)
         {
             Counter = counter;
             Instructions = instructions;
             Increment = increment;
             Check = check;
+            CheckJump = checkJump;
             if (Instructions.Count > 0)
             {
                 FirstInstruction = Instructions.First().FirstInstruction;
@@ -88,6 +89,7 @@ namespace Converter
         public List<Block> Instructions { get; set; } = new List<Block>();
         public List<Block> Increment { get; set; } = new List<Block>();
         public List<Block> Check { get; set; } = new List<Block>();
+        public Block CheckJump { get; }
 
         public override string ToString()
         {
@@ -113,22 +115,29 @@ namespace Converter
         public override string ToInstructionString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("Block: ForBlock");
-            stringBuilder.AppendLine("SubBlock: Increment");
-            foreach (var item in Increment)
-            {
-                stringBuilder.AppendLine(item.ToInstructionString());
-            }
-            stringBuilder.AppendLine("SubBlock: Check");
-            foreach (var item in Check)
-            {
-                stringBuilder.AppendLine(item.ToInstructionString());
-            }
-            stringBuilder.AppendLine("SubBlock: Instructions");
+            stringBuilder.AppendLine("    ;;Block: ForBlock");
+            
+            stringBuilder.AppendLine("    ;;SubBlock: CheckJump");
+            stringBuilder.AppendLine(CheckJump.ToInstructionString());
+            stringBuilder.AppendLine("    ;;SubBlock: Instructions");
             foreach (var item in Instructions)
             {
                 stringBuilder.AppendLine(item.ToInstructionString());
             }
+            stringBuilder.AppendLine("    ;;SubBlock: Increment");
+            foreach (var item in Increment)
+            {
+                stringBuilder.AppendLine(item.ToInstructionString());
+            }
+            stringBuilder.AppendLine("    ;;SubBlock: End");
+            stringBuilder.AppendLine(new WasmInstruction(WasmInstructions.end, 9999, 0).ToInstructionString());
+            stringBuilder.AppendLine("    ;;SubBlock: Check");
+            foreach (var item in Check)
+            {
+                stringBuilder.AppendLine(item.ToInstructionString());
+            }
+            stringBuilder.AppendLine(new WasmInstruction(WasmInstructions.end, 9999, 0).ToInstructionString());
+
             return stringBuilder.ToString();
         }
 

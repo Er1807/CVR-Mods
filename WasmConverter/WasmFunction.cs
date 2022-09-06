@@ -28,29 +28,11 @@ namespace Converter
         public Stack<WasmDataType> stack = new Stack<WasmDataType>();
 
         private List<(int, int)> branches = new List<(int, int)>();
-        
+
         public void FixControlFlow()
         {
-            var branchInstructions = Instructions.Where(x => x.Instruction == WasmInstructions.br
-                || x.Instruction == WasmInstructions.br_if).ToList();
-
-            foreach (var inst in branchInstructions)
-            {
-                if ((inst.Operand as WasmLongOperand).AsUInt < inst.Offset)
-                {
-                    var index = Instructions.FindLastIndex(x => x.Offset == inst.Offset);
-                    Instructions.Insert(index + 1, new WasmInstruction(WasmInstructions.end, 9999, 9999));
-                }
-                else
-                {
-                    var index = Instructions.FindLastIndex(x => x.Offset == (inst.Operand as WasmLongOperand).AsUInt);
-                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.end, 9999, 9999));
-                }
-            }
-
-            DetectForLoops();
-            DetectIfs();
-
+            //DetectForLoops();
+            //DetectIfs();
         }
 
         public void DetectIfs()
@@ -61,7 +43,7 @@ namespace Converter
             for (int i = 0; i < Instructions.Count; i++)
             {
                 WasmInstruction inst = Instructions[i];
-                
+
                 if ((inst.Instruction == WasmInstructions.br || inst.Instruction == WasmInstructions.br_if) && inst.Operand is WasmLongOperand)
                 {
                     br = inst;
@@ -81,7 +63,7 @@ namespace Converter
                     br.Operand = WasmOperand.FromStaticStringmField($"bl{inst.Operand}");
                 }
             }
-            
+
         }
 
         public void DetectForLoops()
@@ -106,8 +88,8 @@ namespace Converter
                     end2 = Instructions[Instructions.IndexOf(brif) + 1];
 
                     Locals.Add($"for{counter}", WasmDataType.i32);
-                    Instructions.Insert(0, new WasmInstruction(WasmInstructions.i32_const, 9999,0, WasmOperand.FromInt(1)));
-                    Instructions.Insert(1, new WasmInstruction(WasmInstructions.set_local, 9999,1, WasmOperand.FromStaticStringmField($"for{counter}")));
+                    Instructions.Insert(0, new WasmInstruction(WasmInstructions.i32_const, 9999, 0, WasmOperand.FromInt(1)));
+                    Instructions.Insert(1, new WasmInstruction(WasmInstructions.set_local, 9999, 1, WasmOperand.FromStaticStringmField($"for{counter}")));
 
                     //loop $lp5
                     //block $bl34
@@ -116,7 +98,7 @@ namespace Converter
                     //set_local $for1
                     //br_if $bl34
                     var index = Instructions.IndexOf(br);
-                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.set_local, 9999,9999, WasmOperand.FromStaticStringmField($"for{counter}")));
+                    Instructions.Insert(index, new WasmInstruction(WasmInstructions.set_local, 9999, 9999, WasmOperand.FromStaticStringmField($"for{counter}")));
                     Instructions.Insert(index, new WasmInstruction(WasmInstructions.i32_const, 9999, 9999, WasmOperand.FromInt(0)));
                     Instructions.Insert(index, new WasmInstruction(WasmInstructions.get_local, 9999, 9999, WasmOperand.FromStaticStringmField($"for{counter}")));
                     Instructions.Insert(index, new WasmInstruction(WasmInstructions.block, 9999, 9999, WasmOperand.FromStaticStringmField($"bl{br.Operand}")));
@@ -148,10 +130,10 @@ namespace Converter
                     continue;
                 builder.AppendLine($"    (local ${local.Key} {local.Value})");
             }
-
-            foreach (var inst in Instructions)
+            
+            foreach (var block in Blocks)
             {
-                builder.AppendLine(inst.ToInstructionString());
+                builder.AppendLine(block.ToInstructionString());
 
             }
 

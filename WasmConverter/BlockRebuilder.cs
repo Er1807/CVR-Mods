@@ -14,7 +14,7 @@ namespace Converter
         {
             this.wasmFunction = wasmFunction;
         }
-        
+
         private int ForCounter = 1;
 
         public void Rebuild()
@@ -58,7 +58,7 @@ namespace Converter
                         for (int j = 0; j < remaining.Count; j++)
                         {
                             var remainingBlock = remaining[j];
-                            if(remainingBlock.LastInstruction == WasmInstructions.br_if)
+                            if (remainingBlock.LastInstruction == WasmInstructions.br_if)
                             {
                                 if (remaining.Last().FirstOffset < (remainingBlock.LastOperand as WasmLongOperand).AsUInt)
                                 {//else
@@ -75,7 +75,7 @@ namespace Converter
                                 }
                             }
                         }
-                        if(remaining.Count != 0)
+                        if (remaining.Count != 0)
                         {
                             ifBlock.Cases.Add((null, remaining));
                             remaining.Clear();
@@ -101,11 +101,11 @@ namespace Converter
                     continue;
 
                 if (block.Instructions.Count == 1 && block.FirstInstruction == WasmInstructions.br
-                    && blocks[i +1].FirstInstruction == WasmInstructions.nop
-                    && blocks.Any(x => x.LastInstruction == WasmInstructions.br_if && x.LastOperand is WasmLongOperand && (x.LastOperand as WasmLongOperand).AsUInt == blocks[i+1].FirstOffset))
+                    && blocks[i + 1].FirstInstruction == WasmInstructions.nop
+                    && blocks.Any(x => x.LastInstruction == WasmInstructions.br_if && x.LastOperand is WasmLongOperand && (x.LastOperand as WasmLongOperand).AsUInt == blocks[i + 1].FirstOffset))
 
                 {
-                    var brif = blocks.Single(x => x.LastInstruction == WasmInstructions.br_if && x.LastOperand is WasmLongOperand && (x.LastOperand as WasmLongOperand).AsUInt == blocks[i+1].FirstOffset);
+                    var brif = blocks.Single(x => x.LastInstruction == WasmInstructions.br_if && x.LastOperand is WasmLongOperand && (x.LastOperand as WasmLongOperand).AsUInt == blocks[i + 1].FirstOffset);
 
                     int start = i;
                     int end = blocks.IndexOf(brif);
@@ -122,10 +122,15 @@ namespace Converter
                     var forBlock = new ForBlock(ForCounter,
                         blocks.Skip(startInstructionBlock).Take(endInstructionBlock - startInstructionBlock + 1).ToList(),
                         new List<Block>() { blocks[incBlock] },
-                        new List<Block>() { blocks[checkBlock] }
+                        new List<Block>() { blocks[checkBlock] },
+                        CreateForCheckBlock(ForCounter)
                     );
+
+                    wasmFunction.Locals.Add($"for{ForCounter}", WasmDataType.i32);
+
                     blocks.Insert(i, forBlock);
                     blocks.RemoveRange(start + 1, end - start + 1);
+                    blocks.Insert(0, CreateForInitializerBlock(ForCounter));
                     ForCounter++;
                     RebuildSubBlock(forBlock.Instructions);
                 }
@@ -145,12 +150,37 @@ namespace Converter
                     lastIndex = i;
                 }
             }
-            if(wasmFunction.Instructions.Last().Instruction == WasmInstructions._return)//wtf. why is the return not added
+            if (wasmFunction.Instructions.Last().Instruction == WasmInstructions._return)//wtf. why is the return not added
             {
                 blocks.Add(new ZeroStackBlock(new List<WasmInstruction>() { wasmFunction.Instructions.Last() }));
             }
             blocks.RemoveAt(0);
             wasmFunction.Blocks = blocks;
+        }
+
+
+
+        public ZeroStackBlock CreateForInitializerBlock(int counter)
+        {
+            var block = new ZeroStackBlock(new List<WasmInstruction>()
+            {
+                new WasmInstruction(WasmInstructions.i32_const, 9999, 9999, WasmOperand.FromInt(1)),
+                new WasmInstruction(WasmInstructions.set_local, 9999, 9999, WasmOperand.FromStaticStringmField($"for{counter}"))
+            });
+            return block;
+        }
+        public ZeroStackBlock CreateForCheckBlock(int counter)
+        {
+            var block = new ZeroStackBlock(new List<WasmInstruction>()
+            {
+                new WasmInstruction(WasmInstructions.loop, 9999, 9999, WasmOperand.FromStaticStringmField($"lpfor{counter}")),
+                new WasmInstruction(WasmInstructions.block, 9999, 9999, WasmOperand.FromStaticStringmField($"blfor{counter}")),
+                new WasmInstruction(WasmInstructions.get_local, 9999, 9999, WasmOperand.FromStaticStringmField($"for{counter}")),
+                new WasmInstruction(WasmInstructions.i32_const, 9999, 9999, WasmOperand.FromInt(0)),
+                new WasmInstruction(WasmInstructions.set_local, 9999, 9999, WasmOperand.FromStaticStringmField($"for{counter}")),
+                new WasmInstruction(WasmInstructions.br_if, 9999, 9999, WasmOperand.FromStaticStringmField($"blfor{counter}"))
+            });
+            return block;
         }
     }
 }
