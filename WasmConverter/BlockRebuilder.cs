@@ -36,23 +36,29 @@ namespace Converter
                 if (block == null)
                     continue;
 
+                List<(List<Block>, List<Block>)> cases = new List<(List<Block>, List<Block>)>();
+
                 if (block.LastInstruction == WasmInstructions.br_if)
                 {
                     var EndOfIf = blocks.IndexOf(blocks.Single(x => x.FirstOffset == (block.LastOperand as WasmLongOperand).AsUInt)) - 1;
                     if (blocks[EndOfIf].FirstInstruction != WasmInstructions.br)//simple if
                     {
-                        var ifBlock = new IfBlock();
-                        ifBlock.Cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i).ToList()));
+                        cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i).ToList()));
 
-                        blocks.Insert(i, ifBlock);
+                        var ifBlock = new IfBlock(cases);
+
+                        blocks.Insert(i, ifBlock); 
                         blocks.RemoveRange(i + 1, EndOfIf - i + 1);
+                        foreach (var ifcase in ifBlock.Cases)
+                        {
+                            RebuildSubBlock(ifcase.Item2);
+                        }
                     }
                     else
                     {
                         var actualEnd = blocks.IndexOf(blocks.Single(x => x.FirstOffset == (blocks[EndOfIf].LastOperand as WasmLongOperand).AsUInt)) - 1;
-
-                        var ifBlock = new IfBlock();
-                        ifBlock.Cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i - 1).ToList()));
+                        
+                        cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i - 1).ToList()));
 
                         var remaining = blocks.Skip(EndOfIf + 1).Take(actualEnd - EndOfIf).ToList();
                         for (int j = 0; j < remaining.Count; j++)
@@ -62,14 +68,14 @@ namespace Converter
                             {
                                 if (remaining.Last().FirstOffset < (remainingBlock.LastOperand as WasmLongOperand).AsUInt)
                                 {//else
-                                    ifBlock.Cases.Add((remaining.Take(j + 1).ToList(), remaining.Skip(j + 1).ToList()));
+                                    cases.Add((remaining.Take(j + 1).ToList(), remaining.Skip(j + 1).ToList()));
                                     remaining.Clear();
                                     j = 0;
                                 }
                                 else
                                 {
                                     var elseifEnd = remaining.IndexOf(remaining.Single(x => x.FirstOffset == (remainingBlock.LastOperand as WasmLongOperand).AsUInt)) - 1;
-                                    ifBlock.Cases.Add((remaining.Take(j + 1).ToList(), remaining.Skip(j + 1).Take(elseifEnd - j - 1).ToList()));
+                                    cases.Add((remaining.Take(j + 1).ToList(), remaining.Skip(j + 1).Take(elseifEnd - j - 1).ToList()));
                                     remaining.RemoveRange(0, elseifEnd + 1);
                                     j = 0;
                                 }
@@ -77,9 +83,11 @@ namespace Converter
                         }
                         if (remaining.Count != 0)
                         {
-                            ifBlock.Cases.Add((null, remaining));
+                            cases.Add((null, remaining));
                             remaining.Clear();
                         }
+                        
+                        var ifBlock = new IfBlock(cases);
 
                         blocks.Insert(i, ifBlock);
                         blocks.RemoveRange(i + 1, actualEnd - i);

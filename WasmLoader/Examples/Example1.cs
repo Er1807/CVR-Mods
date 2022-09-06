@@ -33,6 +33,16 @@ namespace Test
             Logtest.Msg("Method Done");
 
         }
+        
+        public int ifelsereturn(bool v)
+        {
+
+            if (v)
+                return 0;
+            else
+                return 45;
+
+        }
 
         public void For()
         {

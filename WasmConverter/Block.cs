@@ -22,7 +22,7 @@ namespace Converter
             return "NI";
         }
     }
-    
+
     public class ZeroStackBlock : Block
     {
         public List<WasmInstruction> Instructions { get; set; } = new List<WasmInstruction>();
@@ -85,7 +85,7 @@ namespace Converter
                 LastOffset = Instructions.Last().LastOffset;
             }
         }
-        
+
         public List<Block> Instructions { get; set; } = new List<Block>();
         public List<Block> Increment { get; set; } = new List<Block>();
         public List<Block> Check { get; set; } = new List<Block>();
@@ -116,25 +116,25 @@ namespace Converter
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("    ;;Block: ForBlock");
-            
+
             stringBuilder.AppendLine("    ;;SubBlock: CheckJump");
-            stringBuilder.AppendLine(CheckJump.ToInstructionString());
+            stringBuilder.Append(CheckJump.ToInstructionString());
             stringBuilder.AppendLine("    ;;SubBlock: Instructions");
             foreach (var item in Instructions)
             {
-                stringBuilder.AppendLine(item.ToInstructionString());
+                stringBuilder.Append(item.ToInstructionString());
             }
             stringBuilder.AppendLine("    ;;SubBlock: Increment");
             foreach (var item in Increment)
             {
-                stringBuilder.AppendLine(item.ToInstructionString());
+                stringBuilder.Append(item.ToInstructionString());
             }
             stringBuilder.AppendLine("    ;;SubBlock: End");
             stringBuilder.AppendLine(new WasmInstruction(WasmInstructions.end, 9999, 0).ToInstructionString());
             stringBuilder.AppendLine("    ;;SubBlock: Check");
             foreach (var item in Check)
             {
-                stringBuilder.AppendLine(item.ToInstructionString());
+                stringBuilder.Append(item.ToInstructionString());
             }
             stringBuilder.AppendLine(new WasmInstruction(WasmInstructions.end, 9999, 0).ToInstructionString());
 
@@ -145,5 +145,84 @@ namespace Converter
     public class IfBlock : Block
     {
         public List<(List<Block>, List<Block>)> Cases { get; set; } = new List<(List<Block>, List<Block>)>();
+
+        public IfBlock(List<(List<Block>, List<Block>)> cases)
+        {
+            Cases = cases;
+            foreach (var cond in Cases)
+            {
+                if (cond.Item1 != null && cond.Item1.Last() is ZeroStackBlock block && block.LastInstruction == WasmInstructions.br_if)
+                {
+                    block.Instructions.Remove(block.Instructions.Last());
+                    block.LastOffset = block.Instructions.Last().Offset;
+                    block.LastInstruction = block.Instructions.Last().Instruction;
+                    block.LastOperand = block.Instructions.Last().Operand;
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("Block: IfBlock");
+            foreach (var ifCase in Cases)
+            {
+                stringBuilder.AppendLine("SubBlock: Condition");
+                if (ifCase.Item1 == null)
+                    stringBuilder.AppendLine("else");
+                else
+                    foreach (var inst in ifCase.Item1)
+                    {
+                        stringBuilder.AppendLine(inst.ToString());
+                    }
+                stringBuilder.AppendLine("SubBlock: Instructions");
+                foreach (var inst in ifCase.Item2)
+                {
+                    stringBuilder.AppendLine(inst.ToString());
+                }
+            }
+            return stringBuilder.ToString();
+        }
+        public override string ToInstructionString()
+        {
+            return EvaluateRecursive(Cases);
+        }
+
+        public static string EvaluateRecursive(List<(List<Block>, List<Block>)> cases)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            if (cases.Count == 0)
+            {
+                stringBuilder.AppendLine();
+            }
+            else if (cases[0].Item1 == null)
+            {
+                stringBuilder.AppendLine("    ;;SubBlock: Instructions");
+                foreach (var inst in cases[0].Item2)
+                {
+                    stringBuilder.Append(inst.ToInstructionString());
+                }
+            }
+            else
+            {
+                stringBuilder.AppendLine("    ;;SubBlock: Condition");
+                foreach (var inst in cases[0].Item1)
+                {
+                    stringBuilder.Append(inst.ToInstructionString());
+                }
+                stringBuilder.AppendLine("    if");
+                stringBuilder.AppendLine("    ;;SubBlock: Instructions");
+                foreach (var inst in cases[0].Item2)
+                {
+                    stringBuilder.AppendLine(inst.ToInstructionString());
+                }
+                stringBuilder.AppendLine("    else");
+                stringBuilder.Append(EvaluateRecursive(cases.Skip(1).ToList()));
+                stringBuilder.AppendLine("    end");
+            }
+
+            return stringBuilder.ToString();
+        }
+
     }
 }

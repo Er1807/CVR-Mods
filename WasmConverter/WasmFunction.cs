@@ -133,7 +133,7 @@ namespace Converter
             
             foreach (var block in Blocks)
             {
-                builder.AppendLine(block.ToInstructionString());
+                builder.Append(block.ToInstructionString());
 
             }
 
