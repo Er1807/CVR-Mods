@@ -84,7 +84,6 @@ namespace Converter
                         if (remaining.Count != 0)
                         {
                             cases.Add((null, remaining));
-                            remaining.Clear();
                         }
                         
                         var ifBlock = new IfBlock(cases);
@@ -127,13 +126,14 @@ namespace Converter
 
                     int incBlock = end - 2;
                     int checkBlock = end - 1;
+
+                    (blocks[checkBlock + 1] as ZeroStackBlock).Instructions.Last().Operand = WasmOperand.FromStaticStringmField($"lpfor{ForCounter}");
                     var forBlock = new ForBlock(ForCounter,
                         blocks.Skip(startInstructionBlock).Take(endInstructionBlock - startInstructionBlock + 1).ToList(),
                         new List<Block>() { blocks[incBlock] },
-                        new List<Block>() { blocks[checkBlock] },
+                        new List<Block>() { blocks[checkBlock], blocks[checkBlock+1] },//garbage needs to be improved
                         CreateForCheckBlock(ForCounter)
                     );
-
                     wasmFunction.Locals.Add($"for{ForCounter}", WasmDataType.i32);
 
                     blocks.Insert(i, forBlock);

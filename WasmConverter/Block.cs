@@ -74,6 +74,8 @@ namespace Converter
             Increment = increment;
             Check = check;
             CheckJump = checkJump;
+
+
             if (Instructions.Count > 0)
             {
                 FirstInstruction = Instructions.First().FirstInstruction;
@@ -129,7 +131,7 @@ namespace Converter
             {
                 stringBuilder.Append(item.ToInstructionString());
             }
-            stringBuilder.AppendLine("    ;;SubBlock: End");
+            stringBuilder.AppendLine("    ;;SubBlock: EnBLock");
             stringBuilder.AppendLine(new WasmInstruction(WasmInstructions.end, 9999, 0).ToInstructionString());
             stringBuilder.AppendLine("    ;;SubBlock: Check");
             foreach (var item in Check)
@@ -154,6 +156,10 @@ namespace Converter
                 if (cond.Item1 != null && cond.Item1.Last() is ZeroStackBlock block && block.LastInstruction == WasmInstructions.br_if)
                 {
                     block.Instructions.Remove(block.Instructions.Last());
+                    //invert result
+                    block.Instructions.Insert(block.Instructions.Count, new WasmInstruction(WasmInstructions.i32_const, 9999, 0, WasmOperand.FromInt(0)));
+                    block.Instructions.Insert(block.Instructions.Count, new WasmInstruction(WasmInstructions.i32_eq, 9999, 0));
+
                     block.LastOffset = block.Instructions.Last().Offset;
                     block.LastInstruction = block.Instructions.Last().Instruction;
                     block.LastOperand = block.Instructions.Last().Operand;

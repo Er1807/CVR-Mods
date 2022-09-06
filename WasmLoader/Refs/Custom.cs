@@ -41,6 +41,14 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(typeof(UnityEngine.UI.Text));
             });
             
+            linker.DefineFunction("env", "UnityEngine_UI_InputField__Type", (Caller caller) =>
+            {
+                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_UI_InputField__Type");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                return objects.StoreObject(typeof(UnityEngine.UI.InputField));
+            });
+
             linker.DefineFunction("env", "ABI_CCK_Components_CVRVideoPlayer__Type", (Caller caller) =>
             {
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -104,6 +112,18 @@ namespace WasmLoader.Refs
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(test);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_UI_Text__get_text_this__SystemString");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+#endif
+                return objects.StoreObject(test.text);
+            });
+
+            linker.DefineFunction("env", "UnityEngine_UI_InputField__get_text_this__SystemString", (Caller caller, int text) =>
+            {
+                var test = objects.RetriveObject<InputField>(text, caller);
+#if Debug
+                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(test);
+                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_UI_InputField__get_text_this__SystemString");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
 #endif
                 return objects.StoreObject(test.text);

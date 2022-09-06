@@ -311,7 +311,7 @@ namespace Converter
 
                 case Code.Ldtoken:
                     var ldtoken = instruction.Operand as TypeRef;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand() { FunctionName = ldtoken.FullName.Replace(".", "_") + "__Type" } ));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand() { FunctionName = ldtoken.FullName.Replace(".", "_") + "__Type" , ReturnValue = Program.Typetype.ToTypeSig(), Params = new List<TypeSig> ()} ));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldftn:

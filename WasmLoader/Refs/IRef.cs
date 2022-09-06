@@ -16,12 +16,17 @@ namespace WasmLoader.Refs
     {
         public static bool IsAllowed(this GameObject obj, WasmType type)
         {
-            return obj.GetComponent<WasmSelectable>()?.IsAllowed(type) ?? false;
+            var res = obj.GetComponent<WasmSelectable>()?.IsAllowed(type) ?? false;
+            if (!res)
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Unallowed gameobject " + obj.name);
+            return res
         }
 
         public static bool IsAllowed(this Component obj, WasmType type)
-        {
-            return obj.GetComponent<WasmSelectable>()?.IsAllowed(obj, type) ?? false;
+        {var res = obj.GetComponent<WasmSelectable>()?.IsAllowed(obj, type) ?? false;
+            if (!res)
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Unallowed type "+ obj.GetType().ToString()+ obj.GetComponent<WasmSelectable>().AllowedTypes[0]);
+            return res;
         }
     }
 }

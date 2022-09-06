@@ -12,95 +12,95 @@ namespace WasmLoader
     {
         public WasmInstance Instance;
 
-        public void Execute(WasmInstance instance, string method)
+        public void Execute(string method)
         {
-            instance.instance.GetAction(instance.store, method)?.Invoke();
-            instance.CleanUpLocals();
+            Instance.instance.GetAction(Instance.store, method)?.Invoke();
+            Instance.CleanUpLocals();
         }
-        public void Execute<T>(WasmInstance instance, string method, T parameter)
+        public void Execute<T>(string method, T parameter)
         {
-            var paramAsId = instance.objects.StoreObject(parameter);
-            instance.instance.GetAction<int>(instance.store, method)?.Invoke(paramAsId);
-            instance.CleanUpLocals();
+            var paramAsId = Instance.objects.StoreObject(parameter);
+            Instance.instance.GetAction<int>(Instance.store, method)?.Invoke(paramAsId);
+            Instance.CleanUpLocals();
         }
         
         public void Start()
         {
-            Execute(Instance, nameof(Start));
+            Execute(nameof(Start));
         }
         public void Update()
         {
-            Execute(Instance, nameof(Update));
+            Execute(nameof(Update));
         }
         public void FixedUpdate()
         {
-            Execute(Instance, nameof(FixedUpdate));
+            Execute(nameof(FixedUpdate));
         }
         public void LateUpdate()
         {
-            Execute(Instance, nameof(LateUpdate));
+            Execute(nameof(LateUpdate));
         }
         public void OnDisable()
         {
-            Execute(Instance, nameof(OnDisable));
+            Execute(nameof(OnDisable));
         }
         public void OnEnable()
         {
-            Execute(Instance, nameof(OnEnable));
+            Execute(nameof(OnEnable));
         }
         public void OnCollisionEnter(Collision collision)
         {
-            Execute(Instance, nameof(OnCollisionEnter), collision);
+            Execute(nameof(OnCollisionEnter), collision);
 
         }
         public void OnCollisionExit(Collision other)
         {
-            Execute(Instance, nameof(OnCollisionExit), other);
+            Execute(nameof(OnCollisionExit), other);
         }
         public void OnCollisionStay(Collision collisionInfo)
         {
-            Execute(Instance, nameof(OnCollisionStay), collisionInfo);
+            Execute(nameof(OnCollisionStay), collisionInfo);
         }
         public void OnTriggerEnter(Collision collision)
         {
-            Execute(Instance, nameof(OnTriggerEnter), collision);
+            Execute(nameof(OnTriggerEnter), collision);
         }
         public void OnTriggerExit(Collision other)
         {
-            Execute(Instance, nameof(OnTriggerExit), other);
+            Execute(nameof(OnTriggerExit), other);
         }
         public void OnTriggerStay(Collision collisionInfo)
         {
-            Execute(Instance, nameof(OnTriggerStay), collisionInfo);
+            Execute(nameof(OnTriggerStay), collisionInfo);
         }
         //Via Patches
 
         public void Grab()
         {
-            Execute(Instance, nameof(Grab));
+            Execute(nameof(Grab));
         }
         public void Drop()
         {
-            Execute(Instance, nameof(Drop));
+            Execute(nameof(Drop));
         }
         public void InteractUp()
         {
-            Execute(Instance, nameof(InteractUp));
+            Execute(nameof(InteractUp));
         }
 
         public void InteractDown()
         {
-            Execute(Instance, nameof(InteractDown));
+            Execute(nameof(InteractDown));
         }
 
         public void OnPlayerJoined(CVRPlayerEntity player)
         {
-            Execute(Instance, nameof(OnPlayerJoined), player);
+            Execute(nameof(OnPlayerJoined), player);
         }  
         
         public void OnPlayerLeft(CVRPlayerEntity player)
         {
-            Execute(Instance, nameof(OnPlayerLeft), player);
+            Execute(nameof(OnPlayerLeft), player);
         }
     }
 }

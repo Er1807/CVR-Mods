@@ -7,12 +7,13 @@ namespace Converter
 {
     internal class Program
     {
-
+        public static TypeRef Typetype;
         static void Main(string[] args)
         {
             ModuleContext modCtx = ModuleDef.CreateModuleContext();
-            ModuleDefMD module = ModuleDefMD.Load(args[0], modCtx);
+            ModuleDef module = ModuleDefMD.Load(args[0], modCtx);
             var type = module.Types.SingleOrDefault(x => x.FullName == args[1]);
+            Typetype = new CorLibTypes(module).GetTypeRef("System", "Type");
             WasmModule wasmModule = new WasmModule();
             wasmModule.declaringType = type.ToTypeSig();
             foreach (var field in type.Fields)

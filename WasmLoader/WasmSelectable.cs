@@ -30,6 +30,6 @@ public class WasmSelectable : MonoBehaviour
 
     internal bool IsAllowed(Component obj, WasmType type)
     {
-        return obj.GetComponent<WasmSelectable>().AllowedTypes.Contains(type.ToString());
+        return obj.GetComponent<WasmSelectable>().AllowedTypes.Contains(obj.GetType().ToString());
     }
 }

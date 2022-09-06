@@ -27,7 +27,8 @@ namespace Converter
                     DeclaringType = value.DeclaringType.ToTypeSig()
                 };
             }
-            
+
+
             return new WasmExternFunctionOperand() {
                 HasThis = value.HasThis,
                 FunctionName = ConvertMethod(value.DeclaringType.FullName, value.Name, value.HasThis, value.Parameters.Select(x => x.Type).ToList(), value.MethodSig.GetRetType()),
