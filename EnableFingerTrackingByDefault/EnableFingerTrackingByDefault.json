@@ -6,7 +6,7 @@
   "loaderversion": "v0.5.4",
   "modtype": "Mod",
   "author": "Eric van Fandenfart",
-  "description": "Sets the Fingertracking to on by default. To disable accidantel switching remove the change button from your controller",
+  "description": "Sets the Fingertracking to on by default. To disable accidental switching remove the change button from your controller",
   "searchtags": [
     "Fingertracking"
   ],
