@@ -19,7 +19,7 @@ namespace WasmLoader.Refs
             var res = obj.GetComponent<WasmSelectable>()?.IsAllowed(type) ?? false;
             if (!res)
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Unallowed gameobject " + obj.name);
-            return res
+            return res;
         }
 
         public static bool IsAllowed(this Component obj, WasmType type)
