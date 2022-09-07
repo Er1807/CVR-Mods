@@ -1,0 +1,19 @@
+{
+  "_id": 94,
+  "name": "EnableFingerTrackingByDefault",
+  "modversion": "1.0.0",
+  "gameversion": "2022r166p1",
+  "loaderversion": "v0.5.4",
+  "modtype": "Mod",
+  "author": "Eric van Fandenfart",
+  "description": "Sets the Fingertracking to on by default. To disable accidantel switching remove the change button from your controller",
+  "searchtags": [
+    "Fingertracking"
+  ],
+  "requirements": [
+  ],
+  "downloadlink": "https://github.com/Er1807/CVR-Mods/releases/download/EnableFingerTrackingByDefaultMod1.1.0/EnableFingerTrackingByDefault.dll",
+  "sourcelink": "https://github.com/Er1807/CVR-Mods/tree/main/EnableFingerTrackingByDefault",
+  "changelog": "Initial Version",
+  "embedcolor": "7F60CA"
+}
