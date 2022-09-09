@@ -60,10 +60,14 @@ namespace FreezeFrame
         private bool deleteMode;
 
         public static FreezeFrameMod Instance;
+        private FreezeFrameMenu menu;
 
         public override void OnApplicationStart()
         {
             Instance = this;
+
+            menu = new FreezeFrameMenu();
+
             MelonLogger.Msg("Patching AssetBundle unloading");
             HarmonyInstance.Patch(typeof(AssetBundle).GetMethod("Unload"), prefix: new HarmonyMethod(typeof(FreezeFrameMod).GetMethod("PrefixUnload", BindingFlags.Static | BindingFlags.Public)));
 
@@ -71,8 +75,9 @@ namespace FreezeFrame
             var freeze = LoadImage("freeze");
             freeze.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
-            API.OnOnGlobalMenuLoaded += API_OnOnGlobalMenuLoaded;
-            
+            actionemenu = new ActionMenuMod.Lib();
+
+
             var category = MelonPreferences.CreateCategory("FreezeFrame");
             freezeType = category.CreateEntry("FreezeType", FreezeType.PerformanceFreeze, display_name: "Freeze Type", description: "Full Freeze is more accurate and copys everything but is less performant");
             recordBlendshapes = category.CreateEntry("recordBlendshapes", true, display_name: "Record Blendshapes", description: "Blendshape Recording can quite limit the performance you can disable it here");
@@ -80,48 +85,66 @@ namespace FreezeFrame
             saveAnimations = category.CreateEntry("saveAnimations", true, display_name: "Save Animations on freeze animations", description: "If anaimations are saved they can be later exported (uses more ram)");
             smoothLoopingDuration = category.CreateEntry("smoothLoopingDuration", 0.2f, "Smoothing Duration", "Duration of loop smoothing");
 
-            
+
         }
-        private bool InitializedActionMenu = false;
-        private void API_OnOnGlobalMenuLoaded(Menus menus)
+
+        public class FreezeFrameMenu : ActionMenuMod.Lib
         {
-            if (InitializedActionMenu)
-                return;
-            
-            LoggerInstance.Msg("Adding menu items");
-            menus["FreezeFrame"] = new List<MenuItem>() {
-                MenuItemWrapper("Delete Last", DeleteLast, "delete last"),
-                MenuItemWrapper("Delete First", () => Delete(0), "delete first"),
-                MenuItemWrapper("Freeze Self", CreateSelf, "freeze"),
-                MenuItemWrapper("Record", () => AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StartRecording(), "record"),
-                MenuItemWrapper("Record Stop", () => AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StopRecording(), "record"),
-                MenuItemWrapper("Resync Animations", Resync, "resync"),
-                new MenuItem() { name = "Advanced", action = new ItemAction() { type = "menu", menu = "FreezeFrame-Advanced" }, icon = "advanced" },
-            };
+            protected override void OnGlobalMenuLoaded(Menus menus)
+            {
+                Instance.LoggerInstance.Msg("Adding menu items");
 
-            menus["FreezeFrame-Advanced"] = new List<MenuItem>() {
-                MenuItemWrapper("Freeze Self (5s)", () => DelayedSelf = DateTime.Now.AddSeconds(5), "freeze 5sec"),
-                MenuItemWrapper("Delete All", Delete, "delete all"),
-                MenuItemWrapper("Freeze All", Create, "freeze all"),
-                MenuItemWrapper("Freeze All (5s)", () => DelayedAll = DateTime.Now.AddSeconds(5), "freeze all 5sec"),
-                //MenuItemWrapper("Record Time Limit", () => LoggerInstance.Msg("hello world")),
-                //MenuItemWrapper("Delete Mode", () => LoggerInstance.Msg("hello world"), "delete mode")
-
-            };
+                MenusPatch patch = new MenusPatch();
 
 
-            //Register in Main menu
-            menus["main"].Add(new MenuItem() { name = "FreezeFrame", action = new ItemAction() { type = "menu", menu = "FreezeFrame" } });
 
-            InitializedActionMenu = true;
+                patch.add_items["FreezeFrame"] = new List<MenuItem>() {
+                    MenuButtonWrapper("Delete Last", Instance.DeleteLast, "delete last"),
+                    MenuButtonWrapper("Delete First", () => Instance.Delete(0), "delete first"),
+                    MenuButtonWrapper("Freeze Self", Instance.CreateSelf, "freeze"),
+                    MenuToggleWrapper("Record", (state) => {
+                        if(state)
+                            AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StartRecording();
+                        else
+                            AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StopRecording();
+                    }, "record"),
+                    MenuButtonWrapper("Resync Animations", Instance.Resync, "resync"),
+                    DynamicMenuWrapper("testdyn", () => new List<MenuItem>(){MenuButtonWrapper("test", () => Instance.LoggerInstance.Msg("trests"), "delete last"), }),
+                    new MenuItem() { name = "Advanced", action = new ItemAction() { type = "menu", menu = "FreezeFrame-Advanced" }, icon = "advanced" },
+                };
+
+                patch.add_items["FreezeFrame-Advanced"] = new List<MenuItem>() {
+                    MenuButtonWrapper("Freeze Self (5s)", () => Instance.DelayedSelf = DateTime.Now.AddSeconds(5), "freeze 5sec"),
+                    MenuButtonWrapper("Delete All", Instance.Delete, "delete all"),
+                    MenuButtonWrapper("Freeze All", Instance.Create, "freeze all"),
+                    MenuButtonWrapper("Freeze All (5s)", () => Instance.DelayedAll = DateTime.Now.AddSeconds(5), "freeze all 5sec"),
+                    //MenuItemWrapper("Record Time Limit", () => LoggerInstance.Msg("hello world")),
+                    //MenuItemWrapper("Delete Mode", () => LoggerInstance.Msg("hello world"), "delete mode")
+
+                };
+
+
+                //Register in Main menu
+                patch.add_items["main"] = new List<MenuItem>() { new MenuItem() { name = "FreezeFrame", action = new ItemAction() { type = "menu", menu = "FreezeFrame" } } };
+
+                ApplyMenuPatch(menus, patch);
+
+            }
+            public MenuItem MenuButtonWrapper(string name, Action action, string icon = null)
+            {
+                return new MenuItem() { name = name, action = BuildButtonItem(name.Replace(" ", ""), action), icon = icon };
+            }
+            public MenuItem MenuToggleWrapper(string name, Action<bool> action, string icon = null)
+            {
+                return new MenuItem() { name = name, action = BuildToggleItem(name.Replace(" ", ""), action), icon = icon };
+            }
+            public MenuItem DynamicMenuWrapper(string name, Func<List<MenuItem>> action, string icon = null)
+            {
+                return new MenuItem() { name = name, action = BuildCallbackMenu(name.Replace(" ", ""), action), icon = icon };
+            }
+
         }
 
-        public MenuItem MenuItemWrapper(string name, Action action, string icon = null)
-        {
-            return new MenuItem() { name = name, action = ActionMenuMod.BuildCallbackMenuItem(name.Replace(" ", ""), action), icon = icon };
-        }
-
- 
         private void SwitchDeleteMode(bool state)
         {
             deleteMode = state;
@@ -209,11 +232,12 @@ namespace FreezeFrame
         {
             MelonLogger.Msg($"Creating Freeze Frame for yourself");
             EnsureHolderCreated();
-            
+
             InstantiateAvatar(PlayerSetup.Instance.GetComponent<PlayerDescriptor>());
         }
 
         private static AssetBundle iconsAssetBundle;
+        private ActionMenuMod.Lib actionemenu;
 
         /*private void LoadUI()
         {
@@ -315,7 +339,7 @@ namespace FreezeFrame
 
         }
 
-        
+
 
         public void FullCopyWithAnimations(PlayerDescriptor player, AnimationClip animationClip, bool isMain, Dictionary<(string, string), AnimationContainer> animationsCache)
         {
@@ -339,7 +363,7 @@ namespace FreezeFrame
 
             var copy = GameObject.Instantiate(source, ClonesParent.transform, true);
             copy.name = "Avatar Clone";
-            
+
             foreach (var copycomp in copy.GetComponents<Component>())
             {
                 if (copycomp != copy.transform)
@@ -351,7 +375,7 @@ namespace FreezeFrame
             UpdateShadersRecurive(copy, source); //update/restore AFTER Animator was destroyed
 
             copy.GetComponentsInChildren<SkinnedMeshRenderer>().Do(x => x.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On);
-            copy.GetComponentsInChildren<SkinnedMeshRenderer>().DoIf( x=> x.name.EndsWith("_ShadowClone"), x => GameObject.Destroy(x));
+            copy.GetComponentsInChildren<SkinnedMeshRenderer>().DoIf(x => x.name.EndsWith("_ShadowClone"), x => GameObject.Destroy(x));
             var data = copy.AddComponent<FreezeData>();
             data.AvatarId = player.GetAvatarId();
             data.Type = FreezeType.FullFreeze;
