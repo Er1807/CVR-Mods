@@ -96,7 +96,7 @@ namespace FreezeFrame
 
                 MenusPatch patch = new MenusPatch();
 
-
+                patch.add_items = new Menus();
 
                 patch.add_items["FreezeFrame"] = new List<MenuItem>() {
                     MenuButtonWrapper("Delete Last", Instance.DeleteLast, "delete last"),
