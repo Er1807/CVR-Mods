@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace WasmLoader
+namespace WasmLoader.Components
 {
     public class WasmBehavior_Internal : MonoBehaviour
     {
@@ -23,7 +23,14 @@ namespace WasmLoader
             Instance.instance.GetAction<int>(Instance.store, method)?.Invoke(paramAsId);
             Instance.CleanUpLocals();
         }
-        
+        public void Execute<T, U>(string method, T parameter, U parameter2)
+        {
+            var paramAsId = Instance.objects.StoreObject(parameter);
+            var paramAsId2 = Instance.objects.StoreObject(parameter2);
+            Instance.instance.GetAction<int, int>(Instance.store, method)?.Invoke(paramAsId, paramAsId2);
+            Instance.CleanUpLocals();
+        }
+
         public void Start()
         {
             Execute(nameof(Start));

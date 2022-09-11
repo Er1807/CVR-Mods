@@ -5,13 +5,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using Wasmtime;
 
-namespace WasmLoader
+namespace WasmLoader.Components
 {
     public class WasmLoaderBehavior : MonoBehaviour
     {
         public string WasmCode;
-        public string Debug;
-        
+        public string Variables;
+        public string SyncedVariables;
+
         public DictionaryStringGameObject AttributesGameObject = new DictionaryStringGameObject();
         public DictionaryStringTransform AttributesTransform = new DictionaryStringTransform();
         public DictionaryStringString AttributesString = new DictionaryStringString();

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using WasmLoader.Components;
 using Wasmtime;
 namespace WasmLoader.Refs
 {

@@ -13,6 +13,7 @@ using System.Reflection.Emit;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using WasmLoader.Components;
 using WasmLoader.Refs;
 
 namespace WasmLoader

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using ABI_RC.Core;
 using System.Linq;
+using WasmLoader.Components;
 
 [assembly: MelonInfo(typeof(WasmLoaderMod), "WasmLoader", "1.0.1", "Eric van Fandenfart")]
 [assembly: MelonGame]

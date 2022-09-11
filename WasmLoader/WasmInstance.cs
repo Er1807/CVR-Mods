@@ -3,6 +3,7 @@ using Wasmtime;
 using System.Collections.Generic;
 using System.Linq;
 using WasmLoader.Serialisation;
+using WasmLoader.Components;
 
 namespace WasmLoader
 {
@@ -18,6 +19,7 @@ namespace WasmLoader
         public GameObject gameObject;
         public List<Global> exports = new List<Global>();
         public List<SynchronizedVariable> synchronizedVariables = new List<SynchronizedVariable>();
+
         public void InitMemoryManagment()
         {
             foreach (var export in module.Exports)

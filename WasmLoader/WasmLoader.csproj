@@ -39,6 +39,10 @@
       <HintPath>..\3rdParty\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="DarkRift">
+      <HintPath>..\3rdParty\Managed\DarkRift.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MelonLoader">
       <HintPath>..\3rdParty\ml\MelonLoader.dll</HintPath>
       <Private>False</Private>
@@ -83,6 +87,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\WasmBehavior_Internal.cs" />
+    <Compile Include="Components\WasmLoaderBehavior.cs" />
+    <Compile Include="Components\WasmSelectable.cs" />
+    <Compile Include="Serialisation\SerialisationManager.cs" />
+    <Compile Include="Serialisation\SynchronizedVariable.cs" />
     <Compile Include="TypeWrappers\CVRPlayerApi.cs" />
     <Compile Include="TypeWrappers\ListCVRPlayerApi.cs" />
     <Compile Include="TypeWrappers\ListGameobject.cs" />
@@ -100,12 +109,10 @@
     <Compile Include="Refs\Custom.cs" />
     <Compile Include="Refs\IRef.cs" />
     <Compile Include="Refs\SystemString_Ref.cs" />
-    <Compile Include="WasmBehavior_Internal.cs" />
     <Compile Include="WasmBehavior.cs" />
+    <Compile Include="WasmInstance.cs" />
     <Compile Include="WasmLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WasmLoaderBehavior.cs" />
-    <Compile Include="WasmSelectable.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="wasmtime.dll">
@@ -115,8 +122,6 @@
   <ItemGroup>
     <None Include="memory.wat" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Serialisation\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
