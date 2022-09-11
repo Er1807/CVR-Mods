@@ -90,15 +90,11 @@ namespace FreezeFrame
 
         public class FreezeFrameMenu : ActionMenuMod.Lib
         {
-            protected override void OnGlobalMenuLoaded(Menus menus)
+            protected override string modName => "Testmenu";
+
+            protected override List<MenuItem> modMenuItems()
             {
-                Instance.LoggerInstance.Msg("Adding menu items");
-
-                MenusPatch patch = new MenusPatch();
-
-                patch.add_items = new Menus();
-
-                patch.add_items["FreezeFrame"] = new List<MenuItem>() {
+                return new List<MenuItem>() {
                     MenuButtonWrapper("Delete Last", Instance.DeleteLast, "delete last"),
                     MenuButtonWrapper("Delete First", () => Instance.Delete(0), "delete first"),
                     MenuButtonWrapper("Freeze Self", Instance.CreateSelf, "freeze"),
@@ -109,27 +105,17 @@ namespace FreezeFrame
                             AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StopRecording();
                     }, "record"),
                     MenuButtonWrapper("Resync Animations", Instance.Resync, "resync"),
-                    DynamicMenuWrapper("testdyn", () => new List<MenuItem>(){MenuButtonWrapper("test", () => Instance.LoggerInstance.Msg("trests"), "delete last"), }),
-                    new MenuItem() { name = "Advanced", action = new ItemAction() { type = "menu", menu = "FreezeFrame-Advanced" }, icon = "advanced" },
+                    DynamicMenuWrapper("Advanced", () => new List<MenuItem>(){
+                        MenuButtonWrapper("Freeze Self (5s)", () => Instance.DelayedSelf = DateTime.Now.AddSeconds(5), "freeze 5sec"),
+                        MenuButtonWrapper("Delete All", Instance.Delete, "delete all"),
+                        MenuButtonWrapper("Freeze All", Instance.Create, "freeze all"),
+                        MenuButtonWrapper("Freeze All (5s)", () => Instance.DelayedAll = DateTime.Now.AddSeconds(5), "freeze all 5sec"),
+                        //MenuItemWrapper("Record Time Limit", () => LoggerInstance.Msg("hello world")),
+                        //MenuItemWrapper("Delete Mode", () => LoggerInstance.Msg("hello world"), "delete mode")
+                    }, "advanced"),
                 };
-
-                patch.add_items["FreezeFrame-Advanced"] = new List<MenuItem>() {
-                    MenuButtonWrapper("Freeze Self (5s)", () => Instance.DelayedSelf = DateTime.Now.AddSeconds(5), "freeze 5sec"),
-                    MenuButtonWrapper("Delete All", Instance.Delete, "delete all"),
-                    MenuButtonWrapper("Freeze All", Instance.Create, "freeze all"),
-                    MenuButtonWrapper("Freeze All (5s)", () => Instance.DelayedAll = DateTime.Now.AddSeconds(5), "freeze all 5sec"),
-                    //MenuItemWrapper("Record Time Limit", () => LoggerInstance.Msg("hello world")),
-                    //MenuItemWrapper("Delete Mode", () => LoggerInstance.Msg("hello world"), "delete mode")
-
-                };
-
-
-                //Register in Main menu
-                patch.add_items["main"] = new List<MenuItem>() { new MenuItem() { name = "FreezeFrame", action = new ItemAction() { type = "menu", menu = "FreezeFrame" } } };
-
-                ApplyMenuPatch(menus, patch);
-
             }
+            
             public MenuItem MenuButtonWrapper(string name, Action action, string icon = null)
             {
                 return new MenuItem() { name = name, action = BuildButtonItem(name.Replace(" ", ""), action), icon = icon };
