@@ -17,7 +17,7 @@ namespace WasmLoader
         public Instance instance;
         public WasmBehavior_Internal behavior;
         public GameObject gameObject;
-        public List<Global> exports = new List<Global>();
+        public Dictionary<string, Global> exports = new Dictionary<string, Global>();
         public List<SynchronizedVariable> synchronizedVariables = new List<SynchronizedVariable>();
 
         public void InitMemoryManagment()
@@ -26,7 +26,7 @@ namespace WasmLoader
             {
                 var global = instance.GetGlobal(store, export.Name);
                 if (global != null && global.Kind == ValueKind.Int32)
-                    exports.Add(global);
+                    exports.Add(export.Name, global);
             }
             //WasmLoaderMod.Instance.LoggerInstance.Msg("Got globals " + exports);
         }
@@ -37,7 +37,7 @@ namespace WasmLoader
             {
                 if (key == objects.NullCounter)
                     continue;
-                if (!exports.Any(x => key.Equals(x.GetValue(store))))
+                if (!exports.Values.Any(x => key.Equals(x.GetValue(store))))
                 {
                     objects.objects.Remove(key);
                     //WasmLoaderMod.Instance.LoggerInstance.Msg("Deleting " + key);

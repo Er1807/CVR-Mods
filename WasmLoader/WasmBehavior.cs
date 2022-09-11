@@ -28,6 +28,7 @@ namespace WasmLoader
         public virtual void OnPlayerLeft(CVRPlayerEntity player) { }
         public virtual void Grab() { }
         public virtual void Drop() { }
+        public virtual void OnValueChanged(string name) { }
         public GameObject CurrentGameObject() { return null; }
     }
 }
