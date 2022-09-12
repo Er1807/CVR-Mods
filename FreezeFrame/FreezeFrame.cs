@@ -90,7 +90,7 @@ namespace FreezeFrame
 
         public class FreezeFrameMenu : ActionMenuMod.Lib
         {
-            protected override string modName => "Testmenu";
+            protected override string modName => "FreezeFrame";
 
             protected override List<MenuItem> modMenuItems()
             {

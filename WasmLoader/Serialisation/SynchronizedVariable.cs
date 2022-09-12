@@ -33,7 +33,7 @@ namespace WasmLoader.Serialisation
                 var oldValue = ValueGlobal.GetValue(Instance.store);
                 if (oldValue == value)
                     return;
-                valueGlobal.SetValue(Instance.store, value);
+                ValueGlobal.SetValue(Instance.store, value);
                 Instance.behavior.Execute<string>("OnValueChanged", Name);
             }
 

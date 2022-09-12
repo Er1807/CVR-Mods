@@ -42,6 +42,10 @@
       <HintPath>..\3rdParty\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="DarkRift">
+      <HintPath>..\3rdParty\Managed\DarkRift.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MelonLoader">
       <HintPath>..\3rdParty\ml\MelonLoader.dll</HintPath>
       <Private>False</Private>

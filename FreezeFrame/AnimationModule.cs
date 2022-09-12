@@ -40,7 +40,7 @@ namespace FreezeFrame
         }
 
         private readonly PlayerDescriptor Player;
-        public Dictionary<(string, string), AnimationContainer> AnimationsCache = new Dictionary<(string, string), AnimationContainer>();
+        public Dictionary<(string path, string property), AnimationContainer> AnimationsCache = new Dictionary<(string, string), AnimationContainer>();
 
         public float CurrentTime;
         private bool _recording = false;
@@ -76,21 +76,21 @@ namespace FreezeFrame
             float loopingDelay = FreezeFrameMod.Instance.smoothLoopingDuration.Value;
             foreach (var item in AnimationsCache)
             {
-                if (item.Value.Property.StartsWith("blendShape"))
+                if (item.Key.property.StartsWith("blendShape"))
                 {
                     if (loopingDelay > 0)
                         FixLooping(item.Value.Curve);
-                    clip.SetCurve(item.Value.Path, skinnedMeshrendererType, item.Value.Property, item.Value.Curve);
+                    clip.SetCurve(item.Key.path, skinnedMeshrendererType, item.Key.property, item.Value.Curve);
                 }
-                else if (item.Value.Property == "m_IsActive")
+                else if (item.Key.property == "m_IsActive")
                 {
-                    clip.SetCurve(item.Value.Path, gameObjectType, item.Value.Property, item.Value.Curve);
+                    clip.SetCurve(item.Key.path, gameObjectType, item.Key.property, item.Value.Curve);
                 }
                 else
                 {
                     if (loopingDelay > 0)
                         FixLooping(item.Value.Curve);
-                    clip.SetCurve(item.Value.Path, transformType, item.Value.Property, item.Value.Curve);
+                    clip.SetCurve(item.Key.path, transformType, item.Key.property, item.Value.Curve);
                 }
             }
             return clip;
@@ -187,7 +187,7 @@ namespace FreezeFrame
             AnimationContainer container;
             if (!AnimationsCache.TryGetValue((path, propertyName), out container))
             {
-                container = new AnimationContainer(path, propertyName);
+                container = new AnimationContainer();
                 AnimationsCache[(path, propertyName)] = container;
             }
 
