@@ -47,16 +47,30 @@ namespace FreezeFrame
 
         public void StartRecording(bool calledByRemote = false)
         {
-            AnimationsCache.Clear();
+            AnimationsCache = new Dictionary<(string, string), AnimationContainer>();
             _recording = true;
 
             FreezeFrameMod.Instance.Resync();
             CurrentTime = 0;
         }
 
+        public void LoadFromSave(FreezeData data)
+        {
+            AnimationsCache = data.Animation;
+        }
+
         public void StopRecording(bool isMain = false)
         {
             _recording = false;
+            FreezeFrameMod.Instance.LoggerInstance.Msg("Optimizing Animations");
+            foreach (var item in AnimationsCache)
+            {
+                if (item.Key.property.Contains("localPosition"))
+                    continue;
+                if (item.Key.property.Contains("localRotation"))
+                    continue;
+                item.Value.Optimize();
+            }
             FreezeFrameMod.Instance.FullCopyWithAnimations(Player, CreateClip(), isMain, AnimationsCache);
 
         }
@@ -107,48 +121,70 @@ namespace FreezeFrame
             }
         }
 
-        public void Record(Transform transform = null, string path = "")
+        public string GetPathRelative(Transform transform, Transform root)
         {
+            if (transform == root)
+                return "";
+
+            return GetPathRelative(transform.parent, root) + "/" + transform.name;
+        }
+    
+        public void Record()
+        {
+            if (!Recording)
+                return;
             if (Player == null)
             {
                 _recording = false;
                 AnimationsCache.Clear();
                 return;
             }
-
-            if (transform == null) transform = Player.GetAvatarGameObject().transform;
-
-            if (transform.name.EndsWith("_ShadowClone"))
-                return;
-            
-            var position = transform.localPosition;
-            var rotation = transform.localRotation;
-            var renderer = transform.gameObject.GetComponent<SkinnedMeshRenderer>();
-            if (path == "") //root level
+            //Save bones
+            var avatar = Player.GetAvatarGameObject();
+            var animator = avatar.GetComponent<Animator>();
+            for (int i = 0; i < (int)HumanBodyBones.UpperChest; i++)
             {
-                position = transform.position;
-                rotation = transform.rotation;
+                var bone = animator.GetBoneTransform((HumanBodyBones)i);
+                if (bone == null)
+                    continue;
+
+                var position = bone.localPosition;
+                var rotation = bone.localRotation;
+                var scale = bone.localScale;
+                var path = GetPathRelative(bone, animator.transform).TrimStart('/');
+
+                Save(path, "localPosition.x", position.x);
+                Save(path, "localPosition.y", position.y);
+                Save(path, "localPosition.z", position.z);
+                Save(path, "localRotation.x", rotation.x);
+                Save(path, "localRotation.y", rotation.y);
+                Save(path, "localRotation.z", rotation.z);
+                Save(path, "localRotation.w", rotation.w);
+                Save(path, "localScale.x", scale.x);
+                Save(path, "localScale.y", scale.y);
+                Save(path, "localScale.z", scale.z);
+                Save(path, "m_IsActive", bone.gameObject.activeInHierarchy ? 1 : 0);
             }
-
-            Save(path, "localPosition.x", position.x);
-            Save(path, "localPosition.y", position.y);
-            Save(path, "localPosition.z", position.z);
-            Save(path, "localRotation.x", rotation.x);
-            Save(path, "localRotation.y", rotation.y);
-            Save(path, "localRotation.z", rotation.z);
-            Save(path, "localRotation.w", rotation.w);
-            Save(path, "localScale.x", transform.localScale.x);
-            Save(path, "localScale.y", transform.localScale.y);
-            Save(path, "localScale.z", transform.localScale.z);
-            Save(path, "m_IsActive", transform.gameObject.activeInHierarchy ? 1 : 0);
-            SaveBlendshapes(path, renderer);
-
-
-            var prefix = path == "" ? "" : path + "/";
-            for (int i = 0; i < transform.childCount; i++)
+            //Save Blendshapes
+            foreach (var renderer in avatar.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
-                Record(transform.GetChild(i), $"{prefix}{transform.GetChild(i).name}");
+                if (renderer.name.EndsWith("_ShadowClone"))
+                    continue;
+                var path = GetPathRelative(renderer.transform, animator.transform).TrimStart('/');
+                SaveBlendshapes(path, renderer);
             }
+            //Save Root
+            Save("", "localPosition.x", avatar.transform.position.x);
+            Save("", "localPosition.y", avatar.transform.position.y);
+            Save("", "localPosition.z", avatar.transform.position.z);
+            Save("", "localRotation.x", avatar.transform.rotation.x);
+            Save("", "localRotation.y", avatar.transform.rotation.y);
+            Save("", "localRotation.z", avatar.transform.rotation.z);
+            Save("", "localRotation.w", avatar.transform.rotation.w);
+            Save("", "localScale.x", avatar.transform.lossyScale.x);
+            Save("", "localScale.y", avatar.transform.lossyScale.y);
+            Save("", "localScale.z", avatar.transform.lossyScale.z);
+            Save("", "m_IsActive", avatar.activeInHierarchy ? 1 : 0);
         }
 
         private void SaveBlendshapes(string path, SkinnedMeshRenderer renderer)

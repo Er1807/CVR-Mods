@@ -1,4 +1,5 @@
-﻿using MelonLoader;
+﻿using ABI_RC.Core.Player;
+using MelonLoader;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,17 @@ namespace FreezeFrame
             File.WriteAllBytes("UserData/test.txt", Serialize());
         }
 
+        public static void Test2()
+        {
+            var bytes = File.ReadAllBytes("UserData/test.txt");
+            var data = new FreezeData();
+            data.Deserialize(bytes);
+
+            var anim = AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>());
+            anim.LoadFromSave(data);
+            anim.StopRecording();
+        }
+
         public byte[] Serialize()
         {
             FreezeFrameMod.Instance.LoggerInstance.Msg("Creating Lookup");
@@ -45,12 +57,11 @@ namespace FreezeFrame
                     counter++;
                 }
             }
-
-
+            
             FreezeFrameMod.Instance.LoggerInstance.Msg("Done");
 
 
-            using (var writer = DarkRift.DarkRiftWriter.Create(int.MaxValue, Encoding.Unicode))
+            using (var writer = DarkRift.DarkRiftWriter.Create(int.MaxValue, Encoding.UTF8))
             {
 
                 FreezeFrameMod.Instance.LoggerInstance.Msg("Writing Lookup");
@@ -71,10 +82,10 @@ namespace FreezeFrame
                 foreach (var anim in Animation)
                 {
 
-                    FreezeFrameMod.Instance.LoggerInstance.Msg(anim.Key.path + " " + anim.Key.property);
                     writer.Write(lookup[anim.Key.path]);
                     writer.Write(lookup[anim.Key.property]);
-                    anim.Value.Serialize(writer);
+                    var count = anim.Value.Serialize(writer);
+                    FreezeFrameMod.Instance.LoggerInstance.Msg(anim.Key.path + " " + anim.Key.property + " " + count);
                 }
                 return writer.ToArray();
             }
@@ -83,10 +94,13 @@ namespace FreezeFrame
         public void Deserialize(byte[] data)
         {
             Dictionary<int, string> lookup = new Dictionary<int, string>();
+            Animation = new Dictionary<(string path, string property), AnimationContainer>();
+            
             
             using (var reader = DarkRift.DarkRiftReader.CreateFromArray(data, 0, data.Length))
             {
-
+                reader.Encoding = Encoding.UTF8;
+                
                 var lookupLength = reader.ReadInt32();
                 for (int i = 0; i < lookupLength; i++)
                 {
@@ -99,11 +113,13 @@ namespace FreezeFrame
                 var length = reader.ReadInt32();
                 for (int i = 0; i < length; i++)
                 {
-                    var path = reader.ReadString();
-                    var property = reader.ReadString();
+                    var path = lookup[reader.ReadInt32()];
+                    var property = lookup[reader.ReadInt32()];
+                    
                     var anim = new AnimationContainer();
-                    anim.Deserialize(reader);
+                    var count = anim.Deserialize(reader);
                     Animation.Add((path, property), anim);
+                    FreezeFrameMod.Instance.LoggerInstance.Msg(path + " " + property + " " + count);
                 }
             }
         }

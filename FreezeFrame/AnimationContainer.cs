@@ -1,5 +1,6 @@
 ﻿using DarkRift;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace FreezeFrame
@@ -16,16 +17,26 @@ namespace FreezeFrame
 
         public void Record(float currentTime, float value)
         {
-            if (Curve.length != 0 && Curve.keys[Curve.length - 1].value == value)
-                return;
+            //if (Curve.length != 0 && Curve.keys[Curve.length - 1].value == value)
+            //    return;
             
             Curve.AddKey(currentTime, value);
         }
 
-        internal void Serialize(DarkRiftWriter writer)
+        public void Optimize()
         {
-            //writer.Write(Path);
-            //writer.Write(Property);
+            for (int i = 1; i < Curve.length-1; i++)
+            {
+                if (Math.Abs(Curve[i].value - Curve[i - 1].value) < 0.00001f && Math.Abs(Curve[i].value - Curve[i + 1].value) < 0.00001f)
+                {
+                    Curve.RemoveKey(i);
+                    i--;
+                }
+            }
+        }
+
+        internal int Serialize(DarkRiftWriter writer)
+        {
             writer.Write(Curve.keys.Length);
             foreach (var key in Curve.keys)
             {
@@ -34,23 +45,23 @@ namespace FreezeFrame
                 writer.Write(key.inTangent);
                 writer.Write(key.outTangent);
             }
+            return Curve.keys.Length;
         }
 
-        internal void Deserialize(DarkRiftReader reader)
+        internal int Deserialize(DarkRiftReader reader)
         {
-            //Path = reader.ReadString();
-            //Property = reader.ReadString();
             var length = reader.ReadInt32();
+            List<Keyframe> keys = new List<Keyframe>();
             for (int i = 0; i < length; i++)
             {
                 var time = reader.ReadSingle();
                 var value = reader.ReadSingle();
                 var inTangent = reader.ReadSingle();
                 var outTangent = reader.ReadSingle();
-                Curve.AddKey(time, value);
-                Curve.keys[i].inTangent = inTangent;
-                Curve.keys[i].outTangent = outTangent;
+                keys.Add(new Keyframe(time, value, inTangent, outTangent));
             }
+            Curve.keys = keys.ToArray();
+            return length;
         }
     }
 }
