@@ -41,13 +41,16 @@ namespace FreezeFrame
 
         private readonly PlayerDescriptor Player;
         public Dictionary<(string path, string property), AnimationContainer> AnimationsCache = new Dictionary<(string, string), AnimationContainer>();
-
+        private HumanPoseHandler humanPoseHandler;
+        private HumanPose pose = new HumanPose();
         public float CurrentTime;
         private bool _recording = false;
 
         public void StartRecording(bool calledByRemote = false)
         {
             AnimationsCache = new Dictionary<(string, string), AnimationContainer>();
+            humanPoseHandler = new HumanPoseHandler(Player.GetAvatarGameObject().GetComponent<Animator>().avatar, Player.GetAvatarGameObject().GetComponent<Animator>().transform);
+
             _recording = true;
 
             FreezeFrameMod.Instance.Resync();
@@ -72,7 +75,6 @@ namespace FreezeFrame
                 item.Value.Optimize();
             }
             FreezeFrameMod.Instance.FullCopyWithAnimations(Player, CreateClip(), isMain, AnimationsCache);
-
         }
 
         public bool Recording => _recording;
@@ -84,6 +86,7 @@ namespace FreezeFrame
             clip.name = "FreezeAnimation";
 
             var transformType = typeof(Transform);
+            var animatorType = typeof(Animator);
             var skinnedMeshrendererType = typeof(SkinnedMeshRenderer);
             var gameObjectType = typeof(GameObject);
 
@@ -104,7 +107,7 @@ namespace FreezeFrame
                 {
                     if (loopingDelay > 0)
                         FixLooping(item.Value.Curve);
-                    clip.SetCurve(item.Key.path, transformType, item.Key.property, item.Value.Curve);
+                    clip.SetCurve(item.Key.path, animatorType, item.Key.property, item.Value.Curve);
                 }
             }
             return clip;
@@ -139,32 +142,26 @@ namespace FreezeFrame
                 AnimationsCache.Clear();
                 return;
             }
+
+            humanPoseHandler.GetHumanPose(ref pose);
+
+            for (int i = 0; i < HumanTrait.MuscleCount; i++)
+            {
+                Save("", HumanTrait.MuscleName[i], pose.muscles[i]);
+            }
+            Save("", "RootT.x", pose.bodyPosition.x);
+            Save("", "RootT.y", pose.bodyPosition.y);
+            Save("", "RootT.z", pose.bodyPosition.z);
+            
+            Save("", "RootQ.x", pose.bodyRotation.x);
+            Save("", "RootQ.y", pose.bodyRotation.y);
+            Save("", "RootQ.z", pose.bodyRotation.z);
+            Save("", "RootQ.w", pose.bodyRotation.w);
+
             //Save bones
             var avatar = Player.GetAvatarGameObject();
             var animator = avatar.GetComponent<Animator>();
-            for (int i = 0; i < (int)HumanBodyBones.UpperChest; i++)
-            {
-                var bone = animator.GetBoneTransform((HumanBodyBones)i);
-                if (bone == null)
-                    continue;
-
-                var position = bone.localPosition;
-                var rotation = bone.localRotation;
-                var scale = bone.localScale;
-                var path = GetPathRelative(bone, animator.transform).TrimStart('/');
-
-                Save(path, "localPosition.x", position.x);
-                Save(path, "localPosition.y", position.y);
-                Save(path, "localPosition.z", position.z);
-                Save(path, "localRotation.x", rotation.x);
-                Save(path, "localRotation.y", rotation.y);
-                Save(path, "localRotation.z", rotation.z);
-                Save(path, "localRotation.w", rotation.w);
-                Save(path, "localScale.x", scale.x);
-                Save(path, "localScale.y", scale.y);
-                Save(path, "localScale.z", scale.z);
-                Save(path, "m_IsActive", bone.gameObject.activeInHierarchy ? 1 : 0);
-            }
+            
             //Save Blendshapes
             foreach (var renderer in avatar.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
@@ -173,6 +170,8 @@ namespace FreezeFrame
                 var path = GetPathRelative(renderer.transform, animator.transform).TrimStart('/');
                 SaveBlendshapes(path, renderer);
             }
+
+            /*
             //Save Root
             Save("", "localPosition.x", avatar.transform.position.x);
             Save("", "localPosition.y", avatar.transform.position.y);
@@ -185,6 +184,7 @@ namespace FreezeFrame
             Save("", "localScale.y", avatar.transform.lossyScale.y);
             Save("", "localScale.z", avatar.transform.lossyScale.z);
             Save("", "m_IsActive", avatar.activeInHierarchy ? 1 : 0);
+            */
         }
 
         private void SaveBlendshapes(string path, SkinnedMeshRenderer renderer)

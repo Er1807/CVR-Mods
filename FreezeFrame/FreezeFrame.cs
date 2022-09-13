@@ -349,10 +349,10 @@ namespace FreezeFrame
 
             var copy = GameObject.Instantiate(source, ClonesParent.transform, true);
             copy.name = "Avatar Clone";
-
+            var animator = copy.GetComponent<Animator>();
             foreach (var copycomp in copy.GetComponents<Component>())
             {
-                if (copycomp != copy.transform)
+                if (copycomp != copy.transform && copycomp != animator)
                 {
                     GameObject.DestroyImmediate(copycomp);
                 }
