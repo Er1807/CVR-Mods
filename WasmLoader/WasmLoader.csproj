@@ -115,9 +115,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="wasmtime.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="wasmtime.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="memory.wat" />
