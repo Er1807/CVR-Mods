@@ -62,6 +62,7 @@ namespace FreezeFrame
         public void StopRecording(bool isMain = false)
         {
             _recording = false;
+            var toRemove = new List<(string path, string property)>();
             FreezeFrameMod.Instance.LoggerInstance.Msg("Optimizing Animations");
             foreach (var item in AnimationsCache)
             {
@@ -70,7 +71,18 @@ namespace FreezeFrame
                 if (item.Key.property.Contains("localRotation"))
                     continue;
                 item.Value.Optimize();
+                if (true && item.Value.Curve.length == 1)
+                {
+                    FreezeFrameMod.Instance.LoggerInstance.Msg("Removed " + item.Key.path + " " + item.Key.property);
+                    toRemove.Add(item.Key);
+                }
             }
+
+            foreach (var item in toRemove)
+            {
+                AnimationsCache.Remove(item);
+            }
+
             FreezeFrameMod.Instance.FullCopyWithAnimations(Player, CreateClip(), isMain, AnimationsCache);
 
         }

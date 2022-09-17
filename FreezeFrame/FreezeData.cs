@@ -21,21 +21,23 @@ namespace FreezeFrame
 
         public void Test()
         {
-            File.WriteAllBytes("UserData/test.txt", Serialize());
+            using (FileStream stream = new FileStream("UserData/test.txt", FileMode.Create))
+                SerializeToStream(stream);
         }
 
         public static void Test2()
         {
-            var bytes = File.ReadAllBytes("UserData/test.txt");
             var data = new FreezeData();
-            data.Deserialize(bytes);
+            
+            using (var stream = new FileStream("UserData/test.txt", FileMode.Open))
+                data.Deserialize(stream);
 
             var anim = AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>());
             anim.LoadFromSave(data);
             anim.StopRecording();
         }
 
-        public byte[] Serialize()
+        public void SerializeToStream(Stream stream)
         {
             FreezeFrameMod.Instance.LoggerInstance.Msg("Creating Lookup");
             int counter = 0;
@@ -60,8 +62,9 @@ namespace FreezeFrame
             
             FreezeFrameMod.Instance.LoggerInstance.Msg("Done");
 
-
-            using (var writer = DarkRift.DarkRiftWriter.Create(int.MaxValue, Encoding.UTF8))
+            
+            
+            using (var writer = new BinaryWriter(stream, Encoding.UTF8))
             {
 
                 FreezeFrameMod.Instance.LoggerInstance.Msg("Writing Lookup");
@@ -87,27 +90,24 @@ namespace FreezeFrame
                     var count = anim.Value.Serialize(writer);
                     FreezeFrameMod.Instance.LoggerInstance.Msg(anim.Key.path + " " + anim.Key.property + " " + count);
                 }
-                return writer.ToArray();
             }
         }
 
-        public void Deserialize(byte[] data)
+        public void Deserialize(Stream data)
         {
             Dictionary<int, string> lookup = new Dictionary<int, string>();
             Animation = new Dictionary<(string path, string property), AnimationContainer>();
             
             
-            using (var reader = DarkRift.DarkRiftReader.CreateFromArray(data, 0, data.Length))
+            using (var reader = new BinaryReader(data, Encoding.UTF8))
             {
-                reader.Encoding = Encoding.UTF8;
-                
                 var lookupLength = reader.ReadInt32();
                 for (int i = 0; i < lookupLength; i++)
                 {
                     lookup[i] = reader.ReadString();
                 }
 
-                guid = new Guid(reader.ReadBytes());
+                guid = new Guid(reader.ReadBytes(16));
                 AvatarId = reader.ReadString();
                 Type = (FreezeType)reader.ReadByte();
                 var length = reader.ReadInt32();
