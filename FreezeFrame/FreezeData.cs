@@ -62,8 +62,9 @@ namespace FreezeFrame
             
             FreezeFrameMod.Instance.LoggerInstance.Msg("Done");
 
-            
-            
+
+            FreezeFrameMod.Instance.LoggerInstance.Msg($"Start to write Animations");
+
             using (var writer = new BinaryWriter(stream, Encoding.UTF8))
             {
 
@@ -88,17 +89,19 @@ namespace FreezeFrame
                     writer.Write(lookup[anim.Key.path]);
                     writer.Write(lookup[anim.Key.property]);
                     var count = anim.Value.Serialize(writer);
-                    FreezeFrameMod.Instance.LoggerInstance.Msg(anim.Key.path + " " + anim.Key.property + " " + count);
+                    //FreezeFrameMod.Instance.LoggerInstance.Msg(anim.Key.path + " " + anim.Key.property + " " + count);
                 }
             }
+            FreezeFrameMod.Instance.LoggerInstance.Msg($"Writtern {Animation.Count} Animations");
         }
 
         public void Deserialize(Stream data)
         {
             Dictionary<int, string> lookup = new Dictionary<int, string>();
             Animation = new Dictionary<(string path, string property), AnimationContainer>();
-            
-            
+
+            FreezeFrameMod.Instance.LoggerInstance.Msg($"Start to read Animations");
+
             using (var reader = new BinaryReader(data, Encoding.UTF8))
             {
                 var lookupLength = reader.ReadInt32();
@@ -119,9 +122,10 @@ namespace FreezeFrame
                     var anim = new AnimationContainer();
                     var count = anim.Deserialize(reader);
                     Animation.Add((path, property), anim);
-                    FreezeFrameMod.Instance.LoggerInstance.Msg(path + " " + property + " " + count);
+                    //FreezeFrameMod.Instance.LoggerInstance.Msg(path + " " + property + " " + count);
                 }
             }
+            FreezeFrameMod.Instance.LoggerInstance.Msg($"Read {Animation.Count} Animations");
         }
     }
 }

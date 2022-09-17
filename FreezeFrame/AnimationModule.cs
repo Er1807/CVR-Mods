@@ -71,7 +71,7 @@ namespace FreezeFrame
                 if (item.Key.property.Contains("localRotation"))
                     continue;
                 item.Value.Optimize();
-                if (true && item.Value.Curve.length == 1)
+                if (FreezeFrameMod.Instance.optimizeAnimations.Value && item.Value.Curve.length == 1)
                 {
                     FreezeFrameMod.Instance.LoggerInstance.Msg("Removed " + item.Key.path + " " + item.Key.property);
                     toRemove.Add(item.Key);

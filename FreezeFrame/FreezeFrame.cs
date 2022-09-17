@@ -55,6 +55,7 @@ namespace FreezeFrame
         public MelonPreferences_Entry<int> skipFrames;
         public MelonPreferences_Entry<float> smoothLoopingDuration;
         public MelonPreferences_Entry<bool> saveAnimations;
+        public MelonPreferences_Entry<bool> optimizeAnimations;
 
 
         private bool deleteMode;
@@ -84,7 +85,7 @@ namespace FreezeFrame
             skipFrames = category.CreateEntry("skipFrames", 0, display_name: "Skip Frames", description: "Amount of frames to skip between recordings");
             saveAnimations = category.CreateEntry("saveAnimations", true, display_name: "Save Animations on freeze animations", description: "If anaimations are saved they can be later exported (uses more ram)");
             smoothLoopingDuration = category.CreateEntry("smoothLoopingDuration", 0.2f, "Smoothing Duration", "Duration of loop smoothing");
-
+            optimizeAnimations = category.CreateEntry("optimizeAnimations", true, "Optimize Animations", "Optimizes animations to improve saving and loading times (will remove parameters that havent changed)");
 
         }
 
@@ -224,28 +225,6 @@ namespace FreezeFrame
 
         private static AssetBundle iconsAssetBundle;
         private ActionMenuMod.Lib actionemenu;
-
-        /*private void LoadUI()
-        {
-            menuStateController = GameObject.Find("UserInterface").transform.Find("Canvas_QuickMenu(Clone)").GetComponent<MenuStateController>();
-            //based on VRCUKs code
-            var camera = menuStateController.transform.Find("Container/Window/QMParent/Menu_Camera/Scrollrect/Viewport/VerticalLayoutGroup/Buttons/Button_Screenshot");
-            var useractions = menuStateController.transform.Find("Container/Window/QMParent/Menu_SelectedUser_Local/ScrollRect/Viewport/VerticalLayoutGroup/Buttons_UserActions");
-            var createFreezeButton = GameObject.Instantiate(camera, useractions);
-            createFreezeButton.GetComponent<Button>().onClick.RemoveAllListeners();
-            createFreezeButton.GetComponent<Button>().onClick.AddListener(new Action(() =>
-            {
-                MelonLogger.Msg($"Creating Freeze Frame for selected avatar");
-                EnsureHolderCreated();
-                string userid = menuStateController.GetComponentInChildren<SelectedUserMenuQM>().field_Private_IUser_0.prop_String_0;
-                InstantiateByID(userid);
-            }));
-            createFreezeButton.GetComponentInChildren<TextMeshProUGUI>().text = "Create Freeze";
-
-
-
-            MelonLogger.Msg("Buttons sucessfully created");
-        }*/
 
         public void Delete()
         {
