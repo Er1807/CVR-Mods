@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ABI_RC.Core.Player;
 using UnityEngine;
 
@@ -59,7 +60,7 @@ namespace FreezeFrame
             AnimationsCache = data.Animation;
         }
 
-        public void StopRecording(bool isMain = false)
+        public void StopRecording(bool isMain = false, Guid? guid = null)
         {
             _recording = false;
             var toRemove = new List<(string path, string property)>();
@@ -83,7 +84,7 @@ namespace FreezeFrame
                 AnimationsCache.Remove(item);
             }
 
-            FreezeFrameMod.Instance.FullCopyWithAnimations(Player, CreateClip(), isMain, AnimationsCache);
+            FreezeFrameMod.Instance.FullCopyWithAnimations(Player, CreateClip(), isMain, AnimationsCache, guid);
 
         }
 

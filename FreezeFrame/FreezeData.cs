@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Core.Savior;
 using MelonLoader;
 using System;
 using System.Collections.Generic;
@@ -19,23 +20,7 @@ namespace FreezeFrame
         public string AvatarId;
         public FreezeType Type;
 
-        public void Test()
-        {
-            using (FileStream stream = new FileStream("UserData/test.txt", FileMode.Create))
-                SerializeToStream(stream);
-        }
-
-        public static void Test2()
-        {
-            var data = new FreezeData();
-            
-            using (var stream = new FileStream("UserData/test.txt", FileMode.Open))
-                data.Deserialize(stream);
-
-            var anim = AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>());
-            anim.LoadFromSave(data);
-            anim.StopRecording();
-        }
+        
 
         public void SerializeToStream(Stream stream)
         {
@@ -126,6 +111,17 @@ namespace FreezeFrame
                 }
             }
             FreezeFrameMod.Instance.LoggerInstance.Msg($"Read {Animation.Count} Animations");
+        }
+
+        internal void Save(string sceneName)
+        {
+            
+            var path = Path.Combine("UserData","FreezeFrame", sceneName, $"{guid}.txt");
+
+            Directory.GetParent(path).Create(); 
+
+            using (var stream = new FileStream(path, FileMode.Create))
+                SerializeToStream(stream);
         }
     }
 }

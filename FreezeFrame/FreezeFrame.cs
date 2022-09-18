@@ -11,6 +11,7 @@ using System.IO;
 using UnityEngine;
 using ABI_RC.Core.Player;
 using ActionMenu;
+using ABI_RC.Core.Savior;
 
 [assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "1.4.2", "Eric van Fandenfart")]
 [assembly: MelonGame]
@@ -40,12 +41,26 @@ namespace FreezeFrame
             }
         }
 
+
+
         public Texture2D LoadImage(string name)
         {
             return iconsAssetBundle.LoadAsset($"Assets/icons-freeze/{name}.png", typeof(Texture2D)) as Texture2D;
         }
 
-        public GameObject ClonesParent = null;
+        private GameObject _clonesParent = null;
+        public GameObject ClonesParent
+        {
+            get
+            {
+                if (_clonesParent == null || !_clonesParent.scene.IsValid())
+                    _clonesParent = new GameObject("Avatar Clone Holder");
+
+                return _clonesParent;
+            }
+        }
+
+
         private DateTime? DelayedSelf = null;
         private DateTime? DelayedAll = null;
 
@@ -67,6 +82,7 @@ namespace FreezeFrame
         {
             Instance = this;
 
+            new FreezeSaveManager();
             menu = new FreezeFrameMenu();
 
             MelonLogger.Msg("Patching AssetBundle unloading");
@@ -106,14 +122,40 @@ namespace FreezeFrame
                             AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StopRecording();
                     }, "record"),
                     MenuButtonWrapper("Resync Animations", Instance.Resync, "resync"),
-                    DynamicMenuWrapper("Advanced", () => new List<MenuItem>(){
-                        MenuButtonWrapper("Freeze Self (5s)", () => Instance.DelayedSelf = DateTime.Now.AddSeconds(5), "freeze 5sec"),
-                        MenuButtonWrapper("Delete All", Instance.Delete, "delete all"),
-                        MenuButtonWrapper("Freeze All", Instance.Create, "freeze all"),
-                        MenuButtonWrapper("Freeze All (5s)", () => Instance.DelayedAll = DateTime.Now.AddSeconds(5), "freeze all 5sec"),
-                        //MenuItemWrapper("Record Time Limit", () => LoggerInstance.Msg("hello world")),
-                        //MenuItemWrapper("Delete Mode", () => LoggerInstance.Msg("hello world"), "delete mode")
-                    }, "advanced"),
+                    DynamicMenuWrapper("Advanced", GenerateAdvancedMenu, "advanced"),
+                };
+            }
+
+            private List<MenuItem> GenerateAdvancedMenu()
+            {
+                return new List<MenuItem>(){
+                    MenuButtonWrapper("Save Scene", () => FreezeSaveManager.Intstance.OpenSaveDialog(), "save"),
+                    DynamicMenuWrapper("Load Scene", LoadScenes, "load"),
+                    MenuButtonWrapper("Freeze Self (5s)", () => Instance.DelayedSelf = DateTime.Now.AddSeconds(5), "freeze 5sec"),
+                    MenuButtonWrapper("Delete All", Instance.Delete, "delete all"),
+                    MenuButtonWrapper("Freeze All", Instance.Create, "freeze all"),
+                    MenuButtonWrapper("Freeze All (5s)", () => Instance.DelayedAll = DateTime.Now.AddSeconds(5), "freeze all 5sec"),
+                    //MenuItemWrapper("Record Time Limit", () => LoggerInstance.Msg("hello world")),
+                    //MenuItemWrapper("Delete Mode", () => LoggerInstance.Msg("hello world"), "delete mode")
+                };
+            }
+
+            private List<MenuItem> LoadScenes()
+            {
+                var list = new List<MenuItem>();
+
+                foreach (var save in FreezeSaveManager.Intstance.AvailableSaveNames())
+                {
+                    list.Add(DynamicMenuWrapper($"Load {save}", () => SceneMenu(save), "load"));
+                }
+                return list;
+            }
+
+            private List<MenuItem> SceneMenu(string sceneName)
+            {
+                return new List<MenuItem>(){
+                    MenuButtonWrapper("Load Scene", () => FreezeSaveManager.Intstance.LoadAll(sceneName), "load"),
+                    MenuButtonWrapper("Delete Scene", () => FreezeSaveManager.Intstance.Delete(sceneName), "delete"),
                 };
             }
             
@@ -135,7 +177,6 @@ namespace FreezeFrame
         private void SwitchDeleteMode(bool state)
         {
             deleteMode = state;
-            EnsureHolderCreated();
             if (deleteMode)
             {
                 for (int i = 0; i < ClonesParent.transform.childCount; i++)
@@ -194,8 +235,6 @@ namespace FreezeFrame
 
             AnimationModule.Update();
 
-
-
             if (ClonesParent != null && ClonesParent.scene.IsValid())
                 foreach (var anim in ClonesParent.GetComponentsInChildren<Animation>())
                 {
@@ -215,10 +254,11 @@ namespace FreezeFrame
                 }
         }
 
+
+
         private void CreateSelf()
         {
             MelonLogger.Msg($"Creating Freeze Frame for yourself");
-            EnsureHolderCreated();
 
             InstantiateAvatar(PlayerSetup.Instance.GetComponent<PlayerDescriptor>());
         }
@@ -232,7 +272,6 @@ namespace FreezeFrame
             if (ClonesParent != null && ClonesParent.scene.IsValid())
             {
                 GameObject.Destroy(ClonesParent);
-                ClonesParent = null;
                 active = false;
                 MelonLogger.Msg("Cleanup after all Freezes are gone");
                 foreach (var item in StillLoaded)
@@ -245,13 +284,11 @@ namespace FreezeFrame
 
         public void DeleteLast()
         {
-            EnsureHolderCreated();
             Delete(ClonesParent.transform.childCount - 1);
         }
 
         public void Delete(int i)
         {
-            EnsureHolderCreated();
             if (ClonesParent.transform.childCount > i && i >= 0)
             {
                 MelonLogger.Msg($"Deleting Frame {i}");
@@ -266,19 +303,9 @@ namespace FreezeFrame
             }
         }
 
-        public void EnsureHolderCreated()
-        {
-            active = true;
-            if (ClonesParent == null || !ClonesParent.scene.IsValid())
-            {
-                ClonesParent = new GameObject("Avatar Clone Holder");
-            }
-        }
-
         public void Create()
         {
             MelonLogger.Msg("Creating Freeze Frame for all Avatars");
-            EnsureHolderCreated();
 
 
             InstantiateAll();
@@ -306,16 +333,15 @@ namespace FreezeFrame
 
 
 
-        public void FullCopyWithAnimations(PlayerDescriptor player, AnimationClip animationClip, bool isMain, Dictionary<(string, string), AnimationContainer> animationsCache)
+        public void FullCopyWithAnimations(PlayerDescriptor player, AnimationClip animationClip, bool isMain, Dictionary<(string, string), AnimationContainer> animationsCache, Guid? guid = null)
         {
-            EnsureHolderCreated();
             var copy = FullCopy(player);
             if (isMain == true)
                 ClonesParent.GetComponentsInChildren<FreezeData>().Do(x => x.IsMain = false);
             var data = copy.GetComponent<FreezeData>();
             data.IsMain = isMain;
             data.Animation = animationsCache;
-
+            data.guid = guid ?? Guid.NewGuid();
             var animator = copy.AddComponent<Animation>();
             animator.AddClip(animationClip, animationClip.name);
             animator.Play(animationClip.name);
