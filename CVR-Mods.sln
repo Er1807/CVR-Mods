@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnableFingerTrackingByDefault", "EnableFingerTrackingByDefault\EnableFingerTrackingByDefault.csproj", "{BF72F2A7-352C-41EF-A145-54851A14AC11}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CameraAnimation", "CameraAnimation\CameraAnimation.csproj", "{87160CA8-D7C5-4766-91E3-E54DC3693FB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{BF72F2A7-352C-41EF-A145-54851A14AC11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF72F2A7-352C-41EF-A145-54851A14AC11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF72F2A7-352C-41EF-A145-54851A14AC11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87160CA8-D7C5-4766-91E3-E54DC3693FB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87160CA8-D7C5-4766-91E3-E54DC3693FB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87160CA8-D7C5-4766-91E3-E54DC3693FB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87160CA8-D7C5-4766-91E3-E54DC3693FB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
