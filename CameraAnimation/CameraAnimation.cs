@@ -1,5 +1,7 @@
-﻿using ABI_RC.Core.IO;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.IO;
 using ABI_RC.Core.Player;
+using ABI_RC.Systems.Camera;
 using ActionMenu;
 using CameraAnimation;
 using MelonLoader;
@@ -73,15 +75,18 @@ namespace CameraAnimation
 
             private List<MenuItem> GenerateSavedMenu()
             {
-                throw new NotImplementedException();
+                return new List<MenuItem>() { 
+                
+                };
+                
             }
 
             private List<MenuItem> GenerateSettingsMenu()
             {
                 return new List<MenuItem>() {
-                    MenuRadialWrapper("Speed", Instance.SetSpeed, "speed"),
-                    MenuToggleWrapper("Loop mode", Instance.SetLoopMode, "loop mode"),
-                    MenuToggleWrapper("Enable Pickup", Instance.SetEnablePickup, "play"),
+                    MenuRadialWrapper("Speed", (f) => Instance.Speed = f, "speed", Instance.Speed, 0.5, 5),
+                    MenuToggleWrapper("Loop mode", (f) => Instance.LoopMode = f, "loop mode", Instance.LoopMode),
+                    MenuToggleWrapper("Enable Pickup", (f) => Instance.EnablePickup = f, "play", Instance.EnablePickup),
                 };
             }
 
@@ -89,13 +94,13 @@ namespace CameraAnimation
             {
                 return new MenuItem() { name = name, action = BuildButtonItem(name.Replace(" ", ""), action), icon = icon };
             }
-            public MenuItem MenuToggleWrapper(string name, Action<bool> action, string icon = null)
+            public MenuItem MenuToggleWrapper(string name, Action<bool> action, string icon = null, bool defaultValue = false)
             {
                 return new MenuItem() { name = name, action = BuildToggleItem(name.Replace(" ", ""), action), icon = icon };
             }
-            public MenuItem MenuRadialWrapper(string name, Action<double> action, string icon = null)
+            public MenuItem MenuRadialWrapper(string name, Action<double> action, string icon = null, double defaultValue = 0, double minValue= 0, double maxValue = 1)
             {
-                return new MenuItem() { name = name, action = BuildRadialItem(name.Replace(" ", ""), action), icon = icon };
+                return new MenuItem() { name = name, action = BuildRadialItem(name.Replace(" ", ""), action, (float)minValue, (float)maxValue, (float)defaultValue), icon = icon };
             }
             public MenuItem DynamicMenuWrapper(string name, Func<List<MenuItem>> action, string icon = null)
             {
@@ -104,20 +109,16 @@ namespace CameraAnimation
 
         }
 
-        private void SetEnablePickup(bool obj)
-        {
-            throw new NotImplementedException();
+        private bool _enablePickup = true;
+        private bool EnablePickup { get => _enablePickup; set { 
+                _enablePickup = value;
+                foreach (var point in GetInstance.points)
+                    point.displayObject.GetComponent<CVRPickupObject>().enabled = EnablePickup;
+            } 
         }
 
-        private void SetLoopMode(bool obj)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void SetSpeed(double obj)
-        {
-            throw new NotImplementedException();
-        }
+        private double Speed { get; set; } = 2.5;
+        private bool LoopMode { get => GetInstance.looping; set => GetInstance.looping = value; }
 
         private void ClearAnimation()
         {
@@ -131,7 +132,8 @@ namespace CameraAnimation
         
         private void PlayAnimation()
         {
-            GetInstance.PlayPath(5);
+            GetInstance.CopyRefCam();
+            GetInstance.PlayPath((float)Speed * GetInstance.points.Count);
         }
 
         private void RemoveLastPosition()
@@ -143,8 +145,11 @@ namespace CameraAnimation
         
         private void SavePos()
         {
-            Transform rotationPivot = PlayerSetup.Instance._movementSystem.rotationPivot;
-            GetInstance.points.Add(new CVRPathCamPoint(rotationPivot.position, rotationPivot.rotation, GetInstance.points.Count));
+            Transform rotationPivot = PortableCamera.Instance.cameraComponent.transform;
+            var point = new CVRPathCamPoint(rotationPivot.position, rotationPivot.rotation, GetInstance.points.Count);
+            GetInstance.points.Add(point);
+            point.displayObject.GetComponent<CVRPickupObject>().enabled = EnablePickup;
+            
         }
 
         private CVRPathCamController GetInstance => CVRPathCamController.Instance;
