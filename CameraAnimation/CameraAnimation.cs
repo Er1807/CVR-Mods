@@ -30,6 +30,8 @@ namespace CameraAnimation
         {
             Instance = this;
             new CameraAnimationMenu();
+
+            CameraAnimationCalculator.ApplyPatches();
         }
 
         public void RetrieveMethods()
@@ -149,6 +151,8 @@ namespace CameraAnimation
             var point = new CVRPathCamPoint(rotationPivot.position, rotationPivot.rotation, GetInstance.points.Count);
             GetInstance.points.Add(point);
             point.displayObject.GetComponent<CVRPickupObject>().enabled = EnablePickup;
+
+            CameraAnimationCalculator.GenerateCurves();
             
         }
 
