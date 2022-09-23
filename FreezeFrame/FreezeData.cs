@@ -87,29 +87,37 @@ namespace FreezeFrame
 
             FreezeFrameMod.Instance.LoggerInstance.Msg($"Start to read Animations");
 
-            using (var reader = new BinaryReader(data, Encoding.UTF8))
+            using (var memoryStream = new MemoryStream())
             {
-                var lookupLength = reader.ReadInt32();
-                for (int i = 0; i < lookupLength; i++)
-                {
-                    lookup[i] = reader.ReadString();
-                }
+                data.CopyTo(memoryStream);
+                memoryStream.Position = 0;
+                
 
-                guid = new Guid(reader.ReadBytes(16));
-                AvatarId = reader.ReadString();
-                Type = (FreezeType)reader.ReadByte();
-                var length = reader.ReadInt32();
-                for (int i = 0; i < length; i++)
+                using (var reader = new BinaryReader(memoryStream, Encoding.UTF8))
                 {
-                    var path = lookup[reader.ReadInt32()];
-                    var property = lookup[reader.ReadInt32()];
-                    
-                    var anim = new AnimationContainer();
-                    var count = anim.Deserialize(reader);
-                    Animation.Add((path, property), anim);
-                    //FreezeFrameMod.Instance.LoggerInstance.Msg(path + " " + property + " " + count);
+                    var lookupLength = reader.ReadInt32();
+                    for (int i = 0; i < lookupLength; i++)
+                    {
+                        lookup[i] = reader.ReadString();
+                    }
+
+                    guid = new Guid(reader.ReadBytes(16));
+                    AvatarId = reader.ReadString();
+                    Type = (FreezeType)reader.ReadByte();
+                    var length = reader.ReadInt32();
+                    for (int i = 0; i < length; i++)
+                    {
+                        var path = lookup[reader.ReadInt32()];
+                        var property = lookup[reader.ReadInt32()];
+
+                        var anim = new AnimationContainer();
+                        var count = anim.Deserialize(reader);
+                        Animation.Add((path, property), anim);
+                        //FreezeFrameMod.Instance.LoggerInstance.Msg(path + " " + property + " " + count);
+                    }
                 }
             }
+                
             FreezeFrameMod.Instance.LoggerInstance.Msg($"Read {Animation.Count} Animations");
         }
 
