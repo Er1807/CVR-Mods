@@ -86,7 +86,7 @@ namespace CameraAnimation
             private List<MenuItem> GenerateSettingsMenu()
             {
                 return new List<MenuItem>() {
-                    MenuRadialWrapper("Speed", (f) => Instance.Speed = f, "speed", Instance.Speed, 0.5, 5),
+                    MenuRadialWrapper("Speed", (f) => Instance.Speed = f, "speed", Instance.Speed, 0.5f, 5),
                     MenuToggleWrapper("Loop mode", (f) => Instance.LoopMode = f, "loop mode", Instance.LoopMode),
                     MenuToggleWrapper("Enable Pickup", (f) => Instance.EnablePickup = f, "play", Instance.EnablePickup),
                 };
@@ -100,9 +100,9 @@ namespace CameraAnimation
             {
                 return new MenuItem() { name = name, action = BuildToggleItem(name.Replace(" ", ""), action), icon = icon };
             }
-            public MenuItem MenuRadialWrapper(string name, Action<double> action, string icon = null, double defaultValue = 0, double minValue= 0, double maxValue = 1)
+            public MenuItem MenuRadialWrapper(string name, Action<float> action, string icon = null, float defaultValue = 0, float minValue = 0, float maxValue = 1)
             {
-                return new MenuItem() { name = name, action = BuildRadialItem(name.Replace(" ", ""), action, (float)minValue, (float)maxValue, (float)defaultValue), icon = icon };
+                return new MenuItem() { name = name, action = BuildRadialItem(name.Replace(" ", ""), action, minValue, maxValue, defaultValue), icon = icon };
             }
             public MenuItem DynamicMenuWrapper(string name, Func<List<MenuItem>> action, string icon = null)
             {
@@ -119,7 +119,7 @@ namespace CameraAnimation
             } 
         }
 
-        private double Speed { get; set; } = 2.5;
+        private float Speed { get; set; } = 2.5f;
         private bool LoopMode { get => GetInstance.looping; set => GetInstance.looping = value; }
 
         private void ClearAnimation()

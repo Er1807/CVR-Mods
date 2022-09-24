@@ -153,6 +153,7 @@ namespace FreezeFrame
 
             private List<MenuItem> SceneMenu(string sceneName)
             {
+                
                 return new List<MenuItem>(){
                     MenuButtonWrapper("Load Scene", () => FreezeSaveManager.Intstance.LoadAll(sceneName), "load"),
                     MenuButtonWrapper("Delete Scene", () => FreezeSaveManager.Intstance.Delete(sceneName), "delete"),
