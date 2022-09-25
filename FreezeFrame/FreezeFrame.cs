@@ -13,7 +13,7 @@ using ABI_RC.Core.Player;
 using ActionMenu;
 using ABI_RC.Core.Savior;
 
-[assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "1.4.2", "Eric van Fandenfart")]
+[assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "2.0.0", "Eric van Fandenfart")]
 [assembly: MelonGame]
 
 namespace FreezeFrame
