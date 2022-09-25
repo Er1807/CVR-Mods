@@ -53,7 +53,6 @@ namespace CameraAnimation
                     MenuButtonWrapper("Stop Anim", Instance.StopAnimation, "stop"),
                     MenuButtonWrapper("Clear Anim", Instance.ClearAnimation, "clear anim"),
                     DynamicMenuWrapper("Settings", GenerateSettingsMenu, "settings"),
-                    MenuButtonWrapper("Save", AnimationSaveManager.Instance.OpenSaveDialog, "save"),
                     DynamicMenuWrapper("Saved", GenerateSavedMenu, "saved"),
                 };
             }
@@ -62,6 +61,7 @@ namespace CameraAnimation
             {
                 IList<MenuItem> saves = new List<MenuItem>();
 
+                saves.Add(MenuButtonWrapper("Save", AnimationSaveManager.Instance.OpenSaveDialog, "save"));
                 
                 foreach (string availableSave in AnimationSaveManager.Instance.AvailableSaveNames())
                 {

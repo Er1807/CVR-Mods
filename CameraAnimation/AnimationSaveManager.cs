@@ -37,14 +37,14 @@ namespace CameraAnimation
         {   
             var path = Path.Combine("UserData", "CameraAnimation", MetaPort.Instance.CurrentWorldId);
             if (Directory.Exists(path))
-                return Directory.GetDirectories(path).Select(x => Path.GetFileName(x)).ToList();
+                return Directory.GetFiles(path).Select(x => Path.GetFileNameWithoutExtension(x)).ToList();
             else
                 return new List<string>();
         }
 
         public void Delete(string saveName)
         {
-            Directory.Delete(Path.Combine("UserData", "CameraAnimation", MetaPort.Instance.CurrentWorldId, $"{saveName}.save"), true);
+            File.Delete(Path.Combine("UserData", "CameraAnimation", MetaPort.Instance.CurrentWorldId, $"{saveName}.save"));
         }
 
         public void Load(string saveName)
@@ -85,6 +85,8 @@ namespace CameraAnimation
 
         private void Deserialize(string path)
         {
+            GetInstance.DeleteAllPoints();
+
             using (var stream = new FileStream(path, FileMode.Open))
             using (var reader = new BinaryReader(stream, Encoding.UTF8))
             {
