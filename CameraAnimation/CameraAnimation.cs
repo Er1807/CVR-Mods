@@ -6,13 +6,14 @@ using ActionMenu;
 using CameraAnimation;
 using MelonLoader;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(CameraAnimationMod), "Camera Animations", "3.0.0", "Eric van Fandenfart")]
+[assembly: MelonInfo(typeof(CameraAnimationMod), "Camera Animations", "3.0.1", "Eric van Fandenfart")]
 //[assembly: MelonAdditionalDependencies("ActionMenuApi", "UIExpansionKit")]
 //[assembly: MelonOptionalDependencies("TouchCamera")]
 [assembly: MelonGame]
@@ -33,11 +34,21 @@ namespace CameraAnimation
             new CameraAnimationMenu();
 
             CameraAnimationCalculator.ApplyPatches();
+
+            MelonCoroutines.Start(WaitForPathingCam());
         }
 
-        public void RetrieveMethods()
+        public IEnumerator WaitForPathingCam()
         {
-            var type = typeof(CVRPathCamController);
+            while (GetInstance == null)
+            {
+                yield return null;
+            }
+            while (GetInstance.selectedCamera == null)
+            {
+                yield return null;
+            }
+            GetInstance.selectedCamera.gameObject.AddComponent<CameraAnimationCalculator>();
         }
 
         public class CameraAnimationMenu : ActionMenuMod.Lib
