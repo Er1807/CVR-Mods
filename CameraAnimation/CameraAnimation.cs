@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(CameraAnimationMod), "Camera Animations", "3.0.1", "Eric van Fandenfart")]
+[assembly: MelonInfo(typeof(CameraAnimationMod), "Camera Animations", "3.0.2", "Eric van Fandenfart")]
 //[assembly: MelonAdditionalDependencies("ActionMenuApi", "UIExpansionKit")]
 //[assembly: MelonOptionalDependencies("TouchCamera")]
 [assembly: MelonGame]

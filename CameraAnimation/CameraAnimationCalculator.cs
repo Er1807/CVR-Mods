@@ -119,6 +119,7 @@ namespace CameraAnimation
 
         public static bool PlayPath()
         {
+            GetInstance.selectedCamera.stereoTargetEye = StereoTargetEyeMask.None;
             GetInstance.selectedCamera.enabled = true;
             GenerateCurves();
             Instance.Active = true;
