@@ -24,11 +24,12 @@ namespace CameraAnimation
     {
         public static CameraAnimationMod Instance;
 
-        
+
 
         public override void OnApplicationStart()
         {
             Instance = this;
+            new AnimationSaveManager();
             new CameraAnimationMenu();
 
             CameraAnimationCalculator.ApplyPatches();
@@ -38,25 +39,6 @@ namespace CameraAnimation
         {
             var type = typeof(CVRPathCamController);
         }
-
-
-        /*
-         
-         CustomSubMenu.AddButton("Save\nCurrent", () => savedAnimations.Save(), LoadImage("save current"));
-                    CustomSubMenu.AddButton("Load from Clipboard", () => savedAnimations.CopyFromClipBoard(), LoadImage("load from clipboard"));
-                    CustomSubMenu.AddButton("Copy to Clipboard", () => savedAnimations.CopyToClipBoard(), LoadImage("copy to clipboard"));
-                    foreach (string availableSave in savedAnimations.AvailableSaves)
-                    {
-                        CustomSubMenu.AddSubMenu(availableSave,
-                            delegate
-                            {
-                                CustomSubMenu.AddButton("Load", () => savedAnimations.Load(availableSave), LoadImage("load"));
-                                CustomSubMenu.AddButton("Delete", () => savedAnimations.Delete(availableSave), LoadImage("delete"));
-                                CustomSubMenu.AddButton("Copy to Clipboard", () => savedAnimations.CopyToClipBoard(availableSave), LoadImage("copy to clipboard"));
-
-                            }, LoadImage("save current"));
-                    }
-         */
 
         public class CameraAnimationMenu : ActionMenuMod.Lib
         {
@@ -71,16 +53,29 @@ namespace CameraAnimation
                     MenuButtonWrapper("Stop Anim", Instance.StopAnimation, "stop"),
                     MenuButtonWrapper("Clear Anim", Instance.ClearAnimation, "clear anim"),
                     DynamicMenuWrapper("Settings", GenerateSettingsMenu, "settings"),
+                    MenuButtonWrapper("Save", AnimationSaveManager.Instance.OpenSaveDialog, "save"),
                     DynamicMenuWrapper("Saved", GenerateSavedMenu, "saved"),
                 };
             }
-
+            
             private List<MenuItem> GenerateSavedMenu()
             {
-                return new List<MenuItem>() { 
+                IList<MenuItem> saves = new List<MenuItem>();
+
                 
+                foreach (string availableSave in AnimationSaveManager.Instance.AvailableSaveNames())
+                {
+                    saves.Add(DynamicMenuWrapper(availableSave, () => GenerateSavedSubMenu(availableSave), "save current"));
+                }
+                return saves as List<MenuItem>;
+            } 
+
+            private List<MenuItem> GenerateSavedSubMenu(string availableSave)
+            {
+                return new List<MenuItem>() {
+                    MenuButtonWrapper("Load", () => AnimationSaveManager.Instance.Load(availableSave), "load"),
+                    MenuButtonWrapper("Delete", () => AnimationSaveManager.Instance.Delete(availableSave), "delete"),
                 };
-                
             }
 
             private List<MenuItem> GenerateSettingsMenu()
@@ -112,11 +107,14 @@ namespace CameraAnimation
         }
 
         private bool _enablePickup = true;
-        private bool EnablePickup { get => _enablePickup; set { 
+        public bool EnablePickup
+        {
+            get => _enablePickup; set
+            {
                 _enablePickup = value;
                 foreach (var point in GetInstance.points)
                     point.displayObject.GetComponent<CVRPickupObject>().enabled = EnablePickup;
-            } 
+            }
         }
 
         private float Speed { get; set; } = 2.5f;
@@ -131,7 +129,7 @@ namespace CameraAnimation
         {
             GetInstance.StopPath();
         }
-        
+
         private void PlayAnimation()
         {
             GetInstance.CopyRefCam();
@@ -144,7 +142,7 @@ namespace CameraAnimation
             last.SelectThisPoint();
             GetInstance.DeleteSelectedPoint();
         }
-        
+
         private void SavePos()
         {
             Transform rotationPivot = PortableCamera.Instance.cameraComponent.transform;
@@ -153,7 +151,7 @@ namespace CameraAnimation
             point.displayObject.GetComponent<CVRPickupObject>().enabled = EnablePickup;
 
             CameraAnimationCalculator.GenerateCurves();
-            
+
         }
 
         private CVRPathCamController GetInstance => CVRPathCamController.Instance;
