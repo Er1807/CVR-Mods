@@ -13,7 +13,7 @@ using ABI_RC.Core.Player;
 using ActionMenu;
 using ABI_RC.Core.Savior;
 
-[assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "2.0.0", "Eric van Fandenfart")]
+[assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "2.0.1", "Eric van Fandenfart")]
 [assembly: MelonGame]
 
 namespace FreezeFrame
@@ -114,7 +114,7 @@ namespace FreezeFrame
                 return new List<MenuItem>() {
                     MenuButtonWrapper("Delete Last", Instance.DeleteLast, "delete last"),
                     MenuButtonWrapper("Delete First", () => Instance.Delete(0), "delete first"),
-                    MenuButtonWrapper("Freeze Self", Instance.CreateSelf, "freeze"),
+                    MenuButtonWrapper("Freeze Self",  () => Instance.DelayedSelf = DateTime.Now, "freeze"),
                     MenuToggleWrapper("Record", (state) => {
                         if(state)
                             AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StartRecording();
@@ -133,7 +133,7 @@ namespace FreezeFrame
                     DynamicMenuWrapper("Load Scene", LoadScenes, "load"),
                     MenuButtonWrapper("Freeze Self (5s)", () => Instance.DelayedSelf = DateTime.Now.AddSeconds(5), "freeze 5sec"),
                     MenuButtonWrapper("Delete All", Instance.Delete, "delete all"),
-                    MenuButtonWrapper("Freeze All", Instance.Create, "freeze all"),
+                    MenuButtonWrapper("Freeze All", () => Instance.DelayedAll = DateTime.Now, "freeze all"),
                     MenuButtonWrapper("Freeze All (5s)", () => Instance.DelayedAll = DateTime.Now.AddSeconds(5), "freeze all 5sec"),
                     //MenuItemWrapper("Record Time Limit", () => LoggerInstance.Msg("hello world")),
                     //MenuItemWrapper("Delete Mode", () => LoggerInstance.Msg("hello world"), "delete mode")
@@ -307,8 +307,7 @@ namespace FreezeFrame
         public void Create()
         {
             MelonLogger.Msg("Creating Freeze Frame for all Avatars");
-
-
+            
             InstantiateAll();
         }
 
