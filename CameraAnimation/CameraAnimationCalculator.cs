@@ -21,7 +21,6 @@ namespace CameraAnimation
         public static AnimationCurve RotX;
         public static AnimationCurve RotY;
         public static AnimationCurve RotZ;
-        public static AnimationCurve RotW;
 
         private static CVRPathCamController GetInstance => CVRPathCamController.Instance;
         private static HarmonyLib.Harmony HarmonyInstance => CameraAnimationMod.Instance.HarmonyInstance;
@@ -38,7 +37,8 @@ namespace CameraAnimation
             Instance = this;
         }
 
-        public void OnPreCull()
+        //public void OnPreCull()
+        public void Update()
         {
             if (!Active)
                 return;
@@ -82,8 +82,7 @@ namespace CameraAnimation
             HarmonyInstance.Patch(
                 typeof(CVRPathCamController).GetMethod("PlayPath", BindingFlags.Instance | BindingFlags.Public),
                 prefix: new HarmonyMethod(typeof(CameraAnimationCalculator).GetMethod("PlayPath", BindingFlags.Static | BindingFlags.Public)));
-
-
+            
             HarmonyInstance.Patch(
                 typeof(CVRPathCamController).GetMethod("RefreschIndexes", BindingFlags.Instance | BindingFlags.Public),
                 prefix: new HarmonyMethod(typeof(CameraAnimationCalculator).GetMethod("GenerateCurves", BindingFlags.Static | BindingFlags.Public)));
@@ -100,7 +99,6 @@ namespace CameraAnimation
             RotX = new AnimationCurve();
             RotY = new AnimationCurve();
             RotZ = new AnimationCurve();
-            RotW = new AnimationCurve();
 
             for (int i = 0; i < GetInstance.points.Count; i++)
             {
@@ -110,10 +108,35 @@ namespace CameraAnimation
                 PosY.AddKey(i, point.position.y);
                 PosZ.AddKey(i, point.position.z);
 
-                RotX.AddKey(i, point.rotation.x);
-                RotY.AddKey(i, point.rotation.y);
-                RotZ.AddKey(i, point.rotation.z);
-                RotW.AddKey(i, point.rotation.w);
+                RotX.AddKey(i, point.rotation.eulerAngles.x);
+                RotY.AddKey(i, point.rotation.eulerAngles.y);
+                RotZ.AddKey(i, point.rotation.eulerAngles.z);
+            }
+            
+            FixRotationCurve(RotX);
+            FixRotationCurve(RotY);
+            FixRotationCurve(RotZ);
+        }
+
+        private static void FixRotationCurve(AnimationCurve curve)
+        {
+            float lastValue = 0;
+            for (int i = 0; i < curve.length; i++)
+            {
+                var currentValue = curve.keys[i].value;
+
+                var diff = (currentValue - lastValue)%360;
+                if (diff < -180)
+                    diff += 360;
+                if (diff > 180)
+                    diff -= 360;
+
+                curve.RemoveKey(i);
+                //only works because time diff is exacltly 1
+                curve.AddKey(i, lastValue + diff);
+                //CameraAnimationMod.Instance.LoggerInstance.Msg($"{i}: lastValue: {lastValue} currentValue: {currentValue} diff: {diff} newMan: {lastValue + diff} newValue: {curve.keys[i].value}");
+
+                lastValue = curve.keys[i].value;
             }
         }
 
@@ -137,7 +160,7 @@ namespace CameraAnimation
         public static bool GetLerpRotation(ref Quaternion __result, int pointIndex, float time)
         {
             var t = pointIndex + time;
-            __result = new Quaternion(RotX.Evaluate(t), RotY.Evaluate(t), RotZ.Evaluate(t), RotW.Evaluate(t));
+            __result = Quaternion.Euler(RotX.Evaluate(t), RotY.Evaluate(t), RotZ.Evaluate(t));
 
             return false;
         }
