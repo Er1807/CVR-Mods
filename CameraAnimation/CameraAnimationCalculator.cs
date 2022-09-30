@@ -142,6 +142,14 @@ namespace CameraAnimation
 
         public static bool PlayPath()
         {
+            //FreezeFrame integration
+            var clonesParent = GameObject.Find("Avatar Clone Holder");
+            if (clonesParent != null && clonesParent.scene.IsValid())
+                foreach (var item in clonesParent.GetComponentsInChildren<Animation>())
+                {
+                    item.Stop();
+                }
+
             GetInstance.selectedCamera.stereoTargetEye = StereoTargetEyeMask.None;
             GetInstance.selectedCamera.enabled = true;
             GenerateCurves();

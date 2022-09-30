@@ -13,9 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(CameraAnimationMod), "Camera Animations", "3.0.2", "Eric van Fandenfart")]
-//[assembly: MelonAdditionalDependencies("ActionMenuApi", "UIExpansionKit")]
-//[assembly: MelonOptionalDependencies("TouchCamera")]
+[assembly: MelonInfo(typeof(CameraAnimationMod), "Camera Animations", "3.1.0", "Eric van Fandenfart")]
+[assembly: MelonAdditionalDependencies("ActionMenu")]
 [assembly: MelonGame]
 
 namespace CameraAnimation

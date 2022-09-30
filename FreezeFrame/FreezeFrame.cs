@@ -13,8 +13,9 @@ using ABI_RC.Core.Player;
 using ActionMenu;
 using ABI_RC.Core.Savior;
 
-[assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "2.0.1", "Eric van Fandenfart")]
+[assembly: MelonInfo(typeof(FreezeFrameMod), "FreezeFrame", "2.1.0", "Eric van Fandenfart")]
 [assembly: MelonGame]
+[assembly: MelonAdditionalDependencies("ActionMenu")]
 
 namespace FreezeFrame
 {
@@ -116,7 +117,7 @@ namespace FreezeFrame
                     MenuButtonWrapper("Delete First", () => Instance.Delete(0), "delete first"),
                     MenuButtonWrapper("Freeze Self",  () => Instance.DelayedSelf = DateTime.Now, "freeze"),
                     MenuToggleWrapper("Record", (state) => {
-                        if(state)
+                        if (state)
                             AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StartRecording();
                         else
                             AnimationModule.GetAnimationModuleForPlayer(PlayerSetup.Instance.GetComponent<PlayerDescriptor>()).StopRecording();
@@ -153,13 +154,13 @@ namespace FreezeFrame
 
             private List<MenuItem> SceneMenu(string sceneName)
             {
-                
+
                 return new List<MenuItem>(){
                     MenuButtonWrapper("Load Scene", () => FreezeSaveManager.Intstance.LoadAll(sceneName), "load"),
                     MenuButtonWrapper("Delete Scene", () => FreezeSaveManager.Intstance.Delete(sceneName), "delete"),
                 };
             }
-            
+
             public MenuItem MenuButtonWrapper(string name, Action action, string icon = null)
             {
                 return new MenuItem() { name = name, action = BuildButtonItem(name.Replace(" ", ""), action), icon = icon };
@@ -307,7 +308,7 @@ namespace FreezeFrame
         public void Create()
         {
             MelonLogger.Msg("Creating Freeze Frame for all Avatars");
-            
+
             InstantiateAll();
         }
 
