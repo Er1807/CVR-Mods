@@ -58,6 +58,10 @@
       <HintPath>..\3rdParty\Managed\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>..\3rdParty\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\3rdParty\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>

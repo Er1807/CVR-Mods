@@ -1,0 +1,20 @@
+{
+  "_id": 104,
+  "name": "FreezeFrame",
+  "modversion": "2.1.0",
+  "gameversion": "2022r166p1",
+  "loaderversion": "v0.5.4",
+  "modtype": "Mod",
+  "author": "Eric van Fandenfart",
+  "description": "Creates a Freeze Frame locally of avatars in a world by creating a copy of each avatar. The avatar is in the state the Freeze Frame was activated. Freeze Frames can be stacked and all Freeze Frames can be deleted afterward.\nThe buttons to create an delete Freeze Frames are found in the action menu\nIts also possible to record animations and play them back afterwards",
+  "searchtags": [
+    "Camera", "Freeze"
+  ],
+  "requirements": [
+    "[ActionMenu](https://github.com/dakyneko/DakyModsCVR/tree/master/ActionMenu)"
+  ],
+  "downloadlink": "https://github.com/Er1807/CVR-Mods/releases/download/FreezeFrame2.1.0/FreezeFrame.dll",
+  "sourcelink": "hhttps://github.com/Er1807/CVR-Mods/tree/main/FreezeFrame",
+  "changelog": "Now for CVR\nRemoved a bug that required VRC",
+  "embedcolor": "7F60CA"
+}

@@ -1,0 +1,20 @@
+{
+  "_id": 105,
+  "name": "CameraAnimation",
+  "modversion": "3.1.0",
+  "gameversion": "2022r166p1",
+  "loaderversion": "v0.5.4",
+  "modtype": "Mod",
+  "author": "Eric van Fandenfart",
+  "description": "Create animations for recording scenes in VRChat. Only usable with VR in the current version.",
+  "searchtags": [
+    "Camera", "Animation"
+  ],
+  "requirements": [
+    "[ActionMenu](https://github.com/dakyneko/DakyModsCVR/tree/master/ActionMenu)"
+  ],
+  "downloadlink": "https://github.com/Er1807/CVR-Mods/releases/download/CameraAnimation3.1.0/CameraAnimation.dll",
+  "sourcelink": "https://github.com/Er1807/CVR-Mods/tree/main/CameraAnimation",
+  "changelog": "Now for CVR\nRemoved a bug that required VRC",
+  "embedcolor": "7F60CA"
+}
