@@ -20,28 +20,28 @@ namespace Test
         {
             Counter = 0;
             obj = GameObject.Find("Canvas/Text").GetComponent(typeof(Text)) as Text;
-            Logtest.Msg("Initialied Counter W# Instance");
+            WasmLoader.Logger.Msg("Initialied Counter W# Instance");
         }
 
         public override void InteractDown()
         {
             Counter = Counter + 1;
             obj.text = "Button was pressed " + Counter + " Times";
-            Logtest.Msg("Incremented Counter");
+            WasmLoader.Logger.Msg("Incremented Counter");
         }
         public override void OnPlayerJoined(CVRPlayerEntity player)
         {
             var t = obj.text;
             t = t + "Joined: " + player.Username+Environment.NewLine;
             obj.text = t;
-            Logtest.Msg("Joined: " + player.Username);
+            WasmLoader.Logger.Msg("Joined: " + player.Username);
         }
         public override void OnPlayerLeft(CVRPlayerEntity player)
         {
             var t = obj.text;
             t = t + "Left: " + player.Username + Environment.NewLine;
             obj.text = t;
-            Logtest.Msg("Left: " + player.Username);
+            WasmLoader.Logger.Msg("Left: " + player.Username);
         }
 
     }

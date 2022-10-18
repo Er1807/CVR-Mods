@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 using WasmLoader.Components;
 using Wasmtime;
 namespace WasmLoader.Refs
@@ -10,7 +12,7 @@ namespace WasmLoader.Refs
 
     public interface IRef
     {
-        void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType);
+        void Setup(Dictionary<string, Action<Linker, Store, Objectstore, WasmType>> functions);
     }
 
     public static class HelperFunctions

@@ -20,6 +20,8 @@ namespace WasmLoader
     public class WasmLoaderMod : MelonMod
     {
         public static WasmLoaderMod Instance;
+        public Dictionary<string, Action<Linker, Store, Objectstore, WasmType>> Functions = new Dictionary<string, Action<Linker, Store, Objectstore, WasmType>>();
+
 
         public Dictionary<CVRInteractable, WasmInstance> WasmInstances = new Dictionary<CVRInteractable, WasmInstance>();
         public WasmLoaderMod()
@@ -43,20 +45,26 @@ namespace WasmLoader
             var linker = new Linker(engine);
             var store = new Store(engine);
             var objects = new Objectstore(store);
-            
-            foreach (var item in AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).Where(x => typeof(IRef).IsAssignableFrom(x) && typeof(IRef) != x))
+
+            foreach (var import in module.Imports)
             {
-                var t = (Activator.CreateInstance(item) as IRef);
-                t.Setup(linker, store, objects, wasmType);
-                Console.WriteLine(t.ToString());
+                if (Functions.TryGetValue(import.Name, out var action))
+                    action(linker, store, objects, wasmType);
+                else if (import.Name != "WasmLoader_WasmBehavior__CurrentGameObject_this__UnityEngineGameObject")
+                {
+                    LoggerInstance.Warning($"No function found for {import.Name}");
+                }
             }
+            
             var wasminstance = new WasmInstance();
 
             linker.DefineFunction("env", "WasmLoader_WasmBehavior__CurrentGameObject_this__UnityEngineGameObject", (Caller caller) =>
             {
+#if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_WasmBehavior__CurrentGameObject_this__UnityEngineGameObject");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
+#endif
                 return objects.StoreObject(wasminstance.gameObject);
             });
 
@@ -107,6 +115,17 @@ namespace WasmLoader
             Patches.SetupHarmony();
             var arr = (HashSet<Type>)typeof(CVRTools).GetField("componentWhiteList", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
             arr.Add(typeof(WasmLoaderBehavior));
+            var arr2 = (HashSet<Type>)typeof(CVRTools).GetField("rootComponents", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+            arr2.Add(typeof(WasmLoaderBehavior));
+
+            var refs = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).Where(x => typeof(IRef).IsAssignableFrom(x) && typeof(IRef) != x).ToList();
+            for (int i = 0; i < refs.Count; i++)
+            {
+                var temp = (Activator.CreateInstance(refs[i]) as IRef);
+                temp.Setup(Functions);
+                LoggerInstance.Msg($" Loaded {temp} {i+1} out of {refs.Count}");
+            }
+
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WasmLoader
 {
-    public class Logtest
+    public class Logger
     {
         public static void Msg(string msg)
         {

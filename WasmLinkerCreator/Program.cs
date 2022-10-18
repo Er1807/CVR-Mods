@@ -13,7 +13,7 @@ namespace LinkerCreator
     {
         public static void Main(string[] args)
         {
-            GenerateClass(typeof(WasmLoader.TypeWrappers.ListGameobject));
+            GenerateClass(typeof(System.String));
         }
 
         private static void GenerateClass(Type type)
@@ -22,10 +22,14 @@ namespace LinkerCreator
             var methods = type.GetMethods();
             Console.WriteLine("using System;");
             Console.WriteLine("using Wasmtime;");
-            Console.WriteLine("namespace WasmLoader.Refs {");
+            Console.WriteLine("using System.Collections.Generic;");
+            Console.WriteLine("using WasmLoader.Refs;");
+            
+            Console.WriteLine("namespace WasmLoader.Refs.Wrapper {");
             Console.WriteLine($"public class {className} : IRef {{");
-            Console.WriteLine("public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType) {");
-
+            Console.WriteLine("public void Setup(Dictionary<string, Action<Linker, Store, Objectstore, WasmType>> functions) {");
+            
+            Console.WriteLine($@"functions[""{type.FullName.Replace(".", "_")}__Type""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
             Console.WriteLine($@"linker.DefineFunction(""env"", ""{type.FullName.Replace(".", "_")}__Type"", (Caller caller) => {{");
 
             Console.WriteLine($"return objects.StoreObject(typeof({type.FullName}));");
@@ -36,6 +40,9 @@ namespace LinkerCreator
             {
                 if (Check(member))
                     continue;
+                
+                Console.WriteLine($@"functions[""{ConvertMethod(member)}""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
+
                 Console.WriteLine(Header(member));
                 if (HasThis(member) && !IsSimple(member.DeclaringType))
                     Console.WriteLine(RetieveThis(member));

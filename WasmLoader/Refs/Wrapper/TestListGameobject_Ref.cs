@@ -1,17 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using Wasmtime;
-namespace WasmLoader.Refs
+namespace WasmLoader.Refs.Wrapper
 {
     public class TestListGameobject_Ref : IRef
     {
-        public void Setup(Linker linker, Store store, Objectstore objects, WasmType wasmType)
+        public void Setup(Dictionary<string, Action<Linker, Store, Objectstore, WasmType>> functions)
         {
-            linker.DefineFunction("env", "Test_ListGameobject__Type", (Caller caller) => {
+            functions["Test_ListGameobject__Type"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "Test_ListGameobject__Type", (Caller caller) =>
+            {
                 return objects.StoreObject(typeof(TypeWrappers.ListGameobject));
             });
 
-            linker.DefineFunction("env", "WasmLoader_TypeWrappers_ListGameobject__ctor_this__WasmLoaderTypeWrappersListGameobject", (Caller caller) => {
-               
+            functions["WasmLoader_TypeWrappers_ListGameobject__ctor_this__WasmLoaderTypeWrappersListGameobject"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "WasmLoader_TypeWrappers_ListGameobject__ctor_this__WasmLoaderTypeWrappersListGameobject", (Caller caller) =>
+            {
+
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_TypeWrappers_ListGameobject__ctor_this__WasmLoaderTypeWrappersListGameobject");
@@ -21,7 +26,9 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "WasmLoader_TypeWrappers_ListGameobject__Add_this_WasmLoaderTypeWrappersListGameobject_UnityEngineGameObject__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 obj) => {
+            functions["WasmLoader_TypeWrappers_ListGameobject__Add_this_WasmLoaderTypeWrappersListGameobject_UnityEngineGameObject__SystemVoid"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "WasmLoader_TypeWrappers_ListGameobject__Add_this_WasmLoaderTypeWrappersListGameobject_UnityEngineGameObject__SystemVoid", (Caller caller, System.Int32 parameter_this, System.Int32 obj) =>
+            {
                 var resolved_this = objects.RetriveObject<TypeWrappers.ListGameobject>(parameter_this, caller);
                 var resolved_obj = objects.RetriveObject<UnityEngine.GameObject>(obj, caller);
 #if Debug
@@ -35,7 +42,9 @@ namespace WasmLoader.Refs
 
             });
 
-            linker.DefineFunction("env", "WasmLoader_TypeWrappers_ListGameobject__get_Count_this_WasmLoaderTypeWrappersListGameobject__SystemInt32", (Caller caller, System.Int32 parameter_this) => {
+            functions["WasmLoader_TypeWrappers_ListGameobject__get_Count_this_WasmLoaderTypeWrappersListGameobject__SystemInt32"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "WasmLoader_TypeWrappers_ListGameobject__get_Count_this_WasmLoaderTypeWrappersListGameobject__SystemInt32", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<TypeWrappers.ListGameobject>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -46,8 +55,10 @@ namespace WasmLoader.Refs
                 var result = resolved_this?.Count;
                 return result ?? 0;
             });
-            
-            linker.DefineFunction("env", "WasmLoader_TypeWrappers_ListGameobject__Get_this_WasmLoaderTypeWrappersListGameobject_SystemInt32__UnityEngineGameObject", (Caller caller, System.Int32 parameter_this, System.Int32 i) => {
+
+            functions["WasmLoader_TypeWrappers_ListGameobject__Get_this_WasmLoaderTypeWrappersListGameobject_SystemInt32__UnityEngineGameObject"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "WasmLoader_TypeWrappers_ListGameobject__Get_this_WasmLoaderTypeWrappersListGameobject_SystemInt32__UnityEngineGameObject", (Caller caller, System.Int32 parameter_this, System.Int32 i) =>
+            {
                 var resolved_this = objects.RetriveObject<TypeWrappers.ListGameobject>(parameter_this, caller);
 
 #if Debug
@@ -61,7 +72,9 @@ namespace WasmLoader.Refs
                 return objects.StoreObject(result);
             });
 
-            linker.DefineFunction("env", "System_Object__Equals_this_SystemObject__SystemBoolean", (Caller caller, System.Int32 parameter_this, System.Int32 obj) => {
+            functions["System_Object__Equals_this_SystemObject__SystemBoolean"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "System_Object__Equals_this_SystemObject__SystemBoolean", (Caller caller, System.Int32 parameter_this, System.Int32 obj) =>
+            {
                 var resolved_this = objects.RetriveObject<System.Object>(parameter_this, caller);
                 var resolved_obj = objects.RetriveObject<System.Object>(obj, caller);
 #if Debug
@@ -75,7 +88,9 @@ namespace WasmLoader.Refs
                 return result ?? false ? 1 : 0;
             });
 
-            linker.DefineFunction("env", "System_Object__GetHashCode_this__SystemInt32", (Caller caller, System.Int32 parameter_this) => {
+            functions["System_Object__GetHashCode_this__SystemInt32"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "System_Object__GetHashCode_this__SystemInt32", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<System.Object>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
@@ -87,7 +102,9 @@ namespace WasmLoader.Refs
                 return result ?? 0;
             });
 
-            linker.DefineFunction("env", "System_Object__ToString_this__SystemString", (Caller caller, System.Int32 parameter_this) => {
+            functions["System_Object__ToString_this__SystemString"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "System_Object__ToString_this__SystemString", (Caller caller, System.Int32 parameter_this) =>
+            {
                 var resolved_this = objects.RetriveObject<System.Object>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("");
