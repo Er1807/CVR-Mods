@@ -40,7 +40,7 @@ namespace CameraAnimation
         //public void OnPreCull()
         public void Update()
         {
-            if (!Active)
+            if (!Active || GetInstance.points.Count == 0)
                 return;
 
             currentTimeInWaypoint += Time.deltaTime / GetInstance.points[currentWaypointIndex].time * Speed;
@@ -51,13 +51,17 @@ namespace CameraAnimation
                 currentWaypointIndex++;
             }
             
-            if (currentWaypointIndex == GetInstance.points.Count - 1)
+            if ((currentWaypointIndex == GetInstance.points.Count && GetInstance.looping)
+                || (currentWaypointIndex == GetInstance.points.Count - 1 && !GetInstance.looping))
             {
                 currentWaypointIndex = 0;
                 currentTimeInWaypoint = 0;
-                Active = false;
-                GetInstance.StopPath();
-                return;
+                if (!GetInstance.looping)
+                {
+                    Active = false;
+                    GetInstance.StopPath();
+                    return;
+                }
             }
             
             Vector3 vector3 = new Vector3();
@@ -112,7 +116,20 @@ namespace CameraAnimation
                 RotY.AddKey(i, point.rotation.eulerAngles.y);
                 RotZ.AddKey(i, point.rotation.eulerAngles.z);
             }
-            
+
+            if (GetInstance.looping)
+            {
+                var firstPoint = GetInstance.points[0];
+                var time = GetInstance.points.Count;
+                PosX.AddKey(time, firstPoint.position.x);
+                PosY.AddKey(time, firstPoint.position.y);
+                PosZ.AddKey(time, firstPoint.position.z);
+
+                RotX.AddKey(time, firstPoint.rotation.eulerAngles.x);
+                RotY.AddKey(time, firstPoint.rotation.eulerAngles.y);
+                RotZ.AddKey(time, firstPoint.rotation.eulerAngles.z);
+            }
+
             FixRotationCurve(RotX);
             FixRotationCurve(RotY);
             FixRotationCurve(RotZ);
