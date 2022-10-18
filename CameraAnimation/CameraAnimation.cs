@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(CameraAnimationMod), "CameraAnimation", "3.1.0", "Eric van Fandenfart")]
+[assembly: MelonInfo(typeof(CameraAnimationMod), "CameraAnimation", "3.1.1", "Eric van Fandenfart")]
 [assembly: MelonAdditionalDependencies("ActionMenu")]
 [assembly: MelonGame]
 
@@ -91,7 +91,7 @@ namespace CameraAnimation
             private List<MenuItem> GenerateSettingsMenu()
             {
                 return new List<MenuItem>() {
-                    MenuRadialWrapper("Speed", (f) => Instance.Speed = f, "speed", Instance.Speed, 0.5f, 5),
+                    MenuRadialWrapper("Speed", (f) => CameraAnimationCalculator.Instance.Speed = f, "speed", CameraAnimationCalculator.Instance.Speed, 0.1f, 3),
                     MenuToggleWrapper("Loop mode", (f) => Instance.LoopMode = f, "loop mode", Instance.LoopMode),
                     MenuToggleWrapper("Enable Pickup", (f) => Instance.EnablePickup = f, "play", Instance.EnablePickup),
                 };
@@ -103,7 +103,7 @@ namespace CameraAnimation
             }
             public MenuItem MenuToggleWrapper(string name, Action<bool> action, string icon = null, bool defaultValue = false)
             {
-                return new MenuItem() { name = name, action = BuildToggleItem(name.Replace(" ", ""), action), icon = icon };
+                return new MenuItem() { name = name, action = BuildToggleItem(name.Replace(" ", ""), action), icon = icon, enabled = defaultValue };
             }
             public MenuItem MenuRadialWrapper(string name, Action<float> action, string icon = null, float defaultValue = 0, float minValue = 0, float maxValue = 1)
             {
@@ -126,8 +126,7 @@ namespace CameraAnimation
                     point.displayObject.GetComponent<CVRPickupObject>().enabled = EnablePickup;
             }
         }
-
-        private float Speed { get; set; } = 2.5f;
+        
         private bool LoopMode { get => GetInstance.looping; set => GetInstance.looping = value; }
 
         private void ClearAnimation()
@@ -143,7 +142,7 @@ namespace CameraAnimation
         private void PlayAnimation()
         {
             GetInstance.CopyRefCam();
-            GetInstance.PlayPath((float)Speed * GetInstance.points.Count);
+            GetInstance.PlayPath(1);//doesnt matter. not used
         }
 
         private void RemoveLastPosition()

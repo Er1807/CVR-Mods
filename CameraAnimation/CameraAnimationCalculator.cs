@@ -28,8 +28,8 @@ namespace CameraAnimation
         int currentWaypointIndex = 0;
         float currentTimeInWaypoint = 0;
         public bool Active = false;
-        public int Speed = 1;
-        
+        public float Speed { get; set; } = 1f;
+
         public static CameraAnimationCalculator Instance;
 
         public CameraAnimationCalculator()
@@ -43,27 +43,29 @@ namespace CameraAnimation
             if (!Active || GetInstance.points.Count == 0)
                 return;
 
-            currentTimeInWaypoint += Time.deltaTime / GetInstance.points[currentWaypointIndex].time * Speed;
+            currentTimeInWaypoint += Time.deltaTime / GetInstance.points[currentWaypointIndex % GetInstance.points.Count].time * Speed;
 
             if (currentTimeInWaypoint >= 1.0)
             {
                 currentTimeInWaypoint = 0;
                 currentWaypointIndex++;
             }
-            
-            if ((currentWaypointIndex == GetInstance.points.Count && GetInstance.looping)
-                || (currentWaypointIndex == GetInstance.points.Count - 1 && !GetInstance.looping))
+
+            if (currentWaypointIndex == GetInstance.points.Count - 1 && !GetInstance.looping)
             {
                 currentWaypointIndex = 0;
                 currentTimeInWaypoint = 0;
-                if (!GetInstance.looping)
-                {
-                    Active = false;
-                    GetInstance.StopPath();
-                    return;
-                }
+                Active = false;
+                GetInstance.StopPath();
+                return;
             }
-            
+
+            if (currentWaypointIndex == PosX.length - 1 && GetInstance.looping)
+            {
+                currentWaypointIndex = currentWaypointIndex % GetInstance.points.Count;
+                currentTimeInWaypoint = 0;
+            }
+
             Vector3 vector3 = new Vector3();
             GetBezierPosition(ref vector3, currentWaypointIndex, currentTimeInWaypoint);
             GetInstance.selectedCamera.transform.position = vector3;
@@ -86,7 +88,7 @@ namespace CameraAnimation
             HarmonyInstance.Patch(
                 typeof(CVRPathCamController).GetMethod("PlayPath", BindingFlags.Instance | BindingFlags.Public),
                 prefix: new HarmonyMethod(typeof(CameraAnimationCalculator).GetMethod("PlayPath", BindingFlags.Static | BindingFlags.Public)));
-            
+
             HarmonyInstance.Patch(
                 typeof(CVRPathCamController).GetMethod("RefreschIndexes", BindingFlags.Instance | BindingFlags.Public),
                 prefix: new HarmonyMethod(typeof(CameraAnimationCalculator).GetMethod("GenerateCurves", BindingFlags.Static | BindingFlags.Public)));
@@ -119,15 +121,32 @@ namespace CameraAnimation
 
             if (GetInstance.looping)
             {
-                var firstPoint = GetInstance.points[0];
-                var time = GetInstance.points.Count;
-                PosX.AddKey(time, firstPoint.position.x);
-                PosY.AddKey(time, firstPoint.position.y);
-                PosZ.AddKey(time, firstPoint.position.z);
+                
+                //atleast 2 points required
+                if (GetInstance.points.Count >= 2)
+                {
+                    var time = GetInstance.points.Count;
+                    var firstPoint = GetInstance.points[0];
+                    var secondPoint = GetInstance.points[1];
 
-                RotX.AddKey(time, firstPoint.rotation.eulerAngles.x);
-                RotY.AddKey(time, firstPoint.rotation.eulerAngles.y);
-                RotZ.AddKey(time, firstPoint.rotation.eulerAngles.z);
+                    
+                    PosX.AddKey(time, firstPoint.position.x);
+                    PosY.AddKey(time, firstPoint.position.y);
+                    PosZ.AddKey(time, firstPoint.position.z);
+
+                    RotX.AddKey(time, firstPoint.rotation.eulerAngles.x);
+                    RotY.AddKey(time, firstPoint.rotation.eulerAngles.y);
+                    RotZ.AddKey(time, firstPoint.rotation.eulerAngles.z);
+
+                    PosX.AddKey(time + 1, secondPoint.position.x);
+                    PosY.AddKey(time + 1, secondPoint.position.y);
+                    PosZ.AddKey(time + 1, secondPoint.position.z);
+
+                    RotX.AddKey(time + 1, secondPoint.rotation.eulerAngles.x);
+                    RotY.AddKey(time + 1, secondPoint.rotation.eulerAngles.y);
+                    RotZ.AddKey(time + 1, secondPoint.rotation.eulerAngles.z);
+
+                }
             }
 
             FixRotationCurve(RotX);
@@ -142,7 +161,7 @@ namespace CameraAnimation
             {
                 var currentValue = curve.keys[i].value;
 
-                var diff = (currentValue - lastValue)%360;
+                var diff = (currentValue - lastValue) % 360;
                 if (diff < -180)
                     diff += 360;
                 if (diff > 180)
