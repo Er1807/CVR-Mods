@@ -45,7 +45,6 @@ namespace WasmLoader
             var linker = new Linker(engine);
             var store = new Store(engine);
             var objects = new Objectstore(store);
-
             foreach (var import in module.Imports)
             {
                 if (Functions.TryGetValue(import.Name, out var action))
