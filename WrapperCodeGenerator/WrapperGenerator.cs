@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -10,9 +12,67 @@ namespace WrapperCodeGenerator
     [Generator]
     public class WrapperGenerator : ISourceGenerator
     {
+        static Assembly LoadFromMelonLoader(object sender, ResolveEventArgs args)
+        {
+            string folderPath = @"C:\Program Files (x86)\Steam\steamapps\common\ChilloutVR\MelonLoader";
+            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
+            if (!File.Exists(assemblyPath)) return null;
+            Assembly assembly = Assembly.LoadFrom(assemblyPath);
+            return assembly;
+        }
+        static Assembly LoadFromManagedLoader(object sender, ResolveEventArgs args)
+        {
+            string folderPath = @"C:\Program Files (x86)\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed";
+            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
+            if (!File.Exists(assemblyPath)) return null;
+            Assembly assembly = Assembly.LoadFrom(assemblyPath);
+            return assembly;
+        }
+
         public void Execute(GeneratorExecutionContext context)
         {
+            StringBuilder sb = new StringBuilder();
 
+
+
+
+            var testDomain = AppDomain.CurrentDomain;
+            //var testDomain = AppDomain.CreateDomain("TestDomain");
+
+            testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromMelonLoader);
+            testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromManagedLoader);
+
+
+            var asm = testDomain.Load("Assembly-CSharp");
+            var types = new List<Type>();
+
+            sb.AppendLine("//" + asm.ToString());
+            try
+            {
+                foreach (var item in asm.DefinedTypes)
+                {
+                    types.Add(item);
+                }
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                sb.AppendLine("//" + ex.LoaderExceptions[0]);
+            }
+
+
+
+            foreach (var typeofexpr in types)
+            {
+                sb.AppendLine("//" + typeofexpr.ToString());
+            }
+
+            //AppDomain.Unload(testDomain);
+
+
+            sb.AppendLine("//");
+
+
+            context.AddSource("test.g.cs", sb.ToString());
             // Build up the source code
             Generate(context, typeof(string));
             Generate(context, typeof(int));
@@ -21,15 +81,13 @@ namespace WrapperCodeGenerator
         public void Generate(GeneratorExecutionContext context, Type type)
         {
             string source = GenerateClass(type).ToString();
-
-            // Add the source code to the compilation
             context.AddSource($"{(type.Namespace + type.Name).Replace(".", "_") + "_Ref"}.g.cs", source);
         }
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            // No initialization required for this one
         }
+
 
 
         public static StringBuilder GenerateClass(Type type)
@@ -176,7 +234,7 @@ namespace WrapperCodeGenerator
 
                 if (member.IsStatic)
                     return $"{result} {member.DeclaringType.FullName}.{member.Name}({string.Join(" ,", parameters)});";
-                if(member.DeclaringType.IsValueType)
+                if (member.DeclaringType.IsValueType)
                     return $"{result} {(IsSimple(member.DeclaringType) ? "parameter_this" : "resolved_this")}.{member.Name}({string.Join(" ,", parameters)});";
                 return $"{result} {(IsSimple(member.DeclaringType) ? "parameter_this" : "resolved_this")}?.{member.Name}({string.Join(" ,", parameters)});";
 
