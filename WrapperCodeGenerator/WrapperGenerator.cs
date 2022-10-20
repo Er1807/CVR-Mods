@@ -38,32 +38,55 @@ namespace WrapperCodeGenerator
             testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromMelonLoader);
             testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromManagedLoader);
 
-            
 
-            var asm = testDomain.Load("Assembly-CSharp");
-            
+            testDomain.Load("Assembly-CSharp");
+            testDomain.Load("UnityEngine");
+            testDomain.Load("UnityEngine.CoreModule");
+
+            var allowedFunctions = new List<string>();
+            var types = new List<Type>();
+
+            foreach (var item in testDomain.GetAssemblies())
+            {
+                try
+                {
+                    types.AddRange(item.DefinedTypes);
+                }
+                catch (Exception)
+                {
+                }
+            }
 
             foreach (var item in File.ReadAllLines("C:\\Users\\Eric\\Documents\\GitHub\\CVR-Mods\\WasmLoader\\AllowedClasses.txt"))
             {
-                sb.AppendLine("// Generating " + item);
                 try
                 {
-                    Generate(context, Type.GetType(item));
+                    if (item.StartsWith("* "))
+                    {
+                        allowedFunctions.Add(item.Replace("* ", ""));
+                    }
+                    else
+                    {
+                        sb.AppendLine("// Generating " + item +" with "+ allowedFunctions.Count);
+                        
+                        Generate(context, types.Where(x => x.FullName == item).FirstOrDefault(), allowedFunctions);
+                        allowedFunctions.Clear();
+                    }
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
-                    sb.AppendLine("// error " + ex);
+                    sb.AppendLine("// error " + ex.LoaderExceptions[0]);
                 }
                 
             }
-            context.AddSource("test.g.cs", sb.ToString());
+            context.AddSource("Results.g.cs", sb.ToString());
         }
 
-        public void Generate(GeneratorExecutionContext context, Type type)
+        public void Generate(GeneratorExecutionContext context, Type type, List<string> allowedFunctions)
         {
             if (type == null) return;
             
-            string source = GenerateClass(type).ToString();
+            string source = GenerateClass(type, allowedFunctions).ToString();
             context.AddSource($"{(type.Namespace + type.Name).Replace(".", "_") + "_Ref"}.g.cs", source);
         }
 
@@ -73,7 +96,7 @@ namespace WrapperCodeGenerator
 
 
 
-        public static StringBuilder GenerateClass(Type type)
+        public static StringBuilder GenerateClass(Type type, List<string> allowedFunctions)
         {
             var sb = new StringBuilder();
             var className = (type.Namespace + type.Name).Replace(".", "_") + "_Ref";
@@ -96,7 +119,7 @@ namespace WrapperCodeGenerator
 
             foreach (var member in methods)
             {
-                if (Check(member))
+                if (Check(member, allowedFunctions))
                     continue;
 
                 sb.AppendLine($@"functions[""{ConvertMethod(member)}""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
@@ -140,8 +163,11 @@ namespace WrapperCodeGenerator
             return sb;
         }
 
-        public static bool Check(MethodInfo method)
+        public static bool Check(MethodInfo method, List<string> allowedFunctions)
         {
+
+            
+
             if (method.IsGenericMethod)
                 return true;
             if (method.GetParameters().Any(x => x.ParameterType.FullName == null))
@@ -152,6 +178,12 @@ namespace WrapperCodeGenerator
                 return true;
             if (method.Name == "GetType")
                 return true;
+
+            if (allowedFunctions.Count != 0 && !allowedFunctions.Contains(ConvertMethod(method)))
+            {
+                return true;
+            }
+
             return false;
         }
 

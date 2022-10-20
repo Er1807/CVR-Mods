@@ -7,7 +7,7 @@ namespace LinkerCreator
     {
         public static void Main(string[] args)
         {
-            var builder = WrapperGenerator.GenerateClass(typeof(System.String));
+            var builder = WrapperGenerator.GenerateClass(typeof(System.String), new System.Collections.Generic.List<string>());
             Console.WriteLine(builder.ToString());
         }
         
