@@ -115,6 +115,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AllowedClasses.txt" />
     <Content Include="wasmtime.dll" />
   </ItemGroup>
   <ItemGroup>

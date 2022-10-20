@@ -32,54 +32,37 @@ namespace WrapperCodeGenerator
         public void Execute(GeneratorExecutionContext context)
         {
             StringBuilder sb = new StringBuilder();
-
-
-
-
+            
             var testDomain = AppDomain.CurrentDomain;
-            //var testDomain = AppDomain.CreateDomain("TestDomain");
 
             testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromMelonLoader);
             testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromManagedLoader);
 
+            
 
             var asm = testDomain.Load("Assembly-CSharp");
-            var types = new List<Type>();
+            
 
-            sb.AppendLine("//" + asm.ToString());
-            try
+            foreach (var item in File.ReadAllLines("C:\\Users\\Eric\\Documents\\GitHub\\CVR-Mods\\WasmLoader\\AllowedClasses.txt"))
             {
-                foreach (var item in asm.DefinedTypes)
+                sb.AppendLine("// Generating " + item);
+                try
                 {
-                    types.Add(item);
+                    Generate(context, Type.GetType(item));
                 }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    sb.AppendLine("// error " + ex);
+                }
+                
             }
-            catch (ReflectionTypeLoadException ex)
-            {
-                sb.AppendLine("//" + ex.LoaderExceptions[0]);
-            }
-
-
-
-            foreach (var typeofexpr in types)
-            {
-                sb.AppendLine("//" + typeofexpr.ToString());
-            }
-
-            //AppDomain.Unload(testDomain);
-
-
-            sb.AppendLine("//");
-
-
             context.AddSource("test.g.cs", sb.ToString());
-            // Build up the source code
-            Generate(context, typeof(string));
-            Generate(context, typeof(int));
         }
 
         public void Generate(GeneratorExecutionContext context, Type type)
         {
+            if (type == null) return;
+            
             string source = GenerateClass(type).ToString();
             context.AddSource($"{(type.Namespace + type.Name).Replace(".", "_") + "_Ref"}.g.cs", source);
         }
@@ -271,6 +254,14 @@ namespace WrapperCodeGenerator
                     return $"var result = {parameters[0]} == {parameters[1]};";
                 if (name == "op_Inequality")
                     return $"var result = {parameters[0]} != {parameters[1]};";
+                if (name == "op_LessThan")
+                    return $"var result = {parameters[0]} < {parameters[1]};";
+                if (name == "op_GreaterThan")
+                    return $"var result = {parameters[0]} > {parameters[1]};";
+                if (name == "op_LessThanOrEqual")
+                    return $"var result = {parameters[0]} <= {parameters[1]};";
+                if (name == "op_GreaterThanOrEqual")
+                    return $"var result = {parameters[0]} >= {parameters[1]};";
             }
             return "Error";
         }

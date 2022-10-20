@@ -1,0 +1,6 @@
+﻿System.String
+System.Int32
+System.Convert
+System.Double
+System.Single
+System.Boolean
