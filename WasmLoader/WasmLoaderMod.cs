@@ -70,7 +70,7 @@ namespace WasmLoader
 
             var instance = linker.Instantiate(store, module);
 
-            objects.Counter = (instance.GetMemory(store, "memory").Maximum + 1/*Just to be sure*/) * 64 * 1024; //64*1024 is 1 page
+            objects.Counter = (int)((instance.GetMemory(store, "memory").Maximum + 1/*Just to be sure*/) * 64 * 1024); //64*1024 is 1 page
 
             LoggerInstance?.Msg("Loaded WASM");
             wasminstance.engine = engine;

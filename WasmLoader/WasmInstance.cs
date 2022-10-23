@@ -34,7 +34,6 @@ namespace WasmLoader
 
         public void CleanUpLocals()
         {
-            return;
             foreach (var key in objects.objects.Keys.ToList())
             {
                 if (key == objects.NullCounter)
