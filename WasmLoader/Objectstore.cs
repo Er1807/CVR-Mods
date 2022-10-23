@@ -10,8 +10,8 @@ namespace WasmLoader
     public class Objectstore
     {
         private readonly Store store;
-        public Dictionary<int, object> objects = new Dictionary<int, object>();
-        public int Counter = 10000;
+        public Dictionary<long, object> objects = new Dictionary<long, object>();
+        public long Counter = -999999999; 
         public int NullCounter = 0;
         public Objectstore(Store store)
         {

@@ -44,6 +44,7 @@ namespace WasmLoader
             var module = Wasmtime.Module.FromText(engine, Guid.NewGuid().ToString(), wasmCode);
             var linker = new Linker(engine);
             var store = new Store(engine);
+                        
             var objects = new Objectstore(store);
             foreach (var import in module.Imports)
             {
@@ -69,6 +70,7 @@ namespace WasmLoader
 
             var instance = linker.Instantiate(store, module);
 
+            objects.Counter = (instance.GetMemory(store, "memory").Maximum + 1/*Just to be sure*/) * 64 * 1024; //64*1024 is 1 page
 
             LoggerInstance?.Msg("Loaded WASM");
             wasminstance.engine = engine;
