@@ -73,9 +73,9 @@ namespace WrapperCodeGenerator
                         allowedFunctions.Clear();
                     }
                 }
-                catch (ReflectionTypeLoadException ex)
+                catch (Exception)
                 {
-                    sb.AppendLine("// error " + ex.LoaderExceptions[0]);
+                    sb.AppendLine("// Errpr " + item + " with " + allowedFunctions.Count);
                 }
                 
             }

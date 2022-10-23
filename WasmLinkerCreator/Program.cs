@@ -7,8 +7,9 @@ namespace LinkerCreator
     {
         public static void Main(string[] args)
         {
-            var builder = WrapperGenerator.GenerateClass(typeof(System.String), new System.Collections.Generic.List<string>());
+            var builder = WrapperGenerator.GenerateClass(typeof(WasmLoader.TypeWrappers.CVRPlayerApi), new System.Collections.Generic.List<string>());
             Console.WriteLine(builder.ToString());
+            Console.ReadLine();
         }
         
     }
