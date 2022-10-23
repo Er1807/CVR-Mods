@@ -1,83 +1,51 @@
-﻿using UnityEngine;
+﻿using ABI_RC.Systems.MovementSystem;
+using UnityEngine;
 
 namespace WasmLoader.TypeWrappers
 {
-    public class CVRPlayerApi
+    public abstract class CVRPlayerApi
     {
-        public bool isLocal { get; private set; }
-        public bool displayName { get; private set; }
-        public bool userId { get; private set; }
+        public abstract bool isLocal { get; }
+        public abstract string displayName { get; }
+        public abstract string userId { get; }
         //public bool isMaster;
-        public bool playerId { get; private set; }
+        public abstract int playerId { get; }
 
-        private GameObject player; 
 
-        public bool IsPlayerGrounded()
+        public static CVRPlayerApi GetPlayerById(int playerId)
         {
-            return false;
-        }
-        public CVRPlayerApi GetPlayerById(int playerId)
-        {
+            if (playerId == 0)
+            {
+                return CVRPlayerApiLocal.Instance;
+            }
+            else if (CVRPlayerApiRemote.RemotePlayers.Count < playerId - 1)
+            {
+                return CVRPlayerApiRemote.RemotePlayers[playerId - 1];
+            }
             return null;
         }
-        public int GetPlayerCount()
+        public static int GetPlayerCount()
         {
             return 0;
         }
-        public ListCVRPlayerApi GetPlayers()
+        public static ListCVRPlayerApi GetPlayers()
         {
-            return new ListCVRPlayerApi();
+            return null;
         }
-        public Vector3 GetBonePosition(HumanBodyBones bone)
-        {
-            return default(Vector3);
-        }
-        public Quaternion GetBoneRotation(HumanBodyBones bone)
-        {
-            return default(Quaternion);
-        }
-        public void TeleportTo(Vector3 teleportPos, Quaternion teleportRot)
-        {
-
-        }
-        public void EnablePickup(bool enable)
-        {
-
-        }
-        public void SetPlayerTag(string tagName, string tagValue)
-        {
-
-        }
-        public string GetPlayerTag(string tagName)
-        {
-            return "";
-        }
-        public void ClearPlayerTags()
-        {
-
-        }
-        public bool IsUserInVR()
-        {
-            return false;
-        }
-        public void Immobilize(bool immobile)
-        {
-        }
-        public void SetVelocity(Vector3 velocity)
-        {
-        }
-        public Vector3 GetVelocity()
-        {
-            return default(Vector3);
-        }
-        public Vector3 GetPosition()
-        {
-            return player.transform.position;
-        }
-        public Quaternion GetRotation()
-        {
-            return player.transform.rotation;
-        }
+        public abstract bool IsPlayerGrounded();
+        public abstract Vector3 GetBonePosition(HumanBodyBones bone);
+        public abstract Quaternion GetBoneRotation(HumanBodyBones bone);
+        public abstract void TeleportTo(Vector3 teleportPos, Quaternion teleportRot);
+        public abstract void EnablePickup(bool enable);
+        public abstract void SetPlayerTag(string tagName, string tagValue);
+        public abstract string GetPlayerTag(string tagName);
+        public abstract void ClearPlayerTags();
+        public abstract bool IsUserInVR();
+        public abstract void Immobilize(bool immobile);
+        public abstract void SetVelocity(Vector3 velocity);
+        public abstract Vector3 GetVelocity();
+        public abstract Vector3 GetPosition();
+        public abstract Quaternion GetRotation();
 
     }
 
