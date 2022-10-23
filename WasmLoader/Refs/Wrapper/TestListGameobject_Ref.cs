@@ -62,11 +62,11 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<TypeWrappers.ListGameobject>(parameter_this, caller);
 
 #if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg(i);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_TypeWrappers_ListGameobject__Get_this_WasmLoaderTypeWrappersListGameobject_SystemInt32__UnityEngineGameObject");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 var result = resolved_this?.Get(i);
                 return objects.StoreObject(result);
@@ -78,11 +78,11 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<System.Object>(parameter_this, caller);
                 var resolved_obj = objects.RetriveObject<System.Object>(obj, caller);
 #if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_obj);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("System_Object__Equals_this_SystemObject__SystemBoolean");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 var result = resolved_this?.Equals(resolved_obj);
                 return result ?? false ? 1 : 0;
@@ -93,10 +93,10 @@ namespace WasmLoader.Refs.Wrapper
             {
                 var resolved_this = objects.RetriveObject<System.Object>(parameter_this, caller);
 #if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("System_Object__GetHashCode_this__SystemInt32");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 var result = resolved_this?.GetHashCode();
                 return result ?? 0;
@@ -107,10 +107,10 @@ namespace WasmLoader.Refs.Wrapper
             {
                 var resolved_this = objects.RetriveObject<System.Object>(parameter_this, caller);
 #if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("System_Object__ToString_this__SystemString");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 var result = resolved_this?.ToString();
                 return objects.StoreObject(result);

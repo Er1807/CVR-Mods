@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WasmLoader.Serialisation;
 using WasmLoader.Components;
+using System.Runtime.Remoting.Messaging;
 
 namespace WasmLoader
 {
@@ -33,6 +34,7 @@ namespace WasmLoader
 
         public void CleanUpLocals()
         {
+            return;
             foreach (var key in objects.objects.Keys.ToList())
             {
                 if (key == objects.NullCounter)

@@ -21,7 +21,7 @@ namespace WasmLoader
         
         public T RetriveObject<T>(int id, Caller caller)
         {
-            if (typeof(T).FullName == "System.String" && id < 10000)
+            if (/*typeof(T).FullName == "System.String" && */id < 10000)
                 return (T)(object)caller.GetMemory("memory").ReadNullTerminatedString(store, id);
             if (!objects.TryGetValue(id, out object obj))
                 return default(T);

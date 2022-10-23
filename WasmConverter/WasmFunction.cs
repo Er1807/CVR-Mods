@@ -128,7 +128,7 @@ namespace Converter
             {
                 if (local.Key.StartsWith("param"))
                     continue;
-                builder.AppendLine($"    (local ${local.Key} {local.Value})");
+                builder.AppendLine($"    (local ${local.Key} {(local.Value.ToString().Contains("arr") ? WasmDataType.i32: local.Value)})");
             }
             
             foreach (var block in Blocks)

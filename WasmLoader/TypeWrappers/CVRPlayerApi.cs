@@ -26,7 +26,7 @@ namespace WasmLoader.TypeWrappers
         }
         public static int GetPlayerCount()
         {
-            return 0;
+            return CVRPlayerApiRemote.RemotePlayers.Count + 1;
         }
         public static ListCVRPlayerApi GetPlayers()
         {

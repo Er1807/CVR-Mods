@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using WasmLoader;
 using WasmLoader.TypeWrappers;
 
-namespace Test
+namespace WasmLoader.Examples
 {
     
     public class Search : WasmBehavior

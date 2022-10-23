@@ -18,10 +18,10 @@ namespace WasmLoader.Refs.Wrapper
             linker.DefineFunction("env", "WasmLoader_Logger__Msg_SystemString__SystemVoid", (Caller caller, int ptr) =>
             {
 #if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(objects.RetriveObject<string>(ptr, caller));
                 WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_Logtest__Msg_SystemString__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 logger.Msg(objects.RetriveObject<string>(ptr, caller));
             });
@@ -30,10 +30,10 @@ namespace WasmLoader.Refs.Wrapper
             linker.DefineFunction("env", "WasmLoader_Logtest__Msg_SystemString__SystemVoid", (Caller caller, int ptr) =>
             {
 #if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(objects.RetriveObject<string>(ptr, caller));
                 WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_Logtest__Msg_SystemString__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 logger.Msg(objects.RetriveObject<string>(ptr, caller));
             });

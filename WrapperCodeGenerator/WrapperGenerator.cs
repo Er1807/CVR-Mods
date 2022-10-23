@@ -132,7 +132,7 @@ namespace WrapperCodeGenerator
                     sb.AppendLine(Retieve(item));
                 }
                 sb.AppendLine("#if Debug");
-                sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg("""");");
+                sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
                 if (HasThis(member))
                 {
                     sb.AppendLine($"WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);");
@@ -147,7 +147,7 @@ namespace WrapperCodeGenerator
                     sb.AppendLine($"WasmLoaderMod.Instance.LoggerInstance.Msg({name});");
                 }
                 sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""{ConvertMethod(member)}"");");
-                sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg("""");");
+                sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
 
                 sb.AppendLine("#endif");
                 sb.AppendLine(Call(member));

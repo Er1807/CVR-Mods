@@ -60,9 +60,8 @@ namespace Converter
             Console.WriteLine();
 #endif
             new BlockRebuilder(func).Rebuild();
-            //func.FixControlFlow();
 #if DEBUG
-            Console.WriteLine("After Controlflow fix");
+            Console.WriteLine("After BlockRebuild fix");
             Console.WriteLine(func.Name);
             foreach (var item in func.Parameters)
             {
@@ -311,7 +310,7 @@ namespace Converter
 
                 case Code.Ldtoken:
                     var ldtoken = instruction.Operand as TypeRef;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand() { FunctionName = ldtoken.FullName.Replace(".", "_") + "__Type" , ReturnValue = Program.Typetype.ToTypeSig(), Params = new List<TypeSig> ()} ));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand() { FunctionName = ldtoken.FullName.Replace(".", "_") + "__Type" , ReturnValue = Program.TypeType.ToTypeSig(), Params = new List<TypeSig> ()} ));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldftn:
@@ -571,6 +570,190 @@ namespace Converter
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.drop, instruction.Offset, func.stack.Count));
                     func.stack.Pop();
                     break;
+                case Code.Newarr:
+                    func.stack.Pop();
+                    string functionname;
+                    TypeRef returnValue;
+                    switch (instruction.Operand is TypeRef ? (instruction.Operand as TypeRef).FullName : (instruction.Operand as TypeDef).FullName)
+                    {
+                        case "System.Int32":
+                            functionname = "Newarr_Int";
+                            returnValue = Program.TypeInt;
+                            func.stack.Push(WasmDataType.arri32);
+                            break;
+                        case "System.Int64":
+                            
+                            functionname = "Newarr_Long";
+                            returnValue = Program.TypeLong;
+                            func.stack.Push(WasmDataType.arri64);
+                            break;
+                        case "System.Single":
+
+                            functionname = "Newarr_Single";
+                            returnValue = Program.TypeFloat;
+                            func.stack.Push(WasmDataType.arrf32);
+                            break;
+                        case "System.Double":
+
+                            functionname = "Newarr_Double";
+                            returnValue = Program.TypeDouble;
+                            func.stack.Push(WasmDataType.arrf64);
+                            break;
+                        default:
+
+                            functionname = "Newarr_Obj";
+                            returnValue = Program.TypeObject;
+                            func.stack.Push(WasmDataType.arrObj);
+                            break;
+                    }
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count + 1, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = functionname,
+                        ReturnValue = Program.TypeInt.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig() }
+                    }));
+                    break;
+                case Code.Stelem_I4:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Set_Int",
+                        ReturnValue = Program.TypeVoid.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    break;
+                case Code.Stelem_I8:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Set_Long",
+                        ReturnValue = Program.TypeVoid.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig(), Program.TypeLong.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    break;
+                case Code.Stelem_R4:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Set_Float",
+                        ReturnValue = Program.TypeVoid.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig(), Program.TypeFloat.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    break;
+                case Code.Stelem_R8:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Set_Double",
+                        ReturnValue = Program.TypeVoid.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig(), Program.TypeDouble.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    break;
+                case Code.Stelem_Ref:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Set_Object",
+                        ReturnValue = Program.TypeVoid.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig(), Program.TypeObject.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    break;
+                case Code.Ldelem_I4:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Get_Int",
+                        ReturnValue = Program.TypeInt.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Ldelem_I8:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Get_Long",
+                        ReturnValue = Program.TypeLong.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i64);
+                    break;
+                case Code.Ldelem_R4:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Get_Float",
+                        ReturnValue = Program.TypeFloat.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.f32);
+                    break;
+                case Code.Ldelem_R8:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Get_Double",
+                        ReturnValue = Program.TypeDouble.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.f64);
+                    break;
+                case Code.Ldelem_Ref:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = "Arr_Get_Object",
+                        ReturnValue = Program.TypeObject.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig(), Program.TypeInt.ToTypeSig() }
+                    }));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Ldlen:
+                    string lengthFunc = "invalid_Ldlen";
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.arri32:
+                            lengthFunc = "Arr_Count_Int";
+                            break;
+                        case WasmDataType.arri64:
+                            lengthFunc = "Arr_Count_Long";
+                            break;
+                        case WasmDataType.arrf32:
+                            lengthFunc = "Arr_Count_Float";
+                            break;
+                        case WasmDataType.arrf64:
+                            lengthFunc = "Arr_Count_Double";
+                            break;
+                        case WasmDataType.arrObj:
+                            lengthFunc = "Arr_Count_Object";
+                            break;
+                    }
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                    {
+                        FunctionName = lengthFunc,
+                        ReturnValue = Program.TypeInt.ToTypeSig(),
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig()}
+                    }));
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Conv_I4:
+                    break;
                 default:
                     Console.Error.WriteLine("Unkown opcode " + instruction.OpCode.Code);
                     break;
@@ -582,8 +765,11 @@ namespace Converter
         {
             return GetWasmType(type?.FullName);
         }
-
-        public static WasmDataType? GetWasmType(string type)
+        public static WasmDataType? GetWasmTypeWoArray(TypeSig type)
+        {
+            return GetWasmTypeWoArray(type?.FullName);
+        }
+        public static WasmDataType? GetWasmTypeWoArray(string type)
         {
             if (type == null)
                 return null;
@@ -595,6 +781,33 @@ namespace Converter
                 return WasmDataType.f64;
             if (type == "System.Int64")
                 return WasmDataType.i64;
+            
+            return WasmDataType.i32;
+        }
+        public static WasmDataType? GetWasmType(string type)
+        {
+            if (type == null)
+                return null;
+            if (type == "System.Void")
+                return null; 
+            if (type == "System.Single")
+                return WasmDataType.f32;
+            if (type == "System.Double")
+                return WasmDataType.f64;
+            if (type == "System.Int64")
+                return WasmDataType.i64;
+
+            if (type == "System.Int32[]")
+                return WasmDataType.arri32;
+            if (type == "System.Int64[]")
+                return WasmDataType.arri64;
+            if (type == "System.Single[]")
+                return WasmDataType.arrf32;
+            if (type == "System.Double[]")
+                return WasmDataType.arrf64;
+            if (type.Contains("[]"))
+                return WasmDataType.arrObj;
+
             return WasmDataType.i32;
         }
 

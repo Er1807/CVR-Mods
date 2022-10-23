@@ -7,13 +7,25 @@ namespace Converter
 {
     internal class Program
     {
-        public static TypeRef Typetype;
+        public static TypeRef TypeType;
+        public static TypeRef TypeInt;
+        public static TypeRef TypeFloat;
+        public static TypeRef TypeDouble;
+        public static TypeRef TypeLong;
+        public static TypeRef TypeObject;
+        public static TypeRef TypeVoid;
         static void Main(string[] args)
         {
             ModuleContext modCtx = ModuleDef.CreateModuleContext();
             ModuleDef module = ModuleDefMD.Load(args[0], modCtx);
             var type = module.Types.SingleOrDefault(x => x.FullName == args[1]);
-            Typetype = new CorLibTypes(module).GetTypeRef("System", "Type");
+            TypeType = new CorLibTypes(module).GetTypeRef("System", "Type");
+            TypeInt = new CorLibTypes(module).GetTypeRef("System", "Int32");
+            TypeLong = new CorLibTypes(module).GetTypeRef("System", "Int64");
+            TypeFloat = new CorLibTypes(module).GetTypeRef("System", "Single");
+            TypeDouble = new CorLibTypes(module).GetTypeRef("System", "Double");
+            TypeObject = new CorLibTypes(module).GetTypeRef("System", "Object");
+            TypeVoid = new CorLibTypes(module).GetTypeRef("System", "Void");
             WasmModule wasmModule = new WasmModule();
             wasmModule.declaringType = type.ToTypeSig();
             foreach (var field in type.Fields)

@@ -49,3 +49,5 @@ ABI.CCK.Components.CVRVideoPlayer
 UnityEngine.Vector3
 * System_Object__GetType_this__SystemType
 System.Object
+* ABI_RC_Core_Player_CVRPlayerEntity__Username__SystemString__Username__SystemString
+ABI_RC.Core.Player.CVRPlayerEntity__Username__SystemString

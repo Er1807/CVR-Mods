@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using WasmLoader;
 
-namespace Test
+namespace WasmLoader.Examples
 {
     public class Example1 : WasmBehavior
     {

@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using WasmLoader;
 
-namespace Test
+namespace WasmLoader.Examples
 {
     public class Example2 : WasmBehavior
     {

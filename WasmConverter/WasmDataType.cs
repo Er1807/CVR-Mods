@@ -8,7 +8,8 @@ namespace Converter
 {
     public enum WasmDataType
     {
-        i32, i64, f32, f64
+        i32, i64, f32, f64,
+        arri32, arri64, arrf32, arrf64, arrObj
     }
 
     public enum WasmInstructions

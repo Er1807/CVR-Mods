@@ -32,7 +32,7 @@ namespace Converter
 
             foreach (var field in Fields)
             {
-                builder.AppendLine($"  (global ${field.Key} (mut {Converter.GetWasmType(field.Value)}) ({Converter.GetWasmType(field.Value)}.const 0))");
+                builder.AppendLine($"  (global ${field.Key} (mut {Converter.GetWasmTypeWoArray(field.Value)}) ({Converter.GetWasmTypeWoArray(field.Value)}.const 0))");
             }
 
             foreach (var function in Functions)
