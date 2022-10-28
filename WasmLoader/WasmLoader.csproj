@@ -96,15 +96,12 @@
     <Compile Include="Refs\Wrapper\CustomArray_Ref.cs" />
     <Compile Include="Refs\Wrapper\CVRPlayerAPI_Ref.cs" />
     <Compile Include="Refs\Wrapper\Logger.cs" />
-    <Compile Include="Refs\Wrapper\TestListGameobject_Ref.cs" />
     <Compile Include="Refs\Wrapper\UnityEngineGameObject_Ref.cs" />
     <Compile Include="Serialisation\SerialisationManager.cs" />
     <Compile Include="Serialisation\SynchronizedVariable.cs" />
     <Compile Include="TypeWrappers\CVRPlayerApi.cs" />
     <Compile Include="TypeWrappers\CVRPlayerApiLocal.cs" />
     <Compile Include="TypeWrappers\CVRPlayerApiRemote.cs" />
-    <Compile Include="TypeWrappers\ListCVRPlayerApi.cs" />
-    <Compile Include="TypeWrappers\ListGameobject.cs" />
     <Compile Include="Examples\Play.cs" />
     <Compile Include="Examples\Search.cs" />
     <Compile Include="Examples\Example2.cs" />

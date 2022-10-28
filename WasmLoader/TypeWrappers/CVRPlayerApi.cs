@@ -18,7 +18,7 @@ namespace WasmLoader.TypeWrappers
             {
                 return CVRPlayerApiLocal.Instance;
             }
-            else if (CVRPlayerApiRemote.RemotePlayers.Count < playerId - 1)
+            else if (playerId - 1 < CVRPlayerApiRemote.RemotePlayers.Count)
             {
                 return CVRPlayerApiRemote.RemotePlayers[playerId - 1];
             }
@@ -28,9 +28,16 @@ namespace WasmLoader.TypeWrappers
         {
             return CVRPlayerApiRemote.RemotePlayers.Count + 1;
         }
-        public static ListCVRPlayerApi GetPlayers()
+        public static CVRPlayerApi[] GetPlayers()
         {
-            return null;
+            var player = new CVRPlayerApi[GetPlayerCount()];
+
+            for (int i = 0; i < player.Length; i++)
+            {
+                player[i] = GetPlayerById(i);
+            }
+
+            return player;
         }
         public abstract bool IsPlayerGrounded();
         public abstract Vector3 GetBonePosition(HumanBodyBones bone);

@@ -15,6 +15,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using WasmLoader.Components;
 using WasmLoader.Refs;
+using WasmLoader.TypeWrappers;
 
 namespace WasmLoader
 {
@@ -67,6 +68,7 @@ namespace WasmLoader
 
         private static void UserJoinPatch(CVRPlayerEntity player)
         {
+            CVRPlayerApiRemote.RemotePlayers.Add(new CVRPlayerApiRemote(player.PlayerDescriptor.GetComponent<PuppetMaster>()));
             foreach (var instance in WasmLoaderMod.Instance.WasmInstances.Values)
             {
                 instance.behavior.OnPlayerJoined(player);
@@ -77,6 +79,7 @@ namespace WasmLoader
 
         public static void UserLeavePatch(CVRPlayerEntity player)
         {
+            CVRPlayerApiRemote.RemotePlayers.Remove(CVRPlayerApiRemote.RemotePlayers.FirstOrDefault(x => x.displayName == player.Username));
             foreach (var instance in WasmLoaderMod.Instance.WasmInstances.Values)
             {
                 instance.behavior.OnPlayerLeft(player);
@@ -145,6 +148,7 @@ namespace WasmLoader
         [HarmonyPatch(nameof(CVRObjectLoader.LoadIntoWorld))]
         public static void LoadIntoWorldPostfix()
         {
+            CVRPlayerApiRemote.RemotePlayers.Clear();
             WasmLoaderMod.Instance.LoggerInstance.Msg("World started loading. Waiting for finish");
 
             MelonCoroutines.Start(WaitForWorldLoaded());
