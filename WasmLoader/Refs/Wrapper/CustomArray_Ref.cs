@@ -17,8 +17,8 @@ namespace WasmLoader.Refs.Wrapper
             {
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Newarr_Int");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return objects.StoreObject(new int[size]);
@@ -29,8 +29,8 @@ namespace WasmLoader.Refs.Wrapper
             {
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Newarr_Long");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return objects.StoreObject(new long[size]);
@@ -41,8 +41,8 @@ namespace WasmLoader.Refs.Wrapper
             {
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Newarr_Single");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return objects.StoreObject(new float[size]);
@@ -53,8 +53,8 @@ namespace WasmLoader.Refs.Wrapper
             {
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Newarr_Double");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return objects.StoreObject(new double[size]);
@@ -65,8 +65,8 @@ namespace WasmLoader.Refs.Wrapper
             {
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Newarr_Obj");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(size);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return objects.StoreObject(new object[size]);
@@ -80,9 +80,9 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<int[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Int");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg(value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Int");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 resolved_this[index] = value;
@@ -94,9 +94,9 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<long[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Long");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg(value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Long");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 resolved_this[index] = value;
@@ -108,9 +108,9 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<float[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Float");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg(value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Float");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 resolved_this[index] = value;
@@ -122,9 +122,9 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<double[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Object");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg(value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Object");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 resolved_this[index] = value;
@@ -137,9 +137,9 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_value = objects.RetriveObject<object>(value, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Object");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_value);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Set_Object");
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 resolved_this[index] = resolved_value;
@@ -220,8 +220,8 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<int[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Count_Int");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return resolved_this.Length;
@@ -233,8 +233,8 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<long[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Count_Long");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return resolved_this.Length;
@@ -246,8 +246,8 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<float[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Count_Float");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return resolved_this.Length;
@@ -259,8 +259,8 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<double[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Count_Double");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return resolved_this.Length;
@@ -272,8 +272,8 @@ namespace WasmLoader.Refs.Wrapper
                 var resolved_this = objects.RetriveObject<object[]>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Arr_Count_Object");
+                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 return resolved_this.Length;

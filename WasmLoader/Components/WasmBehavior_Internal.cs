@@ -15,8 +15,16 @@ namespace WasmLoader.Components
 
         public void Execute(string method)
         {
-            Instance.instance.GetAction(Instance.store, method)?.Invoke();
-            Instance.CleanUpLocals();
+            try
+            {
+                Instance.instance.GetAction(Instance.store, method)?.Invoke();
+                Instance.CleanUpLocals();
+            }
+            catch (Exception ex)
+            {
+                WasmLoaderMod.Instance.LoggerInstance.Warning(ex.Message);
+            }
+            
         }
         public void Execute<T>(string method, T parameter)
         {

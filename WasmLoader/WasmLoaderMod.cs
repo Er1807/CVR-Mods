@@ -44,7 +44,7 @@ namespace WasmLoader
             var module = Wasmtime.Module.FromText(engine, Guid.NewGuid().ToString(), wasmCode);
             var linker = new Linker(engine);
             var store = new Store(engine);
-                        
+
             var objects = new Objectstore(store);
             foreach (var import in module.Imports)
             {
@@ -55,7 +55,7 @@ namespace WasmLoader
                     LoggerInstance.Warning($"No function found for {import.Name}");
                 }
             }
-            
+
             var wasminstance = new WasmInstance();
 
             linker.DefineFunction("env", "WasmLoader_WasmBehavior__CurrentGameObject_this__UnityEngineGameObject", (Caller caller) =>
@@ -100,11 +100,17 @@ namespace WasmLoader
 
             ClearInstances();
 
+
             var interactable = obj.AddComponent<CVRInteractable>();
-            interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnGrab });
-            interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnDrop });
-            interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnInteractUp });
-            interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnInteractDown });
+            if (wasm.module.Exports.Any(x => x.Name == "Grab"))
+                interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnGrab });
+            if (wasm.module.Exports.Any(x => x.Name == "Drop"))
+                interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnDrop });
+            if (wasm.module.Exports.Any(x => x.Name == "InteractUp"))
+                interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnInteractUp });
+            if (wasm.module.Exports.Any(x => x.Name == "InteractDown"))
+                interactable.actions.Add(new CVRInteractableAction() { actionType = CVRInteractableAction.ActionRegister.OnInteractDown });
+
             var behavior = obj.AddComponent<WasmBehavior_Internal>();
             behavior.Instance = wasm;
             wasm.behavior = behavior;
@@ -124,7 +130,7 @@ namespace WasmLoader
             {
                 var temp = (Activator.CreateInstance(refs[i]) as IRef);
                 temp.Setup(Functions);
-                LoggerInstance.Msg($" Loaded {temp} {i+1} out of {refs.Count}");
+                LoggerInstance.Msg($" Loaded {temp} {i + 1} out of {refs.Count}");
             }
 
         }
