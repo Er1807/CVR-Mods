@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using WasmLoader.TypeWrappers;
 
 namespace WasmLoader
 {
@@ -24,8 +25,8 @@ namespace WasmLoader
         public virtual void OnTriggerStay(Collision collisionInfo) { }
         public virtual void InteractDown() { }
         public virtual void InteractUp() { }
-        public virtual void OnPlayerJoined(CVRPlayerEntity player) { }
-        public virtual void OnPlayerLeft(CVRPlayerEntity player) { }
+        public virtual void OnPlayerJoined(CVRPlayerApi player) { }
+        public virtual void OnPlayerLeft(CVRPlayerApi player) { }
         public virtual void Grab() { }
         public virtual void Drop() { }
         public virtual void OnValueChanged(string name) { }

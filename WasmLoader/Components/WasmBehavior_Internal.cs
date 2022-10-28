@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using WasmLoader.TypeWrappers;
 
 namespace WasmLoader.Components
 {
@@ -100,12 +101,12 @@ namespace WasmLoader.Components
             Execute(nameof(InteractDown));
         }
 
-        public void OnPlayerJoined(CVRPlayerEntity player)
+        public void OnPlayerJoined(CVRPlayerApi player)
         {
             Execute(nameof(OnPlayerJoined), player);
         }  
         
-        public void OnPlayerLeft(CVRPlayerEntity player)
+        public void OnPlayerLeft(CVRPlayerApi player)
         {
             Execute(nameof(OnPlayerLeft), player);
         }

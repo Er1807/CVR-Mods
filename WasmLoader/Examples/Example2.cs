@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using WasmLoader;
+using WasmLoader.TypeWrappers;
 
 namespace WasmLoader.Examples
 {
@@ -29,19 +30,19 @@ namespace WasmLoader.Examples
             obj.text = "Button was pressed " + Counter + " Times";
             WasmLoader.Logger.Msg("Incremented Counter");
         }
-        public override void OnPlayerJoined(CVRPlayerEntity player)
+        public override void OnPlayerJoined(CVRPlayerApi player)
         {
             var t = obj.text;
-            t = t + "Joined: " + player.Username+Environment.NewLine;
+            t = t + "Joined: " + player.displayName+Environment.NewLine;
             obj.text = t;
-            WasmLoader.Logger.Msg("Joined: " + player.Username);
+            WasmLoader.Logger.Msg("Joined: " + player.displayName);
         }
-        public override void OnPlayerLeft(CVRPlayerEntity player)
+        public override void OnPlayerLeft(CVRPlayerApi player)
         {
             var t = obj.text;
-            t = t + "Left: " + player.Username + Environment.NewLine;
+            t = t + "Left: " + player.displayName + Environment.NewLine;
             obj.text = t;
-            WasmLoader.Logger.Msg("Left: " + player.Username);
+            WasmLoader.Logger.Msg("Left: " + player.displayName);
         }
 
     }

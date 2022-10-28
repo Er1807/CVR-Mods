@@ -68,10 +68,11 @@ namespace WasmLoader
 
         private static void UserJoinPatch(CVRPlayerEntity player)
         {
-            CVRPlayerApiRemote.RemotePlayers.Add(new CVRPlayerApiRemote(player.PlayerDescriptor.GetComponent<PuppetMaster>()));
+            var cvrPlayer = new CVRPlayerApiRemote(player.PlayerDescriptor.GetComponent<PuppetMaster>());
+            CVRPlayerApiRemote.RemotePlayers.Add(cvrPlayer);
             foreach (var instance in WasmLoaderMod.Instance.WasmInstances.Values)
             {
-                instance.behavior.OnPlayerJoined(player);
+                instance.behavior.OnPlayerJoined(cvrPlayer);
             }
 
 
@@ -79,11 +80,13 @@ namespace WasmLoader
 
         public static void UserLeavePatch(CVRPlayerEntity player)
         {
-            CVRPlayerApiRemote.RemotePlayers.Remove(CVRPlayerApiRemote.RemotePlayers.FirstOrDefault(x => x.displayName == player.Username));
+            var cvrPlayer = CVRPlayerApiRemote.RemotePlayers.FirstOrDefault(x => x.displayName == player.Username);
+            
             foreach (var instance in WasmLoaderMod.Instance.WasmInstances.Values)
             {
-                instance.behavior.OnPlayerLeft(player);
+                instance.behavior.OnPlayerLeft(cvrPlayer);
             }
+            CVRPlayerApiRemote.RemotePlayers.Remove(cvrPlayer);
         }
     }
 
