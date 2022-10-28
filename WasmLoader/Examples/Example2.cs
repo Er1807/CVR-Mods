@@ -20,7 +20,7 @@ namespace WasmLoader.Examples
         public override void Start()
         {
             Counter = 0;
-            obj = GameObject.Find("Canvas/Text").GetComponent(typeof(Text)) as Text;
+            obj = GameObject.Find("CanvasTest/Text").GetComponent(typeof(Text)) as Text;
             WasmLoader.Logger.Msg("Initialied Counter W# Instance");
         }
 

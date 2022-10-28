@@ -42,6 +42,8 @@ namespace WrapperCodeGenerator
             testDomain.Load("Assembly-CSharp");
             testDomain.Load("UnityEngine");
             testDomain.Load("UnityEngine.CoreModule");
+            testDomain.Load("UnityEngine.UI");
+            testDomain.Load("UnityEngine.UIModule");
 
             var allowedFunctions = new List<string>();
             var types = new List<Type>();
