@@ -102,9 +102,9 @@ UnityEngine.Physics2D
 UnityEngine.Physics
 - UnityEngine_ParticleSystem__get_automaticCullingEnabled_this__SystemBoolean
 UnityEngine.ParticleSystem
-UnityEngine.ParticleSystemParticle
-UnityEngine.ParticleSystemMinMaxGradient
-UnityEngine.ParticleSystemMinMaxCurve
+UnityEngine.ParticleSystem+Particle
+UnityEngine.ParticleSystem+MinMaxGradient
+UnityEngine.ParticleSystem+MinMaxCurve
 UnityEngine.MaterialPropertyBlock
 UnityEngine.Material
 UnityEngine.LineRenderer
@@ -201,17 +201,17 @@ UnityEngine.UI.HorizontalOrVerticalLayoutGroup
 UnityEngine.UI.HorizontalLayoutGroup
 UnityEngine.UI.GridLayoutGroup
 UnityEngine.UI.GraphicRaycaster
-UnityEngine.UI.Dropdown.OptionData
-UnityEngine.UI.Dropdown.OptionDataList
+UnityEngine.UI.Dropdown+OptionData
+UnityEngine.UI.Dropdown+OptionDataList
 UnityEngine.UI.Graphic
 UnityEngine.UI.FontData
-UnityEngine.UI.DropdownDropdownEvent
+UnityEngine.UI.Dropdown+DropdownEvent
 UnityEngine.UI.Dropdown
 UnityEngine.UI.ColorBlock
 UnityEngine.UI.Clipping
 UnityEngine.UI.CanvasScaler
 UnityEngine.UI.AnimationTriggers
-UnityEngine.RenderingPostProcessingPostProcessVolume
+UnityEngine.Rendering.PostProcessing.PostProcessVolume
 UnityEngine.Animations.ScaleConstraint
 UnityEngine.Animations.RotationConstraint
 UnityEngine.Animations.PositionConstraint
