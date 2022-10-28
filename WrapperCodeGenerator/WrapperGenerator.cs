@@ -38,12 +38,12 @@ namespace WrapperCodeGenerator
             testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromMelonLoader);
             testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromManagedLoader);
 
+            string folderPath = @"C:\Program Files (x86)\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed";
 
-            testDomain.Load("Assembly-CSharp");
-            testDomain.Load("UnityEngine");
-            testDomain.Load("UnityEngine.CoreModule");
-            testDomain.Load("UnityEngine.UI");
-            testDomain.Load("UnityEngine.UIModule");
+            foreach (var item in Directory.GetFiles(folderPath))
+            {
+                testDomain.Load(Path.GetFileNameWithoutExtension(item));
+            }
 
             var allowedFunctions = new List<string>();
             var types = new List<Type>();
@@ -167,9 +167,6 @@ namespace WrapperCodeGenerator
 
         public static bool Check(MethodInfo method, List<string> allowedFunctions)
         {
-
-            
-
             if (method.IsGenericMethod)
                 return true;
             if (method.GetParameters().Any(x => x.ParameterType.FullName == null))
@@ -179,6 +176,14 @@ namespace WrapperCodeGenerator
             if (method.GetParameters().Any(x => x.IsOut))
                 return true;
             if (method.Name == "GetType")
+                return true;
+            if (method.Name.StartsWith("set_") && method.GetParameters().Length != 1)
+                return true;
+            if (method.Name.StartsWith("op_Explicit") || method.Name.StartsWith("op_Implicit"))
+                return true;
+            if (method.GetParameters().Any(x => x.ParameterType.IsByRef))
+                return true;
+            if (ConvertMethod(method).Contains("&"))
                 return true;
 
             if (allowedFunctions.Count != 0 && !allowedFunctions.Contains(ConvertMethod(method)))
@@ -265,6 +270,8 @@ namespace WrapperCodeGenerator
                 {
                     if (member.IsStatic)
                         return $"var result = {member.DeclaringType.FullName}.{name};";
+                    if (member.DeclaringType.IsValueType)
+                        return $"var result = {(IsSimple(member.DeclaringType) ? "parameter_this" : "resolved_this")}.{name};";
                     return $"var result = {(IsSimple(member.DeclaringType) ? "parameter_this" : "resolved_this")}?.{name};";
                 }
                 else
@@ -296,8 +303,18 @@ namespace WrapperCodeGenerator
                     return $"var result = {parameters[0]} <= {parameters[1]};";
                 if (name == "op_GreaterThanOrEqual")
                     return $"var result = {parameters[0]} >= {parameters[1]};";
+                if (name.StartsWith("op_Addition"))
+                    return $"var result = {parameters[0]} + {parameters[1]};";
+                if (name.StartsWith("op_Subtraction"))
+                    return $"var result = {parameters[0]} - {parameters[1]};";
+                if (name.StartsWith("op_Multiply"))
+                    return $"var result = {parameters[0]} * {parameters[1]};";
+                if (name.StartsWith("op_Division"))
+                    return $"var result = {parameters[0]} / {parameters[1]};";
+                if (name.StartsWith("op_UnaryNegation"))
+                    return $"var result = - {parameters[0]};";
             }
-            return "Error";
+            return "Error"; 
         }
 
         private static string GetParameterForCall(ParameterInfo x)

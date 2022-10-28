@@ -51,3 +51,9 @@ UnityEngine.Vector3
 System.Object
 * ABI_RC_Core_Player_CVRPlayerEntity__Username__SystemString__Username__SystemString
 ABI_RC.Core.Player.CVRPlayerEntity__Username__SystemString
+
+UnityEngine.Vector4
+UnityEngine.Vector3
+UnityEngine.Vector2
+UnityEngine.Vector3Int
+UnityEngine.Vector2Int
