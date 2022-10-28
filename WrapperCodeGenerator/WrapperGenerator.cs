@@ -120,7 +120,7 @@ namespace WrapperCodeGenerator
             sb.AppendLine($@"functions[""{type.FullName.Replace(".", "_")}__Type""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
             sb.AppendLine($@"linker.DefineFunction(""env"", ""{type.FullName.Replace(".", "_")}__Type"", (Caller caller) => {{");
 
-            sb.AppendLine($"return objects.StoreObject(typeof({type.FullName}));");
+            sb.AppendLine($"return objects.StoreObject(typeof({type.FullName.Replace("+", ".")}));");
             sb.AppendLine("});");
             sb.AppendLine();
 
@@ -191,12 +191,16 @@ namespace WrapperCodeGenerator
                 return true;
             if (method.GetParameters().Any(x => x.ParameterType.IsByRef))
                 return true;
-            if (disallowedFunctions.Contains(ConvertMethod(method)))
+
+            var convertedName = ConvertMethod(method);
+
+
+            if (disallowedFunctions.Contains(convertedName))
                 return true;
-            if (ConvertMethod(method).Contains("&"))
+            if (convertedName.Contains("&") || convertedName.Contains("`"))
                 return true;
             
-            if (allowedFunctions.Count != 0 && !allowedFunctions.Contains(ConvertMethod(method)))
+            if (allowedFunctions.Count != 0 && !allowedFunctions.Contains(convertedName))
             {
                 return true;
             }
@@ -255,7 +259,7 @@ namespace WrapperCodeGenerator
 
         private static string RetieveThis(MethodInfo member)
         {
-            return $"var resolved_this = objects.RetriveObject<{member.DeclaringType.FullName}>(parameter_this, caller);";
+            return $"var resolved_this = objects.RetriveObject<{member.DeclaringType.FullName.Replace("+", ".")}>(parameter_this, caller);";
         }
         public static string Call(MethodInfo member)
         {
