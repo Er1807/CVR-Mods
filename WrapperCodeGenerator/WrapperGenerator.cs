@@ -46,6 +46,7 @@ namespace WrapperCodeGenerator
             }
 
             var allowedFunctions = new List<string>();
+            var disallowedFunctions = new List<string>();
             var types = new List<Type>();
 
             foreach (var item in testDomain.GetAssemblies())
@@ -54,7 +55,7 @@ namespace WrapperCodeGenerator
                 {
                     types.AddRange(item.DefinedTypes);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                 }
             }
@@ -67,28 +68,32 @@ namespace WrapperCodeGenerator
                     {
                         allowedFunctions.Add(item.Replace("* ", ""));
                     }
+                    else if (item.StartsWith("- "))
+                    {
+                        disallowedFunctions.Add(item.Replace("- ", ""));
+                    }
                     else
                     {
                         sb.AppendLine("// Generating " + item +" with "+ allowedFunctions.Count);
                         
-                        Generate(context, types.Where(x => x.FullName == item).FirstOrDefault(), allowedFunctions);
+                        Generate(context, types.Where(x => x.FullName == item).First(), allowedFunctions, disallowedFunctions);
                         allowedFunctions.Clear();
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    sb.AppendLine("// Errpr " + item + " with " + allowedFunctions.Count);
+                    sb.AppendLine("// Error " + item + " with " + allowedFunctions.Count + " " + ex.Message);
                 }
                 
             }
             context.AddSource("Results.g.cs", sb.ToString());
         }
 
-        public void Generate(GeneratorExecutionContext context, Type type, List<string> allowedFunctions)
+        public void Generate(GeneratorExecutionContext context, Type type, List<string> allowedFunctions, List<string> disallowedFunctions)
         {
             if (type == null) return;
             
-            string source = GenerateClass(type, allowedFunctions).ToString();
+            string source = GenerateClass(type, allowedFunctions, disallowedFunctions).ToString();
             context.AddSource($"{(type.Namespace + type.Name).Replace(".", "_") + "_Ref"}.g.cs", source);
         }
 
@@ -98,7 +103,7 @@ namespace WrapperCodeGenerator
 
 
 
-        public static StringBuilder GenerateClass(Type type, List<string> allowedFunctions)
+        public static StringBuilder GenerateClass(Type type, List<string> allowedFunctions, List<string> disallowedFunctions)
         {
             var sb = new StringBuilder();
             var className = (type.Namespace + type.Name).Replace(".", "_") + "_Ref";
@@ -121,7 +126,7 @@ namespace WrapperCodeGenerator
 
             foreach (var member in methods)
             {
-                if (Check(member, allowedFunctions))
+                if (Check(member, allowedFunctions, disallowedFunctions))
                     continue;
 
                 sb.AppendLine($@"functions[""{ConvertMethod(member)}""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
@@ -164,8 +169,9 @@ namespace WrapperCodeGenerator
 
             return sb;
         }
+        
 
-        public static bool Check(MethodInfo method, List<string> allowedFunctions)
+        public static bool Check(MethodInfo method, List<string> allowedFunctions, List<string> disallowedFunctions)
         {
             if (method.IsGenericMethod)
                 return true;
@@ -181,11 +187,15 @@ namespace WrapperCodeGenerator
                 return true;
             if (method.Name.StartsWith("op_Explicit") || method.Name.StartsWith("op_Implicit"))
                 return true;
+            if (method.Name.StartsWith("add_") || method.Name.StartsWith("remove_"))
+                return true;
             if (method.GetParameters().Any(x => x.ParameterType.IsByRef))
+                return true;
+            if (disallowedFunctions.Contains(ConvertMethod(method)))
                 return true;
             if (ConvertMethod(method).Contains("&"))
                 return true;
-
+            
             if (allowedFunctions.Count != 0 && !allowedFunctions.Contains(ConvertMethod(method)))
             {
                 return true;
