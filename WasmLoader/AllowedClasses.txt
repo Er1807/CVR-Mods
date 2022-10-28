@@ -57,3 +57,14 @@ UnityEngine.Vector3
 UnityEngine.Vector2
 UnityEngine.Vector3Int
 UnityEngine.Vector2Int
+* UnityEngine_Time__get_time__SystemSingle
+* UnityEngine_Time__get_deltaTime__SystemSingle
+* UnityEngine_Time__get_fixedTime__SystemSingle
+* UnityEngine_Time__get_unscaledTime__SystemSingle
+* UnityEngine_Time__get_fixedUnscaledTime__SystemSingle
+* UnityEngine_Time__get_unscaledDeltaTime__SystemSingle
+* UnityEngine_Time__get_fixedUnscaledDeltaTime__SystemSingle
+* UnityEngine_Time__get_fixedDeltaTime__SystemSingle
+UnityEngine.Time
+UnityEngine.Quaternion
+UnityEngine.Random

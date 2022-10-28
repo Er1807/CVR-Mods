@@ -240,7 +240,7 @@ namespace WrapperCodeGenerator
         {
             if (IsSimple(param.ParameterType))
                 return "";
-            return $"var resolved_{param.Name} = objects.RetriveObject<{param.ParameterType.FullName}>({param.Name}, caller);";
+            return $"var resolved_{param.Name} = objects.RetriveObject<{param.ParameterType.FullName.Replace("+", ".")}>({param.Name}, caller);";
         }
 
         private static string RetieveThis(MethodInfo member)
@@ -285,7 +285,7 @@ namespace WrapperCodeGenerator
             {
                 name = name.Replace("set_", "");
                 if (member.IsStatic)
-                    return $"{member.DeclaringType.FullName}.{name} = {parameters};";
+                    return $"{member.DeclaringType.FullName}.{name} = {parameters[0]};";
                 return $"{(IsSimple(member.DeclaringType) ? "parameter_this" : "resolved_this")}.{name} = {parameters[0]};";
 
             }
