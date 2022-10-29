@@ -31,7 +31,7 @@ namespace Converter
 
             return new WasmExternFunctionOperand() {
                 HasThis = value.HasThis,
-                FunctionName = ConvertMethod(value.DeclaringType.FullName, value.Name, value.HasThis, value.Parameters.Select(x => x.Type).ToList(), value.MethodSig.GetRetType()),
+                FunctionName = ConvertMethod(value.DeclaringType.FullName, value.Name, value.HasThis, value.Parameters.Skip(1).Select(x => x.Type).ToList(), value.MethodSig.GetRetType()),
                 Params = value.Parameters.Select(x => x.Type).ToList() ?? new List<TypeSig>(),
                 ReturnValue = value.MethodSig.GetRetType(),
                 DeclaringType = value.DeclaringType.ToTypeSig()

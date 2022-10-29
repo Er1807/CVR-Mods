@@ -26,12 +26,12 @@ namespace WasmLoader.Refs.Wrapper
                 return result ?? false ? 1 : 0;
             });
 
-            functions["WasmLoader_TypeWrappers_CVRPlayerApi__get_displayName_this_WasmLoaderTypeWrappersCVRPlayerApi__SystemString"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
-            linker.DefineFunction("env", "WasmLoader_TypeWrappers_CVRPlayerApi__get_displayName_this_WasmLoaderTypeWrappersCVRPlayerApi__SystemString", (Caller caller, System.Int32 parameter_this) => {
+            functions["WasmLoader_TypeWrappers_CVRPlayerApi__get_displayName_this__SystemString"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "WasmLoader_TypeWrappers_CVRPlayerApi__get_displayName_this__SystemString", (Caller caller, System.Int32 parameter_this) => {
                 var resolved_this = objects.RetriveObject<WasmLoader.TypeWrappers.CVRPlayerApi>(parameter_this, caller);
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_TypeWrappers_CVRPlayerApi__get_displayName_this_WasmLoaderTypeWrappersCVRPlayerApi__SystemString");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_TypeWrappers_CVRPlayerApi__get_displayName_this__SystemString");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif

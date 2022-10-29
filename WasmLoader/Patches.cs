@@ -192,9 +192,11 @@ namespace WasmLoader
             try
             {
                 var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(wasmLoader.WasmCode)), type);
+ 
                 instance.gameObject = wasmLoader.gameObject;
                 instance.InitMemoryManagment();
                 //Not working yet
+                /*
                 foreach (var item in wasmLoader.AttributesGameObject.GetAsList())
                 {
                     instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
@@ -218,7 +220,7 @@ namespace WasmLoader
                 foreach (var item in wasmLoader.AttributesBool.GetAsList())
                 {
                     instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
+                }*/
                 WasmLoaderMod.Instance.SetupGameobject(wasmLoader.gameObject, instance);
             }
             catch (Exception ex)

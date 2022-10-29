@@ -27,7 +27,7 @@ namespace WasmLoader.Examples
         public override void InteractDown()
         {
             Counter = Counter + 1;
-            obj.text = "Button was pressed " + Counter + " Times";
+            obj.text = "Button was pressed " + Counter.ToString() + " Times";
             WasmLoader.Logger.Msg("Incremented Counter");
         }
         public override void OnPlayerJoined(CVRPlayerApi player)

@@ -293,7 +293,9 @@ namespace Converter
                     if (externFunction.ReturnValue != null && externFunction.ReturnValue.FullName != "System.Void")
                         func.stack.Push(GetWasmType(externFunction.ReturnValue).Value);
 
-                    if (method?.Name == "CurrentGameObject"){
+                    if ((instruction.Operand as IFullName).Name == "CurrentGameObject")
+                    {
+                        externFunction.Params.Clear();
                         func.stack.Push(WasmDataType.i32);
                         break;
                     }
@@ -309,7 +311,7 @@ namespace Converter
                     break;
 
                 case Code.Ldtoken:
-                    var ldtoken = instruction.Operand as TypeRef;
+                    var ldtoken = instruction.Operand as IFullName;
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand() { FunctionName = ldtoken.FullName.Replace(".", "_") + "__Type" , ReturnValue = Program.TypeType.ToTypeSig(), Params = new List<TypeSig> ()} ));
                     func.stack.Push(WasmDataType.i32);
                     break;
