@@ -1,5 +1,4 @@
-﻿using ABI_RC.Systems.MovementSystem;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace WasmLoader.TypeWrappers
 {
@@ -14,6 +13,7 @@ namespace WasmLoader.TypeWrappers
 
         public static CVRPlayerApi GetPlayerById(int playerId)
         {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
             if (playerId == 0)
             {
                 return CVRPlayerApiLocal.Instance;
@@ -22,11 +22,16 @@ namespace WasmLoader.TypeWrappers
             {
                 return CVRPlayerApiRemote.RemotePlayers[playerId - 1];
             }
+#endif
             return null;
         }
         public static int GetPlayerCount()
         {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
             return CVRPlayerApiRemote.RemotePlayers.Count + 1;
+#else
+            return 0;   
+#endif
         }
         public static CVRPlayerApi[] GetPlayers()
         {

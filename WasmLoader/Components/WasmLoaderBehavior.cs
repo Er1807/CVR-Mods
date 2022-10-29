@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
-using Wasmtime;
 
 namespace WasmLoader.Components
 {
@@ -12,7 +14,9 @@ namespace WasmLoader.Components
         public string WasmCode;
         public string Variables;
         public string SyncedVariables;
-
+#if UNITY_EDITOR
+        public MonoScript behavior;
+#endif
         public DictionaryStringGameObject AttributesGameObject = new DictionaryStringGameObject();
         public DictionaryStringTransform AttributesTransform = new DictionaryStringTransform();
         public DictionaryStringString AttributesString = new DictionaryStringString();
