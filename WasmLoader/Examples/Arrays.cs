@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace WasmLoader.Examples
         public override void InteractDown()
         {
             i = (i + 1) % arro.Length;
-            Logger.Msg("current " + arro[i]);
+            Debug.Log("current " + arro[i]);
         }
     }
 }

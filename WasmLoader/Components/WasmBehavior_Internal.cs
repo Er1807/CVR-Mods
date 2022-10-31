@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,22 @@ namespace WasmLoader.Components
 {
     public class WasmBehavior_Internal : MonoBehaviour
     {
+
         public WasmInstance Instance;
+        public CVRInteractable CvrInteractable;
+        
+        public void OnDestroy()
+        {
+            WasmLoaderMod.Instance.LoggerInstance.Msg("Unloading Wasm Instance " + gameObject.name);
+            try
+            {
+                WasmManager.Instance.WasmInstances.Remove(CvrInteractable);
+            } catch (Exception){}
+            Instance.store.Dispose();
+            Instance.linker.Dispose();
+            Instance.module.Dispose();
+            Instance.engine.Dispose();
+        }
 
         public void Execute(string method)
         {
@@ -25,22 +41,44 @@ namespace WasmLoader.Components
                 WasmLoaderMod.Instance.LoggerInstance.Warning(ex.Message);
                 WasmLoaderMod.Instance.LoggerInstance.Warning(ex.StackTrace);
             }
-            
-        }
-        public void Execute<T>(string method, T parameter)
-        {
-            var paramAsId = Instance.objects.StoreObject(parameter);
-            Instance.instance.GetAction<int>(Instance.store, method)?.Invoke(paramAsId);
-            Instance.CleanUpLocals();
-        }
-        public void Execute<T, U>(string method, T parameter, U parameter2)
-        {
-            var paramAsId = Instance.objects.StoreObject(parameter);
-            var paramAsId2 = Instance.objects.StoreObject(parameter2);
-            Instance.instance.GetAction<int, int>(Instance.store, method)?.Invoke(paramAsId, paramAsId2);
-            Instance.CleanUpLocals();
+
+
         }
 
+        public void Execute<T>(string method, T parameter)
+        {
+            try
+            {
+                var paramAsId = Instance.objects.StoreObject(parameter);
+                Instance.instance.GetAction<int>(Instance.store, method)?.Invoke(paramAsId);
+                Instance.CleanUpLocals();
+            }
+            catch (Exception ex)
+            {
+                WasmLoaderMod.Instance.LoggerInstance.Warning(ex.Message);
+                WasmLoaderMod.Instance.LoggerInstance.Warning(ex.StackTrace);
+            }
+
+        }
+
+        public void Execute<T, U>(string method, T parameter, U parameter2)
+        {
+            try
+            {
+                var paramAsId = Instance.objects.StoreObject(parameter);
+                var paramAsId2 = Instance.objects.StoreObject(parameter2);
+                Instance.instance.GetAction<int, int>(Instance.store, method)?.Invoke(paramAsId, paramAsId2);
+                Instance.CleanUpLocals();
+            }
+            catch (Exception ex)
+            {
+                WasmLoaderMod.Instance.LoggerInstance.Warning(ex.Message);
+                WasmLoaderMod.Instance.LoggerInstance.Warning(ex.StackTrace);
+            }
+        }
+
+        //Forwarding events
+        #region Events
         public void Start()
         {
             Execute(nameof(Start));
@@ -113,11 +151,12 @@ namespace WasmLoader.Components
         public void OnPlayerJoined(CVRPlayerApi player)
         {
             Execute(nameof(OnPlayerJoined), player);
-        }  
-        
+        }
+
         public void OnPlayerLeft(CVRPlayerApi player)
         {
             Execute(nameof(OnPlayerLeft), player);
         }
+        #endregion
     }
 }

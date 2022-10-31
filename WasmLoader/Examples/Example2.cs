@@ -21,28 +21,28 @@ namespace WasmLoader.Examples
         {
             Counter = 0;
             obj = GameObject.Find("CanvasTest/Text").GetComponent(typeof(Text)) as Text;
-            WasmLoader.Logger.Msg("Initialied Counter W# Instance");
+            Debug.Log("Initialied Counter W# Instance");
         }
 
         public override void InteractDown()
         {
             Counter = Counter + 1;
             obj.text = "Button was pressed " + Counter.ToString() + " Times";
-            WasmLoader.Logger.Msg("Incremented Counter");
+            Debug.Log("Incremented Counter");
         }
         public override void OnPlayerJoined(CVRPlayerApi player)
         {
             var t = obj.text;
             t = t + "Joined: " + player.displayName+Environment.NewLine;
             obj.text = t;
-            WasmLoader.Logger.Msg("Joined: " + player.displayName);
+            Debug.Log("Joined: " + player.displayName);
         }
         public override void OnPlayerLeft(CVRPlayerApi player)
         {
             var t = obj.text;
             t = t + "Left: " + player.displayName + Environment.NewLine;
             obj.text = t;
-            WasmLoader.Logger.Msg("Left: " + player.displayName);
+            Debug.Log("Left: " + player.displayName);
         }
 
     }

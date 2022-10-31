@@ -285,6 +285,13 @@ namespace Converter
                     else if (method != null)
                         externFunction = WasmOperand.FromExtern(method);
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, externFunction));
+                    
+                    if ((instruction.Operand as IFullName).Name == "CurrentGameObject")
+                    {
+                        externFunction.Params.Clear();
+                        func.stack.Push(WasmDataType.i32);
+                        break;
+                    }
 
                     foreach (var item in externFunction.Params)
                     {
@@ -293,12 +300,7 @@ namespace Converter
                     if (externFunction.ReturnValue != null && externFunction.ReturnValue.FullName != "System.Void")
                         func.stack.Push(GetWasmType(externFunction.ReturnValue).Value);
 
-                    if ((instruction.Operand as IFullName).Name == "CurrentGameObject")
-                    {
-                        externFunction.Params.Clear();
-                        func.stack.Push(WasmDataType.i32);
-                        break;
-                    }
+                    
                     break;
                 case Code.Ldflda:
                     if (instruction.Operand is FieldDef fieldDefa && fieldDefa.DeclaringType == func.Method.DeclaringType)

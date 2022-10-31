@@ -37,33 +37,33 @@ namespace WasmLoader
 
         public static void Grab(CVRInteractable __instance)
         {
-            if (!WasmLoaderMod.Instance.WasmInstances.TryGetValue(__instance, out var instance))
+            if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
             instance.behavior.Grab();
         }
 
         public static void Drop(CVRInteractable __instance)
         {
-            if (!WasmLoaderMod.Instance.WasmInstances.TryGetValue(__instance, out var instance))
+            if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
             instance.behavior.Drop();
         }
         public static void InteractDown(CVRInteractable __instance)
         {
-            if (!WasmLoaderMod.Instance.WasmInstances.TryGetValue(__instance, out var instance))
+            if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
             instance.behavior.InteractDown();
         }
         public static void InteractUp(CVRInteractable __instance)
         {
-            if (!WasmLoaderMod.Instance.WasmInstances.TryGetValue(__instance, out var instance))
+            if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
             instance.behavior.InteractUp();
         }
 
         public static void GetRequestedUser(CVRInteractable __instance)
         {
-            if (!WasmLoaderMod.Instance.WasmInstances.TryGetValue(__instance, out var instance))
+            if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
             instance.behavior.InteractUp();
         }
@@ -72,7 +72,7 @@ namespace WasmLoader
         {
             var cvrPlayer = new CVRPlayerApiRemote(player.PlayerDescriptor.GetComponent<PuppetMaster>());
             CVRPlayerApiRemote.RemotePlayers.Add(cvrPlayer);
-            foreach (var instance in WasmLoaderMod.Instance.WasmInstances.Values)
+            foreach (var instance in WasmManager.Instance.WasmInstances.Values)
             {
                 instance.behavior.OnPlayerJoined(cvrPlayer);
             }
@@ -84,7 +84,7 @@ namespace WasmLoader
         {
             var cvrPlayer = CVRPlayerApiRemote.RemotePlayers.FirstOrDefault(x => x.displayName == player.Username);
 
-            foreach (var instance in WasmLoaderMod.Instance.WasmInstances.Values)
+            foreach (var instance in WasmManager.Instance.WasmInstances.Values)
             {
                 instance.behavior.OnPlayerLeft(cvrPlayer);
             }
@@ -117,7 +117,7 @@ namespace WasmLoader
 
                 foreach (var wasmLoader in player.GetComponentsInChildren<WasmLoaderBehavior>())
                 {
-                    InitializeWasm(wasmLoader, WasmType.Avatar);
+                    WasmManager.Instance.InitializeWasm(wasmLoader, WasmType.Avatar);
                 }
             }
 
@@ -144,7 +144,7 @@ namespace WasmLoader
             {
                 foreach (var wasmLoader in prop.GetComponentsInChildren<WasmLoaderBehavior>())
                 {
-                    InitializeWasm(wasmLoader, WasmType.Prop);
+                    WasmManager.Instance.InitializeWasm(wasmLoader, WasmType.Prop);
                 }
             }
         }
@@ -182,75 +182,9 @@ namespace WasmLoader
 
                 foreach (var wasmLoader in gameObject.GetComponentsInChildren<WasmLoaderBehavior>())
                 {
-                    InitializeWasm(wasmLoader, WasmType.World);
+                    WasmManager.Instance.InitializeWasm(wasmLoader, WasmType.World);
                 }
             }
-        }
-
-
-
-        private static void InitializeWasm(WasmLoaderBehavior wasmLoader, WasmType type)
-        {
-
-            WasmLoaderMod.Instance.LoggerInstance.Msg("LoadingPatches WasmBehavior on " + wasmLoader.gameObject.name);
-            try
-            {
-                var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(wasmLoader.WasmCode)), type);
-
-                instance.gameObject = wasmLoader.gameObject;
-                instance.InitMemoryManagment();
-
-                var variableDefinitions = JsonConvert.DeserializeObject<List<VariableDefinition>>(wasmLoader.Variables);
-
-                if (variableDefinitions != null)
-                {
-
-                    foreach (var variableDefinition in variableDefinitions)
-                    {
-                        try
-                        {
-                            switch (variableDefinition.VariableType)
-                            {
-                                case "UnityEngine.Gameobject":
-                                    SetVariable(instance, variableDefinition, wasmLoader.AttributesGameObject);
-                                    break;
-                                case "UnityEngine.UI.Text":
-                                    SetVariable(instance, variableDefinition, wasmLoader.AttributesText);
-                                    break;
-                                case "System.String":
-                                    SetVariable(instance, variableDefinition, wasmLoader.AttributesString);
-                                    break;
-                                case "UnityEngine.Transform":
-                                    SetVariable(instance, variableDefinition, wasmLoader.AttributesTransform);
-                                    break;
-                                case "System.Int32":
-                                    instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.SetValue(instance.store, wasmLoader.AttributesInt[variableDefinition.StartIndex]);
-                                    break;
-                                case "System.Boolean":
-                                    instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.SetValue(instance.store, wasmLoader.AttributesBool[variableDefinition.StartIndex]);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        catch (Exception)
-                        {//ignore
-                        }
-                    }
-
-                }
-                WasmLoaderMod.Instance.SetupGameobject(wasmLoader.gameObject, instance);
-            }
-            catch (Exception ex)
-            {
-                WasmLoaderMod.Instance.LoggerInstance.Error(ex);
-            }
-        }
-
-        private static void SetVariable(WasmInstance instance, VariableDefinition variableDefinition, object[] source)
-        {
-            instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.
-                SetValue(instance.store, instance.objects.StoreObject(source[variableDefinition.StartIndex]));
         }
     }
 

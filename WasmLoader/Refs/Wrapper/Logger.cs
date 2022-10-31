@@ -14,24 +14,12 @@ namespace WasmLoader.Refs.Wrapper
         static MelonLogger.Instance logger = new MelonLogger.Instance("WebAssembly", ConsoleColor.DarkGreen);
         public void Setup(Dictionary<string, Action<Linker, Store, Objectstore, WasmType>> functions)
         {
-            functions["WasmLoader_Logger__Msg_SystemString__SystemVoid"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
-            linker.DefineFunction("env", "WasmLoader_Logger__Msg_SystemString__SystemVoid", (Caller caller, int ptr) =>
+            functions["UnityEngine_Debug__Log_SystemObject__SystemVoid"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
+            linker.DefineFunction("env", "UnityEngine_Debug__Log_SystemObject__SystemVoid", (Caller caller, int ptr) =>
             {
 #if Debug
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_Logger__Msg_SystemString__SystemVoid");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(objects.RetriveObject<string>(ptr, caller));
-                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-#endif
-                logger.Msg(objects.RetriveObject<string>(ptr, caller));
-            });
-
-            functions["WasmLoader_Logtest__Msg_SystemString__SystemVoid"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
-            linker.DefineFunction("env", "WasmLoader_Logtest__Msg_SystemString__SystemVoid", (Caller caller, int ptr) =>
-            {
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("WasmLoader_Logtest__Msg_SystemString__SystemVoid");
+                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_Debug__Log_SystemObject__SystemVoid");
                 WasmLoaderMod.Instance.LoggerInstance.Msg(objects.RetriveObject<string>(ptr, caller));
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif

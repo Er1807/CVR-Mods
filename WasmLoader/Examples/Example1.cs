@@ -17,8 +17,8 @@ namespace WasmLoader.Examples
             var obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
             obj.SetActive(!obj.activeSelf);
             if (obj.activeSelf)
-                WasmLoader.Logger.Msg("Mirror is now Visible");
-            WasmLoader.Logger.Msg("Method Done");
+                Debug.Log("Mirror is now Visible");
+            Debug.Log("Method Done");
 
         }
         
@@ -27,10 +27,10 @@ namespace WasmLoader.Examples
             var obj = GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/");
             obj.SetActive(!obj.activeSelf);
             if (obj.activeSelf)
-                WasmLoader.Logger.Msg("Mirror is now Visible");
+                Debug.Log("Mirror is now Visible");
             else
-                WasmLoader.Logger.Msg("Mirror is now Invisible");
-            WasmLoader.Logger.Msg("Method Done");
+                Debug.Log("Mirror is now Invisible");
+            Debug.Log("Method Done");
 
         }
         
@@ -48,7 +48,7 @@ namespace WasmLoader.Examples
         {
             for (int i = 0; i < 10; i++)
             {
-                WasmLoader.Logger.Msg("Current number is " + i);
+                Debug.Log("Current number is " + i);
             }
         }
         public void While()
@@ -56,7 +56,7 @@ namespace WasmLoader.Examples
             int i = 10;
             while(i %3 !=0)
             {
-                WasmLoader.Logger.Msg("Current number is " + i);
+                Debug.Log("Current number is " + i);
                 i++;
             }
         }
@@ -66,7 +66,7 @@ namespace WasmLoader.Examples
             {
                 for (int j = 0; j < 5; j++)
                 {
-                    WasmLoader.Logger.Msg("Current number i is " + i + " j is " + j);
+                    Debug.Log("Current number i is " + i + " j is " + j);
                 }
             }
         }
@@ -76,11 +76,11 @@ namespace WasmLoader.Examples
         {
             if (GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/").activeSelf)
             {
-                WasmLoader.Logger.Msg("Mirror Right is Visible");
+                Debug.Log("Mirror Right is Visible");
             }
             else if (GameObject.Find("MirrorButtons/Mirrors/Mirrorleftp/").activeSelf)
             {
-                WasmLoader.Logger.Msg("Mirror Left is Visible");
+                Debug.Log("Mirror Left is Visible");
             }
         }
 
@@ -88,16 +88,16 @@ namespace WasmLoader.Examples
         {
             if (GameObject.Find("MirrorButtons/Mirrors/Mirrorrightp/").activeSelf)
             {
-                WasmLoader.Logger.Msg("Mirror Right is Visible");
+                Debug.Log("Mirror Right is Visible");
             }
             else if (GameObject.Find("MirrorButtons/Mirrors/Mirrorleftp/").activeSelf)
             {
-                WasmLoader.Logger.Msg("Mirror Left is Visible");
+                Debug.Log("Mirror Left is Visible");
 
             }
             else
             {
-                WasmLoader.Logger.Msg("No Mirror is active");
+                Debug.Log("No Mirror is active");
             }
         }
 
@@ -115,8 +115,8 @@ namespace WasmLoader.Examples
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void TestFunction(int i, int j)
         {
-            WasmLoader.Logger.Msg("Inside sep function");
-            WasmLoader.Logger.Msg("Current number i is " + i + " j is " + j);
+            Debug.Log("Inside sep function");
+            Debug.Log("Current number i is " + i + " j is " + j);
         }
     }
 }

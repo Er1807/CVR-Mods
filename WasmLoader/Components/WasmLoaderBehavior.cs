@@ -17,12 +17,12 @@ namespace WasmLoader.Components
         public string EditorVariables;
         public MonoScript behavior;
 #endif
-        public GameObject[] AttributesGameObject = new GameObject[0];
-        public Transform[] AttributesTransform = new Transform[0];
-        public string[] AttributesString = new string[0];
-        public Text[] AttributesText = new Text[0];
-        public int[] AttributesInt = new int[0];
-        public bool[] AttributesBool = new bool[0];
+        public GameObject[] AttributesGameObject;
+        public Transform[] AttributesTransform;
+        public string[] AttributesString;
+        public Text[] AttributesText;
+        public int[] AttributesInt;
+        public bool[] AttributesBool;
 #if UNITY_EDITOR
         public DictionaryStringGameObject AttributesGameObjectDict = new DictionaryStringGameObject();
         public DictionaryStringTransform AttributesTransformDict = new DictionaryStringTransform();
