@@ -31,6 +31,7 @@ namespace WrapperCodeGenerator
 
         public void Execute(GeneratorExecutionContext context)
         {
+            //return;
             StringBuilder sb = new StringBuilder();
             
             var testDomain = AppDomain.CurrentDomain;

@@ -15,7 +15,6 @@ namespace WasmLoader.Components
 
         public void Execute(string method)
         {
-            WasmLoaderMod.Instance.LoggerInstance.Msg("tset: "+method);
             try
             {
                 Instance.instance.GetAction(Instance.store, method)?.Invoke();

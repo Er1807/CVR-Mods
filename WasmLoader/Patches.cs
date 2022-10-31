@@ -16,6 +16,8 @@ using UnityEngine.SceneManagement;
 using WasmLoader.Components;
 using WasmLoader.Refs;
 using WasmLoader.TypeWrappers;
+using Newtonsoft.Json;
+using UnityEngine.Networking.Types;
 
 namespace WasmLoader
 {
@@ -81,7 +83,7 @@ namespace WasmLoader
         public static void UserLeavePatch(CVRPlayerEntity player)
         {
             var cvrPlayer = CVRPlayerApiRemote.RemotePlayers.FirstOrDefault(x => x.displayName == player.Username);
-            
+
             foreach (var instance in WasmLoaderMod.Instance.WasmInstances.Values)
             {
                 instance.behavior.OnPlayerLeft(cvrPlayer);
@@ -157,9 +159,9 @@ namespace WasmLoader
             MelonCoroutines.Start(WaitForWorldLoaded());
         }
 
-        
 
-        
+
+
         public static IEnumerator WaitForWorldLoaded()
         {
             while (CVRObjectLoader.Instance.IsLoadingWorldToJoin)
@@ -177,13 +179,15 @@ namespace WasmLoader
             {
                 if (gameObject.GetComponent<PlayerDescriptor>() != null || gameObject.GetComponentInChildren<CVRAssetInfo>() != null)
                     continue;
-                
+
                 foreach (var wasmLoader in gameObject.GetComponentsInChildren<WasmLoaderBehavior>())
                 {
                     InitializeWasm(wasmLoader, WasmType.World);
                 }
             }
         }
+
+
 
         private static void InitializeWasm(WasmLoaderBehavior wasmLoader, WasmType type)
         {
@@ -192,41 +196,61 @@ namespace WasmLoader
             try
             {
                 var instance = WasmLoaderMod.Instance.GetWasmInstance(Encoding.UTF8.GetString(Convert.FromBase64String(wasmLoader.WasmCode)), type);
- 
+
                 instance.gameObject = wasmLoader.gameObject;
                 instance.InitMemoryManagment();
-                //Not working yet
-                /*
-                foreach (var item in wasmLoader.AttributesGameObject.GetAsList())
+
+                var variableDefinitions = JsonConvert.DeserializeObject<List<VariableDefinition>>(wasmLoader.Variables);
+
+                if (variableDefinitions != null)
                 {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
+
+                    foreach (var variableDefinition in variableDefinitions)
+                    {
+                        try
+                        {
+                            switch (variableDefinition.VariableType)
+                            {
+                                case "UnityEngine.Gameobject":
+                                    SetVariable(instance, variableDefinition, wasmLoader.AttributesGameObject);
+                                    break;
+                                case "UnityEngine.UI.Text":
+                                    SetVariable(instance, variableDefinition, wasmLoader.AttributesText);
+                                    break;
+                                case "System.String":
+                                    SetVariable(instance, variableDefinition, wasmLoader.AttributesString);
+                                    break;
+                                case "UnityEngine.Transform":
+                                    SetVariable(instance, variableDefinition, wasmLoader.AttributesTransform);
+                                    break;
+                                case "System.Int32":
+                                    instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.SetValue(instance.store, wasmLoader.AttributesInt[variableDefinition.StartIndex]);
+                                    break;
+                                case "System.Boolean":
+                                    instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.SetValue(instance.store, wasmLoader.AttributesBool[variableDefinition.StartIndex]);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        catch (Exception)
+                        {//ignore
+                        }
+                    }
+
                 }
-                foreach (var item in wasmLoader.AttributesTransform.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in wasmLoader.AttributesString.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in wasmLoader.AttributesText.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in wasmLoader.AttributesInt.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }
-                foreach (var item in wasmLoader.AttributesBool.GetAsList())
-                {
-                    instance.instance.GetGlobal(instance.store, item.Key)?.SetValue(instance.store, instance.objects.StoreObject(item.Value));
-                }*/
                 WasmLoaderMod.Instance.SetupGameobject(wasmLoader.gameObject, instance);
             }
             catch (Exception ex)
             {
                 WasmLoaderMod.Instance.LoggerInstance.Error(ex);
             }
+        }
+
+        private static void SetVariable(WasmInstance instance, VariableDefinition variableDefinition, object[] source)
+        {
+            instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.
+                SetValue(instance.store, instance.objects.StoreObject(source[variableDefinition.StartIndex]));
         }
     }
 

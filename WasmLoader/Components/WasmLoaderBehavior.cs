@@ -13,18 +13,26 @@ namespace WasmLoader.Components
     {
         public string WasmCode;
         public string Variables;
-        public string SyncedVariables;
 #if UNITY_EDITOR
+        public string EditorVariables;
         public MonoScript behavior;
 #endif
-        public DictionaryStringGameObject AttributesGameObject = new DictionaryStringGameObject();
-        public DictionaryStringTransform AttributesTransform = new DictionaryStringTransform();
-        public DictionaryStringString AttributesString = new DictionaryStringString();
-        public DictionaryStringText AttributesText = new DictionaryStringText();
-        public DictionaryStringInt AttributesInt = new DictionaryStringInt();
-        public DictionaryStringBool AttributesBool = new DictionaryStringBool();
+        public GameObject[] AttributesGameObject = new GameObject[0];
+        public Transform[] AttributesTransform = new Transform[0];
+        public string[] AttributesString = new string[0];
+        public Text[] AttributesText = new Text[0];
+        public int[] AttributesInt = new int[0];
+        public bool[] AttributesBool = new bool[0];
+#if UNITY_EDITOR
+        public DictionaryStringGameObject AttributesGameObjectDict = new DictionaryStringGameObject();
+        public DictionaryStringTransform AttributesTransformDict = new DictionaryStringTransform();
+        public DictionaryStringString AttributesStringDict = new DictionaryStringString();
+        public DictionaryStringText AttributesTextDict = new DictionaryStringText();
+        public DictionaryStringInt AttributesIntDict = new DictionaryStringInt();
+        public DictionaryStringBool AttributesBoolDict = new DictionaryStringBool();
+#endif
     }
-
+#if UNITY_EDITOR
     [Serializable]
     public class DictionaryStringGameObject : CustomDict<string, GameObject> { }
     [Serializable]
@@ -79,4 +87,5 @@ namespace WasmLoader.Components
             values.RemoveAt(index);
         }
     }
+#endif
 }
