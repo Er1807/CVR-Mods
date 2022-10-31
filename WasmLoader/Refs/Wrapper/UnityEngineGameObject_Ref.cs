@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Wasmtime;
 namespace WasmLoader.Refs.Wrapper
 {
@@ -35,6 +36,7 @@ namespace WasmLoader.Refs.Wrapper
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 var result = UnityEngine.GameObject.FindGameObjectsWithTag(resolved_tag);
+                result = result.Where(x => x.IsAllowed(wasmType)).ToArray();
                 return objects.StoreObject(result);
             });
 
@@ -54,7 +56,7 @@ namespace WasmLoader.Refs.Wrapper
 
                 return objects.StoreObject(null);
             });
-            
+
             functions["UnityEngine_GameObject__CreatePrimitive_UnityEnginePrimitiveType__UnityEngineGameObject"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
             linker.DefineFunction("env", "UnityEngine_GameObject__CreatePrimitive_UnityEnginePrimitiveType__UnityEngineGameObject", (Caller caller, System.Int32 type) =>
             {
@@ -161,6 +163,7 @@ namespace WasmLoader.Refs.Wrapper
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 var result = resolved_this?.GetComponents(resolved_type);
+                result = result.Where(x => x.IsAllowed(wasmType)).ToArray();
                 return objects.StoreObject(result);
             });
 
@@ -177,6 +180,7 @@ namespace WasmLoader.Refs.Wrapper
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 var result = resolved_this?.GetComponentsInChildren(resolved_type);
+                result = result.Where(x => x.IsAllowed(wasmType)).ToArray();
                 return objects.StoreObject(result);
             });
 
@@ -195,25 +199,7 @@ namespace WasmLoader.Refs.Wrapper
                 WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
 #endif
                 var result = resolved_this?.GetComponentsInChildren(resolved_type, includeInactive > 0);
-                return objects.StoreObject(result);
-            });
-
-
-            functions["UnityEngine_GameObject__GetComponentsInParent_this_SystemType_SystemBoolean__UnityEngineComponent"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
-            linker.DefineFunction("env", "UnityEngine_GameObject__GetComponentsInParent_this_SystemType_SystemBoolean__UnityEngineComponent[]", (Caller caller, System.Int32 parameter_this, System.Int32 type, System.Int32 includeInactive) =>
-            {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_type = objects.RetriveObject<System.Type>(type, caller);
-
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__GetComponentsInParent_this_SystemType_SystemBoolean__UnityEngineComponent[]");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_type);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(includeInactive);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-#endif
-                var result = resolved_this?.GetComponentsInParent(resolved_type, includeInactive > 0);
+                result = result.Where(x => x.IsAllowed(wasmType)).ToArray();
                 return objects.StoreObject(result);
             });
 
@@ -232,23 +218,6 @@ namespace WasmLoader.Refs.Wrapper
                     return objects.StoreObject(result);
 
                 return objects.StoreObject(null);
-            });
-
-
-            functions["UnityEngine_GameObject__AddComponent_this_SystemType__UnityEngineComponent"] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>
-            linker.DefineFunction("env", "UnityEngine_GameObject__AddComponent_this_SystemType__UnityEngineComponent", (Caller caller, System.Int32 parameter_this, System.Int32 componentType) =>
-            {
-                var resolved_this = objects.RetriveObject<UnityEngine.GameObject>(parameter_this, caller);
-                var resolved_componentType = objects.RetriveObject<System.Type>(componentType, caller);
-#if Debug
-                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-                WasmLoaderMod.Instance.LoggerInstance.Msg("UnityEngine_GameObject__AddComponent_this_SystemType__UnityEngineComponent");
-                WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);
-                WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_componentType);
-                WasmLoaderMod.Instance.LoggerInstance.Msg("----------------------");
-#endif
-                var result = resolved_this?.AddComponent(resolved_componentType);
-                return objects.StoreObject(result);
             });
         }
     }
