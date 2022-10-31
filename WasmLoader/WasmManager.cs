@@ -134,7 +134,7 @@ namespace WasmLoader
                 {
                     switch (variableDefinition.VariableType)
                     {
-                        case "UnityEngine.Gameobject":
+                        case "UnityEngine.GameObject":
                             SetVariable(instance, variableDefinition, wasmLoader.AttributesGameObject);
                             break;
                         case "UnityEngine.UI.Text":
@@ -164,7 +164,7 @@ namespace WasmLoader
 
         private static void SetVariable(WasmInstance instance, VariableDefinition variableDefinition, Array source)
         {
-            var type = Type.GetType(variableDefinition.VariableType);
+            var type = Type.GetType(variableDefinition.VariableType) ?? typeof(object);
             if (variableDefinition.IsArray)
             {
                 Array array;
