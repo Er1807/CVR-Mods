@@ -154,6 +154,10 @@ UnityEngine.CapsuleCollider2D
 UnityEngine.CapsuleCollider
 UnityEngine.CanvasRenderer
 UnityEngine.Canvas
+- UnityEngine_Camera__get_allCamerasCount__SystemInt32
+- UnityEngine_Camera__get_allCameras__UnityEngineCamera[]
+- UnityEngine_Camera__GetAllCameras_UnityEngineCamera[]__SystemInt32
+- UnityEngine_Camera__get_main__UnityEngineCamera
 UnityEngine.Camera
 UnityEngine.BoxCollider2D
 UnityEngine.BoxCollider

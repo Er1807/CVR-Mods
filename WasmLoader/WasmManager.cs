@@ -176,8 +176,7 @@ namespace WasmLoader
                 {
                     array = Array.CreateInstance(typeof(object), variableDefinition.ArrayCount);
                 }
-
-                //var array = new object[variableDefinition.ArrayCount];
+                
                 for (var i = 0; i < variableDefinition.ArrayCount; i++)
                     array.SetValue(source.GetValue(variableDefinition.StartIndex + i), i);
 
