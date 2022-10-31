@@ -19,7 +19,7 @@ namespace WasmLoader
 
         public Dictionary<CVRInteractable, WasmInstance> WasmInstances = new Dictionary<CVRInteractable, WasmInstance>();
         public Dictionary<string, Action<Linker, Store, Objectstore, WasmType>> Functions = new Dictionary<string, Action<Linker, Store, Objectstore, WasmType>>();
-        
+
         public void CollectFuntions()
         {
             var refs = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).Where(x => typeof(IRef).IsAssignableFrom(x) && typeof(IRef) != x).ToList();
@@ -112,56 +112,87 @@ namespace WasmLoader
             wasm.behavior = behavior;
             WasmManager.Instance.WasmInstances.Add(interactable, wasm);
         }
-        
-        
+
+
 
         private static void AssignVariables(WasmLoaderBehavior wasmLoader, WasmInstance instance)
         {
-            var variableDefinitions = JsonConvert.DeserializeObject<List<VariableDefinition>>(wasmLoader.Variables);
-
-            if (variableDefinitions != null)
+            try
             {
+                var variableDefinitions = JsonConvert.DeserializeObject<List<VariableDefinition>>(wasmLoader.Variables);
+                instance.variables = variableDefinitions;
+            }
+            catch (Exception)
+            {
+                instance.variables = new List<VariableDefinition>();
+            }
 
-                foreach (var variableDefinition in variableDefinitions)
+
+            foreach (var variableDefinition in instance.variables)
+            {
+                try
                 {
-                    try
+                    switch (variableDefinition.VariableType)
                     {
-                        switch (variableDefinition.VariableType)
-                        {
-                            case "UnityEngine.Gameobject":
-                                SetVariable(instance, variableDefinition, wasmLoader.AttributesGameObject);
-                                break;
-                            case "UnityEngine.UI.Text":
-                                SetVariable(instance, variableDefinition, wasmLoader.AttributesText);
-                                break;
-                            case "System.String":
-                                SetVariable(instance, variableDefinition, wasmLoader.AttributesString);
-                                break;
-                            case "UnityEngine.Transform":
-                                SetVariable(instance, variableDefinition, wasmLoader.AttributesTransform);
-                                break;
-                            case "System.Int32":
-                                instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.SetValue(instance.store, wasmLoader.AttributesInt[variableDefinition.StartIndex]);
-                                break;
-                            case "System.Boolean":
-                                instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.SetValue(instance.store, wasmLoader.AttributesBool[variableDefinition.StartIndex]);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    catch (Exception)
-                    {//ignore
+                        case "UnityEngine.Gameobject":
+                            SetVariable(instance, variableDefinition, wasmLoader.AttributesGameObject);
+                            break;
+                        case "UnityEngine.UI.Text":
+                            SetVariable(instance, variableDefinition, wasmLoader.AttributesText);
+                            break;
+                        case "System.String":
+                            SetVariable(instance, variableDefinition, wasmLoader.AttributesString);
+                            break;
+                        case "UnityEngine.Transform":
+                            SetVariable(instance, variableDefinition, wasmLoader.AttributesTransform);
+                            break;
+                        case "System.Int32":
+                            SetVariable(instance, variableDefinition, wasmLoader.AttributesInt);
+                            break;
+                        case "System.Boolean":
+                            SetVariable(instance, variableDefinition, wasmLoader.AttributesBool);
+                            break;
+                        default:
+                            break;
                     }
                 }
-
+                catch (Exception)
+                {//ignore
+                }
             }
         }
 
-        private static void SetVariable(WasmInstance instance, VariableDefinition variableDefinition, object[] source)
+        private static void SetVariable(WasmInstance instance, VariableDefinition variableDefinition, Array source)
         {
-            instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.
-                SetValue(instance.store, instance.objects.StoreObject(source[variableDefinition.StartIndex]));
+            var type = Type.GetType(variableDefinition.VariableType);
+            if (variableDefinition.IsArray)
+            {
+                Array array;
+                if (type.IsValueType)
+                {
+                    array = Array.CreateInstance(type, variableDefinition.ArrayCount);
+                }
+                else
+                {
+                    array = Array.CreateInstance(typeof(object), variableDefinition.ArrayCount);
+                }
+
+                //var array = new object[variableDefinition.ArrayCount];
+                for (var i = 0; i < variableDefinition.ArrayCount; i++)
+                    array.SetValue(source.GetValue(variableDefinition.StartIndex + i), i);
+
+                instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.
+                    SetValue(instance.store, instance.objects.StoreObject(array));
+            }
+            else
+            {
+                object objectToStore = source.GetValue(variableDefinition.StartIndex);
+                if (!type.IsValueType)
+                    objectToStore = instance.objects.StoreObject(objectToStore);
+                
+                instance.instance.GetGlobal(instance.store, variableDefinition.VariableName)?.
+                    SetValue(instance.store, objectToStore);
+            }
         }
 
     }

@@ -20,6 +20,7 @@ namespace WasmLoader
         public GameObject gameObject;
         public Dictionary<string, Global> exports = new Dictionary<string, Global>();
         public List<SynchronizedVariable> synchronizedVariables = new List<SynchronizedVariable>();
+        public List<VariableDefinition> variables = new List<VariableDefinition>();
 
         public void InitMemoryManagment()
         {
