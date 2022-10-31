@@ -24,12 +24,5 @@ namespace WasmLoader.Refs
                 WasmLoaderMod.Instance.LoggerInstance.Msg("Unallowed gameobject " + obj.name);
             return res;
         }
-
-        public static bool IsAllowed(this Component obj, WasmType type)
-        {var res = obj.GetComponent<WasmSelectable>()?.IsAllowed(obj, type) ?? false;
-            if (!res)
-                WasmLoaderMod.Instance.LoggerInstance.Msg("Unallowed type "+ obj.GetType().ToString()+ obj.GetComponent<WasmSelectable>().AllowedTypes[0]);
-            return res;
-        }
     }
 }

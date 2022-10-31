@@ -11,7 +11,6 @@ namespace WasmLoader.Components
         public bool AllowAvatarScripts;
         public bool AllowPropScripts;
         public bool AllowUserScripts;
-        public string[] AllowedTypes;
 
         internal bool IsAllowed(WasmType type)
         {
@@ -28,11 +27,6 @@ namespace WasmLoader.Components
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-        }
-
-        internal bool IsAllowed(Component obj, WasmType type)
-        {
-            return obj.GetComponent<WasmSelectable>().AllowedTypes.Contains(obj.GetType().ToString());
         }
     }
 }
