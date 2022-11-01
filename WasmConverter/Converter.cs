@@ -93,9 +93,12 @@ namespace Converter
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_const, instruction.Offset, func.stack.Count, WasmOperand.FromLong((long)instruction.Operand)));
                     func.stack.Push(WasmDataType.i64);
                     break;
-                case Code.Ldc_I4:
                 case Code.Ldc_I4_S:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt((sbyte)instruction.Operand)));
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Ldc_I4:
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt((int)instruction.Operand)));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldstr:
