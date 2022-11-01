@@ -15,14 +15,18 @@ namespace WasmLoader.Components
 
         public WasmInstance Instance;
         public CVRInteractable CvrInteractable;
-        
+
+        public Dictionary<string, Action> funtionLookup = new Dictionary<string, Action>();
+        public Dictionary<string, Action<int>> funtionLookupInt = new Dictionary<string, Action<int>>();
+
         public void OnDestroy()
         {
             WasmLoaderMod.Instance.LoggerInstance.Msg("Unloading Wasm Instance " + gameObject.name);
             try
             {
                 WasmManager.Instance.WasmInstances.Remove(CvrInteractable);
-            } catch (Exception){}
+            }
+            catch (Exception) { }
             Instance.store.Dispose();
             Instance.linker.Dispose();
             Instance.module.Dispose();
@@ -31,9 +35,16 @@ namespace WasmLoader.Components
 
         public void Execute(string method)
         {
+            if (!funtionLookup.TryGetValue(method, out Action action))
+            {
+                action = Instance.instance.GetAction(Instance.store, method);
+                funtionLookup[method] = action;
+            }
+            if (action == null)
+                return;
             try
             {
-                Instance.instance.GetAction(Instance.store, method)?.Invoke();
+                action.Invoke();
                 Instance.CleanUpLocals();
             }
             catch (Exception ex)
@@ -49,9 +60,32 @@ namespace WasmLoader.Components
         {
             try
             {
-                var paramAsId = Instance.objects.StoreObject(parameter);
-                Instance.instance.GetAction<int>(Instance.store, method)?.Invoke(paramAsId);
-                Instance.CleanUpLocals();
+                if (typeof(T) == typeof(int) || typeof(T) == typeof(long) || typeof(T) == typeof(float) || typeof(T) == typeof(double))
+                {
+                    Action<T> action = Instance.instance.GetAction<T>(Instance.store, method);
+
+                    if (action == null)
+                        return;
+                    action.Invoke(parameter);
+                    Instance.CleanUpLocals();
+                }
+                else
+                {
+                    if (!funtionLookupInt.TryGetValue(method, out Action<int> action))
+                    {
+                        action = Instance.instance.GetAction<int>(Instance.store, method);
+                        funtionLookupInt[method] = action;
+                    }
+                    if (action == null)
+                        return;
+
+
+                    var paramAsId = Instance.objects.StoreObject(parameter);
+                    action.Invoke(paramAsId);
+                    Instance.CleanUpLocals();
+
+
+                }
             }
             catch (Exception ex)
             {
@@ -156,6 +190,59 @@ namespace WasmLoader.Components
         public void OnPlayerLeft(CVRPlayerApi player)
         {
             Execute(nameof(OnPlayerLeft), player);
+        }
+
+        public int GetProgramVariableInt(string variable)
+        {
+            if (Instance.exports.TryGetValue(variable, out var value) && value.Kind == Wasmtime.ValueKind.Int32)
+            {
+                return (int)value.GetValue(Instance.store);
+            }
+            throw new Exception("Variable not found or Type wrong");
+        }
+
+        public long GetProgramVariableLong(string variable)
+        {
+            if (Instance.exports.TryGetValue(variable, out var value) && value.Kind == Wasmtime.ValueKind.Int64)
+            {
+                return (long)value.GetValue(Instance.store);
+            }
+            throw new Exception("Variable not found or Type wrong");
+        }
+
+        public float GetProgramVariableFloat(string variable)
+        {
+            if (Instance.exports.TryGetValue(variable, out var value) && value.Kind == Wasmtime.ValueKind.Float32)
+            {
+                return (float)value.GetValue(Instance.store);
+            }
+            throw new Exception("Variable not found or Type wrong");
+        }
+
+        public double GetProgramVariableDouble(string variable)
+        {
+            if (Instance.exports.TryGetValue(variable, out var value) && value.Kind == Wasmtime.ValueKind.Float64)
+            {
+                return (double)value.GetValue(Instance.store);
+            }
+            throw new Exception("Variable not found or Type wrong");
+        }
+
+        internal object GetProgramVariableObject(string variable)
+        {
+            if (Instance.exports.TryGetValue(variable, out var value) && value.Kind == Wasmtime.ValueKind.Int32)
+            {
+                return value.GetValue(Instance.store);
+            }
+            throw new Exception("Variable not found or Type wrong");
+        }
+
+        internal void SetProgramVariable(string variable, object value)
+        {
+            if (Instance.exports.TryGetValue(variable, out var value2) && value2.Kind == Wasmtime.ValueKind.Int32)
+            {
+                value2.SetValue(Instance.store, value);
+            }
         }
         #endregion
     }

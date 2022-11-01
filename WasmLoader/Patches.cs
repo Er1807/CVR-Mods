@@ -39,33 +39,33 @@ namespace WasmLoader
         {
             if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
-            instance.behavior.Grab();
+            instance.behaviorInternal.Grab();
         }
 
         public static void Drop(CVRInteractable __instance)
         {
             if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
-            instance.behavior.Drop();
+            instance.behaviorInternal.Drop();
         }
         public static void InteractDown(CVRInteractable __instance)
         {
             if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
-            instance.behavior.InteractDown();
+            instance.behaviorInternal.InteractDown();
         }
         public static void InteractUp(CVRInteractable __instance)
         {
             if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
-            instance.behavior.InteractUp();
+            instance.behaviorInternal.InteractUp();
         }
 
         public static void GetRequestedUser(CVRInteractable __instance)
         {
             if (!WasmManager.Instance.WasmInstances.TryGetValue(__instance, out var instance))
                 return;
-            instance.behavior.InteractUp();
+            instance.behaviorInternal.InteractUp();
         }
 
         private static void UserJoinPatch(CVRPlayerEntity player)
@@ -74,7 +74,7 @@ namespace WasmLoader
             CVRPlayerApiRemote.RemotePlayers.Add(cvrPlayer);
             foreach (var instance in WasmManager.Instance.WasmInstances.Values)
             {
-                instance.behavior.OnPlayerJoined(cvrPlayer);
+                instance.behaviorInternal.OnPlayerJoined(cvrPlayer);
             }
 
 
@@ -86,7 +86,7 @@ namespace WasmLoader
 
             foreach (var instance in WasmManager.Instance.WasmInstances.Values)
             {
-                instance.behavior.OnPlayerLeft(cvrPlayer);
+                instance.behaviorInternal.OnPlayerLeft(cvrPlayer);
             }
             CVRPlayerApiRemote.RemotePlayers.Remove(cvrPlayer);
         }

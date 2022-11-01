@@ -1,16 +1,14 @@
-﻿using ABI_RC.Core.Player;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
+using WasmLoader.Components;
 using WasmLoader.TypeWrappers;
 
 namespace WasmLoader
 {
-    public class WasmBehavior
+    public class WasmBehavior : MonoBehaviour
     {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+        public WasmBehavior_Internal _internal;
+#endif
         public virtual void Start() { }
         public virtual void Update() { }
         public virtual void FixedUpdate() { }
@@ -31,5 +29,116 @@ namespace WasmLoader
         public virtual void Drop() { }
         public virtual void OnValueChanged(string name) { }
         public GameObject CurrentGameObject() { return null; }
+        public void SendCustomEvent(string eventName)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.Execute(eventName);
+#endif
+        }
+
+        public void SendCustomEvent(string eventName, int parameter)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.Execute(eventName, parameter);
+#endif
+        }
+
+        public void SendCustomEvent(string eventName, long parameter)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.Execute(eventName, parameter);
+#endif
+        }
+
+        public void SendCustomEvent(string eventName, float parameter)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.Execute(eventName, parameter);
+#endif
+        }
+
+        public void SendCustomEvent(string eventName, double parameter)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.Execute(eventName, parameter);
+#endif
+        }
+        public void SendCustomEvent(string eventName, object parameter)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.Execute(eventName, parameter);
+#endif
+        }
+
+        public void SetProgramVariable(string variable, int value)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.SetProgramVariable(variable, value);
+#endif
+        }
+        public void SetProgramVariable(string variable, long value)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.SetProgramVariable(variable, value);
+#endif
+        }
+        public void SetProgramVariable(string variable, float value)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.SetProgramVariable(variable, value);
+#endif
+        }
+        public void SetProgramVariable(string variable, double value)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.SetProgramVariable(variable, value);
+#endif
+        }
+        public void SetProgramVariable(string variable, object value)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            _internal.SetProgramVariable(variable, value);
+#endif
+        }
+        public int GetProgramVariableInt(string variable)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            return _internal.GetProgramVariableInt(variable);
+#else
+            return 0;
+#endif
+        }
+        public long GetProgramVariableLong(string variable)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            return _internal.GetProgramVariableLong(variable);
+#else
+            return 0;
+#endif
+        }
+        public float GetProgramVariableFloat(string variable)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            return _internal.GetProgramVariableFloat(variable);
+#else
+            return 0;
+#endif
+        }
+        public double GetProgramVariableDouble(string variable)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            return _internal.GetProgramVariableDouble(variable);
+#else
+            return 0;
+#endif
+        }
+        public object GetProgramVariableObject(string variable)
+        {
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+            return _internal.GetProgramVariableObject(variable);
+#else
+            return 0;
+#endif
+        }
     }
 }

@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace WasmLoader.Components
 {
-    public class WasmLoaderBehavior : MonoBehaviour
+    public class WasmLoaderBehavior : WasmBehavior
     {
         public string WasmCode;
         public string Variables;

@@ -10,13 +10,14 @@ namespace WasmLoader
 {
     public class WasmInstance
     {
+        public WasmLoaderBehavior behaviorExternal;
         public Engine engine;
         public Linker linker;
         public Store store;
         public Objectstore objects;
         public Module module;
         public Instance instance;
-        public WasmBehavior_Internal behavior;
+        public WasmBehavior_Internal behaviorInternal;
         public GameObject gameObject;
         public Dictionary<string, Global> exports = new Dictionary<string, Global>();
         public List<SynchronizedVariable> synchronizedVariables = new List<SynchronizedVariable>();
