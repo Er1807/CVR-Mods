@@ -186,8 +186,6 @@ namespace WrapperCodeGenerator
                 return true;
             if (method.Name.StartsWith("set_") && method.GetParameters().Length != 1)
                 return true;
-            if (method.Name.StartsWith("op_Explicit") || method.Name.StartsWith("op_Implicit"))
-                return true;
             if (method.Name.StartsWith("add_") || method.Name.StartsWith("remove_"))
                 return true;
             if (method.GetParameters().Any(x => x.ParameterType.IsByRef))
@@ -328,6 +326,10 @@ namespace WrapperCodeGenerator
                     return $"var result = {parameters[0]} / {parameters[1]};";
                 if (name.StartsWith("op_UnaryNegation"))
                     return $"var result = - {parameters[0]};";
+                if (name.StartsWith("op_Explicit"))
+                    return $"var result = ({member.ReturnType.FullName}) {parameters[0]};";
+                if (name.StartsWith("op_Implicit"))
+                    return $"var result = {parameters[0]};";
             }
             return "Error"; 
         }
