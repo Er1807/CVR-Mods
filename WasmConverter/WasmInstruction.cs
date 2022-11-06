@@ -1,4 +1,5 @@
-﻿using dnlib.DotNet;
+﻿#if UNITY_EDITOR
+using dnlib.DotNet;
 using System.Collections.Generic;
 using System.Text;
 
@@ -105,3 +106,4 @@ namespace Converter
 
     }
 }
+#endif

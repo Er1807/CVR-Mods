@@ -21,11 +21,14 @@ namespace WasmLoader.Serialisation
             
             foreach (var obj in instance.synchronizedVariables)
             {
-                switch (obj.Value)
+                var cachedValue = obj.Value;
+                if (cachedValue == null) {
+                    writer.Write((byte)0);
+                    continue;
+                }
+                writer.Write((byte)1);
+                switch (cachedValue)
                 {
-                    case null:
-                        writer.Write(0);
-                        break;
                     case short value:
                         writer.Write(value);
                         break;
@@ -121,6 +124,12 @@ namespace WasmLoader.Serialisation
             
             foreach (var obj in instance.synchronizedVariables)
             {
+                if(reader.ReadByte() == 0) //null
+                {
+                    obj.Value = null;
+                    continue;
+                }
+                
                 if (obj.ValueType == typeof(short))
                     obj.Value = reader.ReadInt16();
                 else if (obj.ValueType == typeof(ushort))
@@ -175,9 +184,6 @@ namespace WasmLoader.Serialisation
                     obj.Value = reader.ReadChars();
                 else if (obj.ValueType == typeof(bool[]))
                     obj.Value = reader.ReadBooleans();
-                
-
-
             }
         }
 

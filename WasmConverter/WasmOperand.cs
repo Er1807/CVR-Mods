@@ -1,4 +1,5 @@
-﻿using dnlib.DotNet;
+﻿#if UNITY_EDITOR
+using dnlib.DotNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,6 +61,18 @@ namespace Converter
                 Params = list,
                 ReturnValue = value.MethodSig.GetRetType(),
                 DeclaringType = value.DeclaringType.ToTypeSig()
+            };
+        }
+
+        public static WasmExternFunctionOperand FromExtern(string className, string methodName, bool hasThis, List<TypeSig> parameters, TypeSig returnType)
+        {
+            return new WasmExternFunctionOperand()
+            {
+                HasThis = hasThis,
+                FunctionName = ConvertMethod(className, methodName, hasThis, parameters, returnType),
+                Params = parameters,
+                ReturnValue = returnType,
+                DeclaringType = null
             };
         }
 
@@ -184,3 +197,4 @@ namespace Converter
     }
 
 }
+#endif

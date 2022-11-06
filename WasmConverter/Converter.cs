@@ -1,4 +1,5 @@
-﻿using dnlib.DotNet;
+﻿#if UNITY_EDITOR
+using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Converter
             func.ReturnType = GetWasmType(method.ReturnType);
             func.Method = method;
 
-            
+
 
             foreach (var parameter in method.Parameters.Where(x => !x.IsHiddenThisParameter))
             {
@@ -167,14 +168,14 @@ namespace Converter
                 case Code.Ldarg_S:
                     var Ldarg = (int)instruction.Operand;
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromParamField($"param{Ldarg - 1}")));
-                    func.stack.Push(func.Parameters[Ldarg-1]);
+                    func.stack.Push(func.Parameters[Ldarg - 1]);
                     break;
                 case Code.Ldarga_S:
                     var Ldarga_S = -1;
                     if (instruction.Operand is Parameter)
                         Ldarga_S = ((Parameter)instruction.Operand).Index;
                     else
-                        Ldarga_S = (int)instruction.Operand; 
+                        Ldarga_S = (int)instruction.Operand;
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromParamField($"param{Ldarga_S - 1}")));
                     func.stack.Push(func.Parameters[Ldarga_S - 1]);
                     break;
@@ -207,9 +208,9 @@ namespace Converter
                     var Stloc = -1;
                     if (instruction.Operand is Local)
                         Stloc = ((Local)instruction.Operand).Index;
-                    else 
+                    else
                         Stloc = (int)instruction.Operand;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"local{Stloc}") ));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"local{Stloc}")));
                     if (!func.Locals.ContainsKey($"local{Stloc}"))
                         func.Locals.Add($"local{Stloc}", func.stack.Peek());
                     func.stack.Pop();
@@ -237,7 +238,7 @@ namespace Converter
                         Ldloc = ((Local)instruction.Operand).Index;
                     else
                         Ldloc = (int)instruction.Operand;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"local{Ldloc}") ));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"local{Ldloc}")));
                     func.stack.Push(func.Locals[$"local{Ldloc}"]);
                     break;
                 case Code.Ldloca_S:
@@ -258,21 +259,34 @@ namespace Converter
                 case Code.Callvirt:
                 case Code.Ldsfld:
                 case Code.Ldfld:
-                    if (instruction.Operand is MemberRef m && m.Name == "GetTypeFromHandle")
-                        return;
-                    if (instruction.Operand is FieldDef fieldDef && fieldDef.DeclaringType == func.Method.DeclaringType)
-                    {
-                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, WasmOperand.FromGlobalField(fieldDef.Name.ToString())));
-                        func.stack.Push(GetWasmType(func.Module.Fields[fieldDef.Name]).Value); 
-                        break;
-                    }
                     var method = instruction.Operand as MethodDef;
                     var member = instruction.Operand as MemberRef;
+                    var field = instruction.Operand as FieldDef;
 
-                    if(method != null && method.DeclaringType.FullName == func.Module.declaringType.FullName)
+                    if (member != null && member.Name == "GetTypeFromHandle")
+                        return;
+
+
+                    if (field != null && field.DeclaringType == func.Method.DeclaringType)
+                    {
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, WasmOperand.FromGlobalField(field.Name.ToString())));
+                        func.stack.Push(GetWasmType(func.Module.Fields[field.Name]).Value);
+                        break;
+                    }
+
+                    if (field != null && field.DeclaringType != func.Method.DeclaringType)
+                    {
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, WasmOperand.FromExtern(field.DeclaringType.FullName, $"get_{field.Name}", true, new List<TypeSig>(), field.FieldType)));
+
+                        func.stack.Pop();
+                        func.stack.Push(GetWasmType(field.FieldType).Value);
+                        break;
+                    }
+
+                    if (method != null && method.DeclaringType.FullName == func.Module.declaringType.FullName)
                     {
                         func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, WasmOperand.FromLocalFunction(method.Name)));
-                        for (int i = 0; i < method.Parameters.Count -1 ; i++)
+                        for (int i = 0; i < method.Parameters.Count - 1; i++)
                         {
                             func.stack.Pop();
                         }
@@ -288,7 +302,7 @@ namespace Converter
                     else if (method != null)
                         externFunction = WasmOperand.FromExtern(method);
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, externFunction));
-                    
+
                     if ((instruction.Operand as IFullName).Name == "CurrentGameObject")
                     {
                         externFunction.Params.Clear();
@@ -303,12 +317,12 @@ namespace Converter
                     if (externFunction.ReturnValue != null && externFunction.ReturnValue.FullName != "System.Void")
                         func.stack.Push(GetWasmType(externFunction.ReturnValue).Value);
 
-                    
+
                     break;
                 case Code.Ldflda:
                     if (instruction.Operand is FieldDef fieldDefa && fieldDefa.DeclaringType == func.Method.DeclaringType)
                     {
-                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count,WasmOperand.FromGlobalField(fieldDefa.Name.ToString())));
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, WasmOperand.FromGlobalField(fieldDefa.Name.ToString())));
                         func.stack.Push(GetWasmType(func.Module.Fields[fieldDefa.Name]).Value);
                         break;
                     }
@@ -317,7 +331,7 @@ namespace Converter
 
                 case Code.Ldtoken:
                     var ldtoken = instruction.Operand as IFullName;
-                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand() { FunctionName = ldtoken.FullName.Replace(".", "_") + "__Type" , ReturnValue = Program.TypeType.ToTypeSig(), Params = new List<TypeSig> ()} ));
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand() { FunctionName = ldtoken.FullName.Replace(".", "_") + "__Type", ReturnValue = Program.TypeType.ToTypeSig(), Params = new List<TypeSig>() }));
                     func.stack.Push(WasmDataType.i32);
                     break;
                 case Code.Ldftn:
@@ -332,6 +346,16 @@ namespace Converter
                         func.stack.Pop();
                         break;
                     }
+
+                    if (instruction.Operand is FieldDef fieldDef3 && fieldDef3.DeclaringType != func.Method.DeclaringType)
+                    {
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, WasmOperand.FromExtern(fieldDef3.DeclaringType.FullName, $"set_{fieldDef3.Name}", true, new List<TypeSig>(), fieldDef3.FieldType)));
+
+                        func.stack.Pop();
+                        func.stack.Pop();
+                        break;
+                    }
+
                     Console.Error.WriteLine("Unkown opcode op " + instruction.OpCode.Code);
                     break;
                 case Code.Newobj:
@@ -548,19 +572,19 @@ namespace Converter
                     {
                         case WasmDataType.i32:
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromInt(0)));
-                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_eq, instruction.Offset, func.stack.Count+1));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_eq, instruction.Offset, func.stack.Count + 1));
                             break;
                         case WasmDataType.i64:
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_const, instruction.Offset, func.stack.Count, WasmOperand.FromLong(0)));
-                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_eq, instruction.Offset, func.stack.Count+1));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_eq, instruction.Offset, func.stack.Count + 1));
                             break;
                         case WasmDataType.f32:
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_const, instruction.Offset, func.stack.Count, WasmOperand.FromFloat(0)));
-                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_eq, instruction.Offset, func.stack.Count+1));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_eq, instruction.Offset, func.stack.Count + 1));
                             break;
                         case WasmDataType.f64:
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_const, instruction.Offset, func.stack.Count, WasmOperand.FromDouble(0)));
-                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_eq, instruction.Offset, func.stack.Count+1));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_eq, instruction.Offset, func.stack.Count + 1));
                             break;
                     }
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, func.stack.Count, WasmOperand.FromLong(((Instruction)instruction.Operand).Offset)));
@@ -589,7 +613,7 @@ namespace Converter
                             func.stack.Push(WasmDataType.arri32);
                             break;
                         case "System.Int64":
-                            
+
                             functionname = "Newarr_Long";
                             returnValue = Program.TypeLong;
                             func.stack.Push(WasmDataType.arri64);
@@ -754,7 +778,7 @@ namespace Converter
                     {
                         FunctionName = lengthFunc,
                         ReturnValue = Program.TypeInt.ToTypeSig(),
-                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig()}
+                        Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig() }
                     }));
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.i32);
@@ -788,7 +812,7 @@ namespace Converter
                 return WasmDataType.f64;
             if (type == "System.Int64")
                 return WasmDataType.i64;
-            
+
             return WasmDataType.i32;
         }
         public static WasmDataType? GetWasmType(string type)
@@ -796,7 +820,7 @@ namespace Converter
             if (type == null)
                 return null;
             if (type == "System.Void")
-                return null; 
+                return null;
             if (type == "System.Single")
                 return WasmDataType.f32;
             if (type == "System.Double")
@@ -818,6 +842,7 @@ namespace Converter
             return WasmDataType.i32;
         }
 
-        
+
     }
 }
+#endif
