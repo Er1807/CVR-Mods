@@ -135,6 +135,10 @@ namespace WrapperCodeGenerator
                 sb.AppendLine($@"functions[""{ConvertMethod(member)}""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
 
                 sb.AppendLine(Header(member));
+                sb.AppendLine("#if Debug");
+                sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
+                sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""{ConvertMethod(member)}"");");
+                sb.AppendLine($@"#endif");
                 if (HasThis(member) && !IsSimple(member.DeclaringType))
                     sb.AppendLine(Retieve(member.DeclaringType));
                 foreach (var item in member.GetParameters())
@@ -142,8 +146,6 @@ namespace WrapperCodeGenerator
                     sb.AppendLine(Retieve(item));
                 }
                 sb.AppendLine("#if Debug");
-                sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
-                sb.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""{ConvertMethod(member)}"");");
                 if (HasThis(member))
                 {
                     sb.AppendLine($"WasmLoaderMod.Instance.LoggerInstance.Msg(parameter_this);");
