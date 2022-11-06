@@ -33,7 +33,7 @@ namespace WrapperCodeGenerator
         {
             //return;
             StringBuilder sb = new StringBuilder();
-            
+
             var testDomain = AppDomain.CurrentDomain;
 
             testDomain.AssemblyResolve += new ResolveEventHandler(LoadFromMelonLoader);
@@ -75,8 +75,8 @@ namespace WrapperCodeGenerator
                     }
                     else
                     {
-                        sb.AppendLine("// Generating " + item +" with "+ allowedFunctions.Count);
-                        
+                        sb.AppendLine("// Generating " + item + " with " + allowedFunctions.Count);
+
                         Generate(context, types.Where(x => x.FullName == item).First(), allowedFunctions, disallowedFunctions);
                         allowedFunctions.Clear();
                     }
@@ -85,7 +85,7 @@ namespace WrapperCodeGenerator
                 {
                     sb.AppendLine("// Error " + item + " with " + allowedFunctions.Count + " " + ex.Message);
                 }
-                
+
             }
             context.AddSource("Results.g.cs", sb.ToString());
         }
@@ -93,7 +93,7 @@ namespace WrapperCodeGenerator
         public void Generate(GeneratorExecutionContext context, Type type, List<string> allowedFunctions, List<string> disallowedFunctions)
         {
             if (type == null) return;
-            
+
             string source = GenerateClass(type, allowedFunctions, disallowedFunctions).ToString();
             context.AddSource($"{(type.Namespace + type.Name).Replace(".", "_") + "_Ref"}.g.cs", source);
         }
@@ -127,6 +127,8 @@ namespace WrapperCodeGenerator
 
             foreach (var member in methods)
             {
+                if (member.DeclaringType != type)
+                    continue;
                 if (Check(member, allowedFunctions, disallowedFunctions))
                     continue;
 
@@ -134,7 +136,7 @@ namespace WrapperCodeGenerator
 
                 sb.AppendLine(Header(member));
                 if (HasThis(member) && !IsSimple(member.DeclaringType))
-                    sb.AppendLine(RetieveThis(member));
+                    sb.AppendLine(Retieve(member.DeclaringType));
                 foreach (var item in member.GetParameters())
                 {
                     sb.AppendLine(Retieve(item));
@@ -163,6 +165,12 @@ namespace WrapperCodeGenerator
                 sb.AppendLine("});");
                 sb.AppendLine();
             }
+
+            foreach (var item in type.GetFields())
+            {
+                sb.AppendLine(GenerateField(item, allowedFunctions, disallowedFunctions));
+            }
+
             sb.AppendLine("}");
             sb.AppendLine("}");
             sb.AppendLine("}");
@@ -170,7 +178,7 @@ namespace WrapperCodeGenerator
 
             return sb;
         }
-        
+
 
         public static bool Check(MethodInfo method, List<string> allowedFunctions, List<string> disallowedFunctions)
         {
@@ -198,11 +206,31 @@ namespace WrapperCodeGenerator
                 return true;
             if (convertedName.Contains("&") || convertedName.Contains("`"))
                 return true;
-            
+
             if (allowedFunctions.Count != 0 && !allowedFunctions.Contains(convertedName))
             {
                 return true;
             }
+
+            return false;
+        }
+
+        public static bool Check(FieldInfo field, List<string> allowedFunctions, List<string> disallowedFunctions, bool read)
+        {
+            if (field.FieldType.IsGenericType)
+                return true;
+            if (field.IsInitOnly || field.IsLiteral)
+                return true;
+
+            var getName = ConvertMethod(field.DeclaringType, $"get_{field.Name}", HasThis(field), new List<Type>(), field.FieldType);
+            var setName = ConvertMethod(field.DeclaringType, $"set_{field.Name}", HasThis(field), new List<Type>() { field.FieldType }, field.FieldType);
+
+
+
+            if (disallowedFunctions.Contains(getName) && read)
+                return true;
+            if (disallowedFunctions.Contains(setName) && !read)
+                return true;
 
             return false;
         }
@@ -219,9 +247,105 @@ namespace WrapperCodeGenerator
 
             return $"linker.DefineFunction(\"env\", \"{ConvertMethod(method)}\", (Caller caller {paramsting}) => {{";
         }
+        public static string GenerateField(FieldInfo field, List<string> allowedFunctions, List<string> disallowedFunctions)
+        {
+
+            if (field.FieldType.IsGenericType)
+                return "";
+
+            var param = new List<string>();
+            if (HasThis(field))
+                param.Insert(0, $"{GetWasmType(field.DeclaringType)} parameter_this");
+
+            string paramsting = "";
+            if (param.Count > 0)
+                paramsting = ", ";
+            paramsting += string.Join(", ", param);
+
+            StringBuilder builder = new StringBuilder();
+
+            var getName = ConvertMethod(field.DeclaringType, $"get_{field.Name}", HasThis(field), new List<Type>(), field.FieldType);
+            var setName = ConvertMethod(field.DeclaringType, $"set_{field.Name}", HasThis(field), new List<Type>() { field.FieldType }, field.FieldType);
+            if (!Check(field, allowedFunctions, disallowedFunctions, true))
+            {
+                builder.AppendLine($@"functions[""{getName}""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
+                builder.AppendLine($"linker.DefineFunction(\"env\", \"{getName}\", (Caller caller {paramsting}) => {{");
+
+                builder.AppendLine("#if Debug");
+                builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
+                builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""{getName}"");");
+                builder.AppendLine($@"#endif");
+                if (HasThis(field))
+                {
+                    builder.AppendLine(Retieve(field.DeclaringType));
+
+                    builder.AppendLine("#if Debug");
+                    builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);");
+                    builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
+                    builder.AppendLine($@"#endif");
+                    builder.AppendLine($"return resolved_this.{field.Name};");
+                }
+                else
+                {
+                    builder.AppendLine("#if Debug");
+                    builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
+                    builder.AppendLine($@"#endif");
+                    builder.AppendLine($"return {field.DeclaringType.FullName}.{field.Name};");
+                }
+                builder.AppendLine("});");
+
+            }
+            builder.AppendLine("");
+
+            param.Add($"{GetWasmType(field.FieldType)} value");
+
+            paramsting = "";
+            if (param.Count > 0)
+                paramsting = ", ";
+            paramsting += string.Join(", ", param);
+
+            if (field.IsInitOnly || field.IsLiteral)
+                return builder.ToString();
+            if (!Check(field, allowedFunctions, disallowedFunctions, false))
+            {
+                builder.AppendLine($@"functions[""{setName}""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
+                builder.AppendLine($"linker.DefineFunction(\"env\", \"{setName}\", (Caller caller {paramsting}) => {{");
+
+                builder.AppendLine("#if Debug");
+                builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
+                builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""{setName}"");");
+                builder.AppendLine($@"#endif");
+                if (HasThis(field))
+                {
+                    builder.AppendLine(Retieve(field.DeclaringType));
+                    builder.AppendLine(Retieve(field.FieldType, "value"));
+
+                    builder.AppendLine("#if Debug");
+                    builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(resolved_this);");
+                    builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
+                    builder.AppendLine($@"#endif");
+                    builder.AppendLine($"resolved_this.{field.Name} = {GetParameterForCall("value", field.FieldType)};");
+                }
+                else
+                {
+                    builder.AppendLine(Retieve(field.FieldType, "value"));
+                    builder.AppendLine("#if Debug");
+                    builder.AppendLine($@"WasmLoaderMod.Instance.LoggerInstance.Msg(""----------------------"");");
+                    builder.AppendLine($@"#endif");
+                    builder.AppendLine($"{field.DeclaringType.FullName}.{field.Name} = {GetParameterForCall("value", field.FieldType)};");
+                }
+                builder.AppendLine("});");
+            }
+            return builder.ToString();
+        }
+
         public static string ConvertMethod(MethodInfo method)
         {
-            return $"{method.DeclaringType.FullName.Replace(".", "_")}__{method.Name.Replace(".", "")}{GetParamStr(HasThis(method), method.GetParameters().Select(x => x.ParameterType).ToList(), method.ReturnType)}";
+            return ConvertMethod(method.DeclaringType, method.Name, HasThis(method), method.GetParameters().Select(x => x.ParameterType).ToList(), method.ReturnType);
+        }
+        public static string ConvertMethod(Type type, string name, bool hasThis, List<Type> parameters, Type returnType)
+        {
+            return $"{type.FullName.Replace(".", "_")}__{name.Replace(".", "")}{GetParamStr(hasThis, parameters, returnType)}";
         }
         public static string GetParamStr(bool hasThis, List<Type> parameters, Type returnType)
         {
@@ -251,15 +375,19 @@ namespace WrapperCodeGenerator
         }
         public static string Retieve(ParameterInfo param)
         {
-            if (IsSimple(param.ParameterType))
-                return "";
-            return $"var resolved_{param.Name} = objects.RetriveObject<{param.ParameterType.FullName.Replace("+", ".")}>({param.Name}, caller);";
+            return Retieve(param.ParameterType, param.Name);
         }
 
-        private static string RetieveThis(MethodInfo member)
+        public static string Retieve(Type type, string name = "this")
         {
-            return $"var resolved_this = objects.RetriveObject<{member.DeclaringType.FullName.Replace("+", ".")}>(parameter_this, caller);";
+            var parameterName = name;
+            if (name == "this")
+                parameterName = "parameter_this";
+            if (IsSimple(type))
+                return "";
+            return $"var resolved_{name} = objects.RetriveObject<{type.FullName.Replace("+", ".")}>({parameterName}, caller);";
         }
+
         public static string Call(MethodInfo member)
         {
             var parameters = member.GetParameters().Select(x => GetParameterForCall(x)).ToList();
@@ -331,14 +459,19 @@ namespace WrapperCodeGenerator
                 if (name.StartsWith("op_Implicit"))
                     return $"var result = {parameters[0]};";
             }
-            return "Error"; 
+            return "Error";
         }
 
         private static string GetParameterForCall(ParameterInfo x)
         {
-            if (x.ParameterType == typeof(bool))
-                return $"{x.Name} > 0";
-            return IsSimple(x.ParameterType) ? x.Name : $"resolved_{x.Name}";
+            return GetParameterForCall(x.Name, x.ParameterType);
+        }
+
+        private static string GetParameterForCall(string name, Type type)
+        {
+            if (type == typeof(bool))
+                return $"{name} > 0";
+            return IsSimple(type) ? name : $"resolved_{name}";
         }
 
         public static string ReturnValue(MethodInfo method)
@@ -389,7 +522,10 @@ namespace WrapperCodeGenerator
         {
             return (method.CallingConvention & CallingConventions.HasThis) == CallingConventions.HasThis;
         }
-
+        public static bool HasThis(FieldInfo field)
+        {
+            return !field.IsStatic;
+        }
         public static bool HasSpecialName(MethodInfo method)
         {
             return (method.Attributes & MethodAttributes.SpecialName) == MethodAttributes.SpecialName;
