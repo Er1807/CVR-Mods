@@ -30,6 +30,11 @@ namespace Converter
             {
                 func.Locals.Add($"param{i}", func.Parameters[i]);
             }
+
+            for (int i = 0; i < method.Body.Variables.Count; i++)
+            {
+                func.Locals.Add($"local{method.Body.Variables[i].Index}", GetWasmType(method.Body.Variables[i].Type).Value);
+            }
             var instructions = method.Body.Instructions;
             for (int i = 0; i < instructions.Count; i++)
             {
