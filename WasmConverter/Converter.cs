@@ -189,26 +189,18 @@ namespace Converter
                     break;
                 case Code.Stloc_0:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local0")));
-                    if (!func.Locals.ContainsKey("local0"))
-                        func.Locals.Add($"local0", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Stloc_1:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local1")));
-                    if (!func.Locals.ContainsKey("local1"))
-                        func.Locals.Add($"local1", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Stloc_2:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local2")));
-                    if (!func.Locals.ContainsKey("local2"))
-                        func.Locals.Add($"local2", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Stloc_3:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField("local3")));
-                    if (!func.Locals.ContainsKey("local3"))
-                        func.Locals.Add($"local3", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Stloc:
@@ -219,8 +211,6 @@ namespace Converter
                     else
                         Stloc = (int)instruction.Operand;
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"local{Stloc}")));
-                    if (!func.Locals.ContainsKey($"local{Stloc}"))
-                        func.Locals.Add($"local{Stloc}", func.stack.Peek());
                     func.stack.Pop();
                     break;
                 case Code.Starg:
