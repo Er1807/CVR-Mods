@@ -36,17 +36,18 @@ namespace Converter
 
                 if (inst.Instruction == WasmInstructions.br && inst.StackSizeBefore != 0)
                 {
-                    Console.WriteLine("Funtion needs jump fixing");
+                    Console.WriteLine("Funtion needs jump fixing " + wasmFunction.Name);
                     var altTarget = wasmFunction.Instructions[i + 1];
                     var thisTarget = wasmFunction.Instructions[i + 2];
 
                     wasmFunction.Locals.Add($"jumpFix{counter}", WasmDataType.i32);
                     wasmFunction.Instructions.Insert(i, new WasmInstruction(WasmInstructions.set_local, inst.Offset, inst.StackSizeBefore, WasmOperand.FromLocalField($"jumpFix{counter}")));
                     wasmFunction.Instructions.Insert(wasmFunction.Instructions.IndexOf(thisTarget), new WasmInstruction(WasmInstructions.set_local, 9999, inst.StackSizeBefore, WasmOperand.FromLocalField($"jumpFix{counter}")));
-                    wasmFunction.Instructions.Insert(wasmFunction.Instructions.IndexOf(thisTarget), new WasmInstruction(WasmInstructions.get_local, 0, inst.StackSizeBefore, WasmOperand.FromLocalField($"jumpFix{counter}")));
+                    wasmFunction.Instructions.Insert(wasmFunction.Instructions.IndexOf(thisTarget), new WasmInstruction(WasmInstructions.get_local, 0, 0, WasmOperand.FromLocalField($"jumpFix{counter}")));
                     counter++;
 
                     inst.StackSizeBefore = 0;
+                    altTarget.StackSizeBefore = 0;
                     //fix stack count for all other instructions
                     for (int j = wasmFunction.Instructions.IndexOf(thisTarget); j < wasmFunction.Instructions.Count; j++)
                     {
@@ -86,6 +87,22 @@ namespace Converter
 
                         blocks.Insert(i, ifBlock);
                         blocks.RemoveRange(i + 1, EndOfIf - i + 1);
+                        foreach (var ifcase in ifBlock.Cases)
+                        {
+                            RebuildSubBlock(ifcase.Item2);
+                        }
+                    }
+                    else if (!blocks.Any(x => x.FirstOffset == (blocks[EndOfIf].LastOperand as WasmLongOperand).AsUInt)) // ||
+                    {
+                        var shortFin = blocks.Single(x => x.FirstOffset == (block.LastOperand as WasmLongOperand).AsUInt);
+
+                        cases.Add((new List<Block>() { block }, new List<Block>() { shortFin }));
+                        cases.Add((null, blocks.Skip(i + 1).Take(blocks.IndexOf(shortFin) - 1 - i - 1).ToList() )); // remove last br
+
+                        var ifBlock = new IfBlock(cases);
+
+                        blocks.Insert(i, ifBlock);
+                        blocks.RemoveRange(i + 1, EndOfIf - i + 2);
                         foreach (var ifcase in ifBlock.Cases)
                         {
                             RebuildSubBlock(ifcase.Item2);
