@@ -1,5 +1,7 @@
 ﻿#if UNITY_EDITOR
+using dnlib.DotNet.Emit;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +22,43 @@ namespace Converter
 
         public void Rebuild()
         {
+            FixJumpsWithStack();
             BuildZeroStackBlocks();
             RebuildSubBlock(wasmFunction.Blocks);
         }
+
+        private void FixJumpsWithStack()
+        {
+            int counter = 0;
+            for (int i = 0; i < wasmFunction.Instructions.Count; i++)
+            {
+                var inst = wasmFunction.Instructions[i];
+
+                if (inst.Instruction == WasmInstructions.br && inst.StackSizeBefore != 0)
+                {
+                    Console.WriteLine("Funtion needs jump fixing");
+                    var altTarget = wasmFunction.Instructions[i + 1];
+                    var thisTarget = wasmFunction.Instructions[i + 2];
+
+                    wasmFunction.Locals.Add($"jumpFix{counter}", WasmDataType.i32);
+                    wasmFunction.Instructions.Insert(i, new WasmInstruction(WasmInstructions.set_local, inst.Offset, inst.StackSizeBefore, WasmOperand.FromLocalField($"jumpFix{counter}")));
+                    wasmFunction.Instructions.Insert(wasmFunction.Instructions.IndexOf(thisTarget), new WasmInstruction(WasmInstructions.set_local, 9999, inst.StackSizeBefore, WasmOperand.FromLocalField($"jumpFix{counter}")));
+                    wasmFunction.Instructions.Insert(wasmFunction.Instructions.IndexOf(thisTarget), new WasmInstruction(WasmInstructions.get_local, 0, inst.StackSizeBefore, WasmOperand.FromLocalField($"jumpFix{counter}")));
+                    counter++;
+
+                    inst.StackSizeBefore = 0;
+                    //fix stack count for all other instructions
+                    for (int j = wasmFunction.Instructions.IndexOf(thisTarget); j < wasmFunction.Instructions.Count; j++)
+                    {
+                        wasmFunction.Instructions[j].StackSizeBefore--;
+
+                    }
+
+
+                }
+            }
+        }
+
         public void RebuildSubBlock(List<Block> blocks)
         {
             BuildForBlocks(blocks);
@@ -48,7 +84,7 @@ namespace Converter
 
                         var ifBlock = new IfBlock(cases);
 
-                        blocks.Insert(i, ifBlock); 
+                        blocks.Insert(i, ifBlock);
                         blocks.RemoveRange(i + 1, EndOfIf - i + 1);
                         foreach (var ifcase in ifBlock.Cases)
                         {
@@ -58,7 +94,7 @@ namespace Converter
                     else
                     {
                         var actualEnd = blocks.IndexOf(blocks.Single(x => x.FirstOffset == (blocks[EndOfIf].LastOperand as WasmLongOperand).AsUInt)) - 1;
-                        
+
                         cases.Add((new List<Block>() { block }, blocks.Skip(i + 1).Take(EndOfIf - i - 1).ToList()));
 
                         var remaining = blocks.Skip(EndOfIf + 1).Take(actualEnd - EndOfIf).ToList();
@@ -86,7 +122,7 @@ namespace Converter
                         {
                             cases.Add((null, remaining));
                         }
-                        
+
                         var ifBlock = new IfBlock(cases);
 
                         blocks.Insert(i, ifBlock);
@@ -132,7 +168,7 @@ namespace Converter
                     var forBlock = new ForBlock(ForCounter,
                         blocks.Skip(startInstructionBlock).Take(endInstructionBlock - startInstructionBlock + 1).ToList(),
                         new List<Block>() { blocks[incBlock] },
-                        new List<Block>() { blocks[checkBlock], blocks[checkBlock+1] },//garbage needs to be improved
+                        new List<Block>() { blocks[checkBlock], blocks[checkBlock + 1] },//garbage needs to be improved
                         CreateForCheckBlock(ForCounter)
                     );
                     wasmFunction.Locals.Add($"for{ForCounter}", WasmDataType.i32);
@@ -159,6 +195,11 @@ namespace Converter
                     lastIndex = i;
                 }
             }
+            if (lastIndex != wasmFunction.Instructions.Count - 1)
+            {
+                blocks.Add(new ZeroStackBlock(wasmFunction.Instructions.Skip(lastIndex).Take(wasmFunction.Instructions.Count - 1 - lastIndex).ToList()));
+            }
+
             if (wasmFunction.Instructions.Last().Instruction == WasmInstructions._return)//wtf. why is the return not added
             {
                 blocks.Add(new ZeroStackBlock(new List<WasmInstruction>() { wasmFunction.Instructions.Last() }));
