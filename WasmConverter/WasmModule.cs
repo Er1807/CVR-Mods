@@ -28,7 +28,7 @@ namespace Converter
             //data
             foreach (var function in Functions.SelectMany(x => x.Instructions).Where(x => x.Instruction == WasmInstructions.call && x.Operand is WasmExternFunctionOperand).Select(x => x.Operand as WasmExternFunctionOperand).GroupBy(x => x.FunctionName).Select(x => x.First()))
             {
-                builder.AppendLine($@"  (import ""env"" ""{function.FunctionName}"" (func ${function.FunctionName} {WasmFunction.BuildParamString(function.Params.Select(x => Converter.GetWasmType(x).Value).ToList(), true)} {WasmFunction.BuildResultString(Converter.GetWasmType(function.ReturnValue.FullName))}))");
+                builder.AppendLine($@"  (import ""env"" ""{function.FunctionName}"" (func ${function.FunctionName} {WasmFunction.BuildParamString(function.Params.Select(x => Converter.GetWasmTypeWoArray(x).Value).ToList(), true)} {WasmFunction.BuildResultString(Converter.GetWasmTypeWoArray(function.ReturnValue.FullName))}))");
             }
 
             foreach (var field in Fields)

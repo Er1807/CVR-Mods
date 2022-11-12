@@ -59,7 +59,7 @@ namespace Converter
                 HasThis = value.HasThis,
                 FunctionName = ConvertMethod(value.DeclaringType.FullName, value.Name, value.HasThis, value.GetParams().ToList(), value.MethodSig.GetRetType()),
                 Params = list,
-                ReturnValue = value.MethodSig.GetRetType(),
+                ReturnValue = value.MethodSig?.GetRetType() ?? value.FieldSig.Type,
                 DeclaringType = value.DeclaringType.ToTypeSig()
             };
         }
