@@ -19,6 +19,8 @@ namespace Converter
         call, nop, _return, drop,
         i32_add, i64_add, f32_add, f64_add,
         i32_sub, i64_sub, f32_sub, f64_sub,
+        i32_mul, i64_mul, f32_mul, f64_mul,
+        i32_div_s, i64_div_s, i32_div_u, i64_div_u, f32_div, f64_div,
         i32_rem_s, i64_rem_s, i32_rem_u, i64_rem_u,
         i32_eq, i64_eq, f32_eq, f64_eq,
         i32_eqz, i64_eqz,
@@ -26,6 +28,8 @@ namespace Converter
         i32_gt_u, i64_gt_u,
         i32_lt_s, i64_lt_s, f32_lt, f64_lt,
         i32_lt_u, i64_lt_u,
+        i32_ge_s, i64_ge_s, f32_ge, f64_ge,
+        i32_ge_u, i64_ge_u,
         get_local, set_local, tee_local,
         get_global, set_global,
         br, br_if, block, loop, end

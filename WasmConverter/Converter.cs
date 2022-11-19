@@ -343,7 +343,6 @@ namespace Converter
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count, WasmOperand.FromString(Ldftn.Name)));
                     func.stack.Push(WasmDataType.i32);
                     break;
-                    
                 case Code.Stfld:
                     if (instruction.Operand is FieldDef fieldDef2 && fieldDef2.DeclaringType == func.Method.DeclaringType)
                     {
@@ -415,6 +414,64 @@ namespace Converter
                             break;
                         case WasmDataType.f64:
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_add, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.f64);
+                            break;
+                    }
+                    break;
+                case Code.Div:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_div_s, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.i32);
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_div_s, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.i64);
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_div, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.f32);
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_div, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.f64);
+                            break;
+                    }
+                    break;
+                case Code.Mul:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_mul, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.i32);
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_mul, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.i64);
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_mul, instruction.Offset, func.stack.Count));
+                            func.stack.Pop();
+                            func.stack.Pop();
+                            func.stack.Push(WasmDataType.f32);
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_mul, instruction.Offset, func.stack.Count));
                             func.stack.Pop();
                             func.stack.Pop();
                             func.stack.Push(WasmDataType.f64);
@@ -538,6 +595,8 @@ namespace Converter
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.i32);
                     break;
+                case Code.Ble:
+                case Code.Ble_S:
                 case Code.Clt:
                     switch (func.stack.Peek())
                     {
@@ -558,6 +617,8 @@ namespace Converter
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.i32);
                     break;
+                case Code.Ble_Un:
+                case Code.Ble_Un_S:
                 case Code.Clt_Un:
                     switch (func.stack.Peek())
                     {
@@ -566,6 +627,42 @@ namespace Converter
                             break;
                         case WasmDataType.i64:
                             func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_lt_u, instruction.Offset, func.stack.Count));
+                            break;
+                    }
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Bge:
+                case Code.Bge_S:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_ge_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_ge_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_ge, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_ge, instruction.Offset, func.stack.Count));
+                            break;
+                    }
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Bge_Un:
+                case Code.Bge_Un_S:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_ge_u, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_ge_u, instruction.Offset, func.stack.Count));
                             break;
                     }
                     func.stack.Pop();
@@ -730,6 +827,9 @@ namespace Converter
                     func.stack.Pop();
                     break;
                 case Code.Ldelem_I4:
+                case Code.Ldelem_U1:
+                case Code.Ldelem_U2:
+                case Code.Ldelem_U4:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
                     {
                         FunctionName = "Arr_Get_Int",
@@ -773,6 +873,7 @@ namespace Converter
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.f64);
                     break;
+                case Code.Ldelem:
                 case Code.Ldelem_Ref:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
                     {
