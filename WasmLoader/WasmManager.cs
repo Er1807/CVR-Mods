@@ -61,7 +61,7 @@ namespace WasmLoader
             {
                 if (Functions.TryGetValue(import.Name, out var action))
                     action(linker, store, objects, wasmType);
-                else if (import.Name != "WasmLoader_WasmBehavior__CurrentGameObject_this__UnityEngineGameObject")
+                else if (!import.Name.StartsWith("WasmLoader_WasmBehavior"))
                 {
                     WasmLoaderMod.Instance.LoggerInstance.Warning($"No function found for {import.Name}");
                 }

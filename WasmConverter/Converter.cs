@@ -46,6 +46,12 @@ namespace Converter
                     instructions.RemoveAt(i + 2);
                     instructions.RemoveAt(i);
                 }
+                if ((instructions[i].OpCode == OpCodes.Br || instructions[i].OpCode == OpCodes.Br_S) && instructions[i].Operand == instructions[i+1])
+                {
+                    //why tf add random small jumps
+                    instructions[i].OpCode = OpCodes.Nop;
+                    instructions[i].Operand = null;
+                }
             }
 
             foreach (var instruction in instructions)
