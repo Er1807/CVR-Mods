@@ -20,6 +20,7 @@ namespace Converter
         i32_add, i64_add, f32_add, f64_add,
         i32_sub, i64_sub, f32_sub, f64_sub,
         i32_mul, i64_mul, f32_mul, f64_mul,
+        f32_neg, f64_neg,
         i32_div_s, i64_div_s, i32_div_u, i64_div_u, f32_div, f64_div,
         i32_rem_s, i64_rem_s, i32_rem_u, i64_rem_u,
         i64_extend_i32_s, i64_extend_i32_u, i32_wrap_i64,

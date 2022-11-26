@@ -669,6 +669,48 @@ namespace Converter
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.i32);
                     break;
+                case Code.Beq:
+                case Code.Beq_S:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_eq, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_eq, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_eq, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_eq, instruction.Offset, func.stack.Count));
+                            break;
+                    }
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, func.stack.Count - 1, WasmOperand.FromLong(((Instruction)instruction.Operand).Offset)));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    break;
+                case Code.Bgt_Un:
+                case Code.Bgt_Un_S:
+                    switch (func.stack.Peek())
+                    {
+                case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_gt_u, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_gt_u, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_gt, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_gt, instruction.Offset, func.stack.Count));
+                            break;
+                    }
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, func.stack.Count - 1, WasmOperand.FromLong(((Instruction)instruction.Operand).Offset)));
+                    func.stack.Pop();
+                    func.stack.Pop();
+                    break;
                 case Code.Brfalse:
                 case Code.Brfalse_S:
                     switch (func.stack.Peek())
@@ -1039,6 +1081,84 @@ namespace Converter
                     }
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.f64);
+                    break;
+                case Code.Unbox_Any:
+                    func.stack.Pop();
+                    switch (instruction.Operand is TypeRef ? (instruction.Operand as TypeRef).FullName : (instruction.Operand as TypeDef).FullName)
+                    {
+                        case "System.Boolean":
+                        case "System.Integer":
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                            {
+                                FunctionName = "Unbox_Int",
+                                ReturnValue = Program.TypeInt.ToTypeSig(),
+                                Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig() }
+                            }));
+                            func.stack.Push(WasmDataType.i32);
+                            break;
+                        case "System.Long":
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                            {
+                                FunctionName = "Unbox_Long",
+                                ReturnValue = Program.TypeLong.ToTypeSig(),
+                                Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig() }
+                            }));
+                            func.stack.Push(WasmDataType.i64);
+                            break;
+                        case "System.Float":
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                            {
+                                FunctionName = "Unbox_Float",
+                                ReturnValue = Program.TypeFloat.ToTypeSig(),
+                                Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig() }
+                            }));
+                            func.stack.Push(WasmDataType.f32);
+                            break;
+                        case "System.Double":
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                            {
+                                FunctionName = "Unbox_Double",
+                                ReturnValue = Program.TypeDouble.ToTypeSig(),
+                                Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig() }
+                            }));
+                            func.stack.Push(WasmDataType.f64);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case Code.Neg:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            if (!func.Locals.ContainsKey($"temp{func.stack.Peek()}"))
+                                func.Locals.Add($"temp{func.stack.Peek()}", func.stack.Peek());
+                            
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"temp{func.stack.Peek()}")));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_const, instruction.Offset, func.stack.Count - 1, WasmOperand.FromInt(0)));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"temp{func.stack.Peek()}")));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_sub, instruction.Offset, func.stack.Count + 1));
+                            
+                            break;
+                        case WasmDataType.i64:
+                            if (!func.Locals.ContainsKey($"temp{func.stack.Peek()}"))
+                                func.Locals.Add($"temp{func.stack.Peek()}", func.stack.Peek());
+
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.set_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"temp{func.stack.Peek()}")));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_const, instruction.Offset, func.stack.Count - 1, WasmOperand.FromLong(0)));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromLocalField($"temp{func.stack.Peek()}")));
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_sub, instruction.Offset, func.stack.Count + 1));
+
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_neg, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_neg, instruction.Offset, func.stack.Count));
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 default:
                     Console.Error.WriteLine("Unkown opcode " + instruction.OpCode.Code);
