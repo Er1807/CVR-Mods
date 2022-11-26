@@ -36,10 +36,6 @@ namespace Converter
 
             foreach (var method in type.Methods.Where(x => !x.IsConstructor))
             {
-                if (method.Name == "SetEntry")
-                    continue;
-                //if (method.Name == "GetColorFromString")
-                //    continue;
                 var mem = new Converter().Convert(wasmModule, method);
             }
 

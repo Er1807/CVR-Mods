@@ -360,6 +360,15 @@ namespace Converter
                         break;
                     }
 
+                    if (instruction.Operand is MemberRef memberef && memberef.DeclaringType != func.Method.DeclaringType)
+                    {
+                        func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, WasmOperand.FromExtern(memberef.DeclaringType.FullName, $"set_{memberef.Name}", true, new List<TypeSig>(), memberef.FieldSig.Type)));
+
+                        func.stack.Pop();
+                        func.stack.Pop();
+                        break;
+                    }
+
                     Console.Error.WriteLine("Unkown opcode op " + instruction.OpCode.Code);
                     break;
                 case Code.Newobj:
@@ -560,6 +569,27 @@ namespace Converter
                     func.stack.Pop();
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Bgt:
+                case Code.Bgt_S:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_gt_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_gt_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_gt, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_gt, instruction.Offset, func.stack.Count));
+                            break;
+                    }
+                    func.Instructions.Add(new WasmInstruction(WasmInstructions.br_if, instruction.Offset, func.stack.Count - 1, WasmOperand.FromLong(((Instruction)instruction.Operand).Offset)));
+                    func.stack.Pop();
+                    func.stack.Pop();
                     break;
                 case Code.Cgt:
                     switch (func.stack.Peek())
@@ -857,6 +887,7 @@ namespace Converter
                     func.stack.Pop();
                     func.stack.Pop();
                     break;
+                case Code.Stelem:
                 case Code.Stelem_Ref:
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
                     {
