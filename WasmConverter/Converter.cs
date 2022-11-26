@@ -174,7 +174,7 @@ namespace Converter
                     break;
                 case Code.Ldarg:
                 case Code.Ldarg_S:
-                    var Ldarg = instruction.Operand is Parameter param ? param.Index :(int)instruction.Operand;
+                    var Ldarg = instruction.Operand is Parameter param ? param.Index : (int)instruction.Operand;
                     func.Instructions.Add(new WasmInstruction(WasmInstructions.get_local, instruction.Offset, func.stack.Count, WasmOperand.FromParamField($"param{Ldarg - 1}")));
                     func.stack.Push(func.Parameters[Ldarg - 1]);
                     break;
@@ -914,7 +914,131 @@ namespace Converter
                     func.stack.Pop();
                     func.stack.Push(WasmDataType.i32);
                     break;
+                case Code.Box:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                            {
+                                FunctionName = "Box_Int",
+                                ReturnValue = Program.TypeInt.ToTypeSig(),
+                                Params = new List<TypeSig>() { Program.TypeInt.ToTypeSig() }
+                            }));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                            {
+                                FunctionName = "Box_Long",
+                                ReturnValue = Program.TypeInt.ToTypeSig(),
+                                Params = new List<TypeSig>() { Program.TypeLong.ToTypeSig() }
+                            }));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                            {
+                                FunctionName = "Box_Float",
+                                ReturnValue = Program.TypeInt.ToTypeSig(),
+                                Params = new List<TypeSig>() { Program.TypeFloat.ToTypeSig() }
+                            }));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, new WasmExternFunctionOperand()
+                            {
+                                FunctionName = "Box_Double",
+                                ReturnValue = Program.TypeInt.ToTypeSig(),
+                                Params = new List<TypeSig>() { Program.TypeDouble.ToTypeSig() }
+                            }));
+                            break;
+                        default:
+                            break;
+                    }
+
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
                 case Code.Conv_I4:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.nop, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_wrap_i64, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_trunc_f32_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i32_trunc_f64_s, instruction.Offset, func.stack.Count));
+                            break;
+                        default:
+                            break;
+                    }
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i32);
+                    break;
+                case Code.Conv_I8:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_extend_i32_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.nop, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_trunc_f32_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.i64_trunc_f64_s, instruction.Offset, func.stack.Count));
+                            break;
+                        default:
+                            break;
+                    }
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.i64);
+                    break;
+                case Code.Conv_R4:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_convert_i32_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_convert_i64_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.nop, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f32_demote_f64, instruction.Offset, func.stack.Count));
+                            break;
+                        default:
+                            break;
+                    }
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.f32);
+                    break;
+                case Code.Conv_R8:
+                    switch (func.stack.Peek())
+                    {
+                        case WasmDataType.i32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_convert_i32_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.i64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_convert_i64_s, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f32:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.f64_promote_f32, instruction.Offset, func.stack.Count));
+                            break;
+                        case WasmDataType.f64:
+                            func.Instructions.Add(new WasmInstruction(WasmInstructions.nop, instruction.Offset, func.stack.Count));
+                            break;
+                        default:
+                            break;
+                    }
+                    func.stack.Pop();
+                    func.stack.Push(WasmDataType.f64);
                     break;
                 default:
                     Console.Error.WriteLine("Unkown opcode " + instruction.OpCode.Code);

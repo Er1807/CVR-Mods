@@ -330,6 +330,7 @@
     <Compile Include="Components\WasmLoaderBehavior.cs" />
     <Compile Include="Components\WasmSelectable.cs" />
     <Compile Include="Examples\Arrays.cs" />
+    <Compile Include="Refs\Wrapper\CustomBox_Ref.cs" />
     <Compile Include="Refs\Wrapper\CustomArray_Ref.cs" />
     <Compile Include="Refs\Wrapper\CVRPlayerAPI_Ref.cs" />
     <Compile Include="Refs\Wrapper\Logger.cs" />
