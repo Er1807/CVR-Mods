@@ -2,6 +2,7 @@
 using dnlib.DotNet;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Converter
 {
@@ -46,61 +47,16 @@ namespace Converter
 
         public string OpCodeToText()
         {
-            switch (Instruction)
+            var str = Instruction.ToString();
+            if (str.StartsWith("i32") || str.StartsWith("i64") || str.StartsWith("f32") || str.StartsWith("f64"))
             {
-                case WasmInstructions.i32_const:
-                case WasmInstructions.i64_const:
-                case WasmInstructions.f32_const:
-                case WasmInstructions.f64_const:
-                case WasmInstructions.i32_add:
-                case WasmInstructions.i64_add:
-                case WasmInstructions.f32_add:
-                case WasmInstructions.f64_add:
-                case WasmInstructions.i32_sub:
-                case WasmInstructions.i64_sub:
-                case WasmInstructions.f32_sub:
-                case WasmInstructions.f64_sub:
-                case WasmInstructions.i32_eq:
-                case WasmInstructions.i64_eq:
-                case WasmInstructions.f32_eq:
-                case WasmInstructions.f64_eq:
-                case WasmInstructions.i32_eqz:
-                case WasmInstructions.i64_eqz:
-                case WasmInstructions.f32_gt:
-                case WasmInstructions.f64_gt:
-                    return Instruction.ToString().Replace("_", ".");
-                case WasmInstructions._return:
-                    return "return";
-
-                case WasmInstructions.i32_gt_s:
-                    return "i32.gt_s";
-                case WasmInstructions.i64_gt_s:
-                    return "i64.gt_s";
-                case WasmInstructions.i32_gt_u:
-                    return "i32.gt_u";
-                case WasmInstructions.i64_gt_u:
-                    return "i64.gt_u";
-
-                case WasmInstructions.i32_lt_s:
-                    return "i32.lt_s";
-                case WasmInstructions.i64_lt_s:
-                    return "i64.lt_s";
-                case WasmInstructions.i32_lt_u:
-                    return "i32.lt_u";
-                case WasmInstructions.i64_lt_u:
-                    return "i64.lt_u";
-
-                case WasmInstructions.i32_rem_s:
-                    return "i32.rem_s";
-                case WasmInstructions.i64_rem_s:
-                    return "i64.rem_s";
-                case WasmInstructions.i32_rem_u:
-                    return "i32.rem_u";
-                case WasmInstructions.i64_rem_u:
-                    return "i64.rem_u";
-                default:
-                    return Instruction.ToString();
+                var regex = new Regex(Regex.Escape("_"));
+                var newText = regex.Replace(str, ".", 1);
+                return newText;
             }
+            else if (Instruction == WasmInstructions._return)
+                return "return";
+            return str;
         }
 
 

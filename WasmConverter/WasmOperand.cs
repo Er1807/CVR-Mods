@@ -100,7 +100,7 @@ namespace Converter
 
         private static string ConvertMethod(string className, string methodName, bool hasThis, IList<TypeSig> parameters, TypeSig returnType)
         {
-            return $"{className.Replace(".", "_")}__{methodName.Replace(".", "")}{GetParamStr(hasThis, parameters, returnType)}";
+            return ($"{className.Replace(".", "_")}__{methodName.Replace(".", "")}{GetParamStr(hasThis, parameters, returnType)}").Replace("[", "_").Replace("]", "_");
         }
 
         private static string GetParamStr(bool hasThis, IList<TypeSig> parameters, TypeSig returnType)

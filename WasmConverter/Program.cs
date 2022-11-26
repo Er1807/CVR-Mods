@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using dnlib.DotNet;
 
 namespace Converter
@@ -31,7 +32,7 @@ namespace Converter
             wasmModule.declaringType = type.ToTypeSig();
             foreach (var field in type.Fields)
             {
-                wasmModule.Fields.Add(field.Name, field.FieldType);
+                wasmModule.Fields.Add(field.Name, new WasmField(field));
             }
 
             foreach (var method in type.Methods.Where(x => !x.IsConstructor))
@@ -47,7 +48,6 @@ namespace Converter
             var str = wasmModule.CreateWat();
             Console.WriteLine(str);
 
-
             Console.WriteLine();
             Console.WriteLine();
 
@@ -57,7 +57,7 @@ namespace Converter
             foreach (var item in wasmModule.Fields)
             {
 
-                Console.Write($"{item.Value}:{item.Key}|");
+                Console.Write($"{item.Value.Type}:{item.Key}|");
             }
 
             Console.ReadLine();

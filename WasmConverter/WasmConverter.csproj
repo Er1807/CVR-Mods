@@ -47,6 +47,7 @@
     <Compile Include="Block.cs" />
     <Compile Include="BlockRebuilder.cs" />
     <Compile Include="Converter.cs" />
+    <Compile Include="WasmField.cs" />
     <Compile Include="WasmFunction.cs" />
     <Compile Include="WasmModule.cs" />
     <Compile Include="WasmInstruction.cs" />

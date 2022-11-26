@@ -18,6 +18,7 @@ namespace Converter
             func.Name = method.Name;
             func.ReturnType = GetWasmType(method.ReturnType);
             func.Method = method;
+            func.IsPublic = method.IsPublic;
 
 
 
@@ -274,7 +275,7 @@ namespace Converter
                     if (field != null && field.DeclaringType == func.Method.DeclaringType)
                     {
                         func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, WasmOperand.FromGlobalField(field.Name.ToString())));
-                        func.stack.Push(GetWasmType(func.Module.Fields[field.Name]).Value);
+                        func.stack.Push(GetWasmType(func.Module.Fields[field.Name].Type).Value);
                         break;
                     }
 
@@ -327,7 +328,7 @@ namespace Converter
                     if (instruction.Operand is FieldDef fieldDefa && fieldDefa.DeclaringType == func.Method.DeclaringType)
                     {
                         func.Instructions.Add(new WasmInstruction(WasmInstructions.get_global, instruction.Offset, func.stack.Count, WasmOperand.FromGlobalField(fieldDefa.Name.ToString())));
-                        func.stack.Push(GetWasmType(func.Module.Fields[fieldDefa.Name]).Value);
+                        func.stack.Push(GetWasmType(func.Module.Fields[fieldDefa.Name].Type).Value);
                         break;
                     }
                     Console.Error.WriteLine("Missing ldflda");

@@ -19,6 +19,7 @@ namespace Converter
         }
 
         public string Name;
+        public bool IsPublic;
         public WasmDataType? ReturnType;
         public List<WasmDataType> Parameters = new List<WasmDataType>();
         public Dictionary<string, WasmDataType> Locals = new Dictionary<string, WasmDataType>();

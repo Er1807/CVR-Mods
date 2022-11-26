@@ -3,6 +3,7 @@ using dnlib.DotNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Converter
     {
         public List<WasmFunction> Functions = new List<WasmFunction>();
         public Dictionary<string, int> Strings = new Dictionary<string, int>();
-        public Dictionary<string, TypeSig> Fields = new Dictionary<string, TypeSig>();
+        public Dictionary<string, WasmField> Fields = new Dictionary<string, WasmField>();
         public int MemoryPtr = 4;
         public TypeSig declaringType;
 
@@ -33,14 +34,14 @@ namespace Converter
 
             foreach (var field in Fields)
             {
-                builder.AppendLine($"  (global ${field.Key} (mut {Converter.GetWasmTypeWoArray(field.Value)}) ({Converter.GetWasmTypeWoArray(field.Value)}.const 0))");
+                builder.AppendLine($"  (global ${field.Key} (mut {Converter.GetWasmTypeWoArray(field.Value.Type)}) ({Converter.GetWasmTypeWoArray(field.Value.Type)}.const 0))");
             }
 
-            foreach (var function in Functions)
+            foreach (var function in Functions.Where(x=>x.IsPublic))
             {
                 builder.Append($"  (export \"{function.Name}\" (func ${function.Name}))\n");
             }
-            foreach (var field in Fields)
+            foreach (var field in Fields.Where(x=>x.Value.IsPublic))
             {
 
                 builder.AppendLine($"  (export \"{field.Key}\"(global ${field.Key}))");
@@ -58,6 +59,7 @@ namespace Converter
 
         public int Allocate(string str)
         {
+            str = str.Replace("\\", "\\\\").Replace("\r", "\\0D").Replace("\n", "\\0A");
             if (Strings.ContainsKey(str))
             {
                 return Strings[str];
