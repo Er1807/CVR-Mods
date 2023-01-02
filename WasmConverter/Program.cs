@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
@@ -70,6 +69,29 @@ namespace Converter
                     item.FieldSig = item.FieldSig.Clone();
                     item.FieldSig.Type = module.CorLibTypes.Int32;
                 }
+
+                var getter = new MethodDefUser($"GET_{item.Name}", MethodSig.CreateStatic(module.CorLibTypes.Int32),
+                            MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public);
+                var setter = new MethodDefUser($"SET_{item.Name}", MethodSig.CreateStatic(module.CorLibTypes.Void, module.CorLibTypes.Int32),
+                            MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public);
+
+                getter.Signature.HasThis = true;
+                setter.Signature.HasThis = true;
+
+                getter.Body = new CilBody();
+                getter.Body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+                getter.Body.Instructions.Add(OpCodes.Ldfld.ToInstruction(item));
+                getter.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+
+                setter.Body = new CilBody();
+                setter.Body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+                setter.Body.Instructions.Add(OpCodes.Ldarg_1.ToInstruction());
+                setter.Body.Instructions.Add(OpCodes.Stfld.ToInstruction(item));
+                setter.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+                type.Methods.Add(getter);
+                type.Methods.Add(setter);
             }
 
             foreach (var item in toRename)
