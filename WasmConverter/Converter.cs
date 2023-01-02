@@ -296,6 +296,10 @@ namespace Converter
 
                     if (method != null && method.DeclaringType.FullName == func.Module.declaringType.FullName)
                     {
+                        if(method.Name == "GetSTLayerMaterial")
+                        {
+
+                        }
                         func.Instructions.Add(new WasmInstruction(WasmInstructions.call, instruction.Offset, func.stack.Count, WasmOperand.FromLocalFunction(method.Name)));
                         for (int i = 0; i < method.Parameters.Count - 1; i++)
                         {

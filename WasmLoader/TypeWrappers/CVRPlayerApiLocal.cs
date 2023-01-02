@@ -113,7 +113,7 @@ namespace WasmLoader.TypeWrappers
 
         public override bool IsUserInVR()
         {
-            return playerSetup._inVr;
+            return true; //playerSetup.vr;
         }
 
         public override void TeleportTo(Vector3 teleportPos, Quaternion teleportRot)

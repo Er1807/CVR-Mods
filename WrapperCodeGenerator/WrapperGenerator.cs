@@ -29,10 +29,50 @@ namespace WrapperCodeGenerator
             return assembly;
         }
 
+        StringBuilder sbexport = new StringBuilder("/*\r\n");
+        StringBuilder sb = new StringBuilder();
+
+        public void AddExport(string funtionname, List<string> param, Type returnType)
+        {
+            if (param == null)
+                param = new List<string>();
+            if (returnType == null)
+                returnType = typeof(void);
+
+            var returnTypeAsString = ChangeTypeToCStyle(returnType.ToString());
+
+            for (int i = 0; i < param.Count; i++)
+            {
+                var paramarr = param[i].Split(' ');
+                param[i] = $"{ChangeTypeToCStyle(paramarr[0])} {paramarr[1]}";
+            }
+
+            sbexport.AppendLine($"extern {returnTypeAsString} {funtionname}({string.Join(", ", param)});");
+        }
+
+        private string ChangeTypeToCStyle(string str)
+        {
+            switch (str)
+            {
+                case "System.Int32":
+                case "System.Int16":
+                case "System.Byte":
+                case "System.Boolean":
+                    return "int";
+                case "System.Int64":
+                    return "long";
+                case "System.Single":
+                    return "float";
+                case "System.Double":
+                    return "double";
+                default:
+                    return "int";
+            }
+        }
+
         public void Execute(GeneratorExecutionContext context)
         {
             //return;
-            StringBuilder sb = new StringBuilder();
 
             var testDomain = AppDomain.CurrentDomain;
 
@@ -88,6 +128,7 @@ namespace WrapperCodeGenerator
 
             }
             context.AddSource("Results.g.cs", sb.ToString());
+            context.AddSource("Exports.g.cs", sbexport.ToString()+"*/");
         }
 
         public void Generate(GeneratorExecutionContext context, Type type, List<string> allowedFunctions, List<string> disallowedFunctions)
@@ -104,7 +145,7 @@ namespace WrapperCodeGenerator
 
 
 
-        public static StringBuilder GenerateClass(Type type, List<string> allowedFunctions, List<string> disallowedFunctions)
+        public StringBuilder GenerateClass(Type type, List<string> allowedFunctions, List<string> disallowedFunctions)
         {
             var sb = new StringBuilder();
             var className = (type.Namespace + type.Name).Replace(".", "_") + "_Ref";
@@ -118,6 +159,7 @@ namespace WrapperCodeGenerator
             sb.AppendLine($"public class {className} : IRef {{");
             sb.AppendLine("public void Setup(Dictionary<string, Action<Linker, Store, Objectstore, WasmType>> functions) {");
 
+            AddExport($"{type.FullName.Replace(".", "_").Replace("+", "_")}__Type", null, typeof(Type));
             sb.AppendLine($@"functions[""{type.FullName.Replace(".", "_")}__Type""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
             sb.AppendLine($@"linker.DefineFunction(""env"", ""{type.FullName.Replace(".", "_")}__Type"", (Caller caller) => {{");
 
@@ -182,7 +224,7 @@ namespace WrapperCodeGenerator
         }
 
 
-        public static bool Check(MethodInfo method, List<string> allowedFunctions, List<string> disallowedFunctions)
+        public bool Check(MethodInfo method, List<string> allowedFunctions, List<string> disallowedFunctions)
         {
             if (method.IsGenericMethod)
                 return true;
@@ -217,7 +259,7 @@ namespace WrapperCodeGenerator
             return false;
         }
 
-        public static bool Check(FieldInfo field, List<string> allowedFunctions, List<string> disallowedFunctions, bool read)
+        public bool Check(FieldInfo field, List<string> allowedFunctions, List<string> disallowedFunctions, bool read)
         {
             if (field.FieldType.IsGenericType)
                 return true;
@@ -237,7 +279,7 @@ namespace WrapperCodeGenerator
             return false;
         }
 
-        public static string Header(MethodInfo method)
+        public string Header(MethodInfo method)
         {
             var param = method.GetParameters().Select(x => $"{GetWasmType(x.ParameterType)} {x.Name}").ToList();
             if (HasThis(method))
@@ -247,9 +289,12 @@ namespace WrapperCodeGenerator
                 paramsting = ", ";
             paramsting += string.Join(", ", param);
 
+
+            AddExport(ConvertMethod(method), param, method.ReturnType);
+
             return $"linker.DefineFunction(\"env\", \"{ConvertMethod(method)}\", (Caller caller {paramsting}) => {{";
         }
-        public static string GenerateField(FieldInfo field, List<string> allowedFunctions, List<string> disallowedFunctions)
+        public string GenerateField(FieldInfo field, List<string> allowedFunctions, List<string> disallowedFunctions)
         {
 
             if (field.FieldType.IsGenericType)
@@ -270,6 +315,8 @@ namespace WrapperCodeGenerator
             var setName = ConvertMethod(field.DeclaringType, $"set_{field.Name}", HasThis(field), new List<Type>() { field.FieldType }, field.FieldType);
             if (!Check(field, allowedFunctions, disallowedFunctions, true))
             {
+
+                AddExport(getName, param, field.FieldType);
                 builder.AppendLine($@"functions[""{getName}""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
                 builder.AppendLine($"linker.DefineFunction(\"env\", \"{getName}\", (Caller caller {paramsting}) => {{");
 
@@ -310,6 +357,8 @@ namespace WrapperCodeGenerator
                 return builder.ToString();
             if (!Check(field, allowedFunctions, disallowedFunctions, false))
             {
+
+                AddExport(setName, param, null);
                 builder.AppendLine($@"functions[""{setName}""] = (Linker linker, Store store, Objectstore objects, WasmType wasmType) =>");
                 builder.AppendLine($"linker.DefineFunction(\"env\", \"{setName}\", (Caller caller {paramsting}) => {{");
 
@@ -341,15 +390,15 @@ namespace WrapperCodeGenerator
             return builder.ToString();
         }
 
-        public static string ConvertMethod(MethodInfo method)
+        public string ConvertMethod(MethodInfo method)
         {
             return ConvertMethod(method.DeclaringType, method.Name, HasThis(method), method.GetParameters().Select(x => x.ParameterType).ToList(), method.ReturnType);
         }
-        public static string ConvertMethod(Type type, string name, bool hasThis, List<Type> parameters, Type returnType)
+        public string ConvertMethod(Type type, string name, bool hasThis, List<Type> parameters, Type returnType)
         {
-            return $"{type.FullName.Replace(".", "_")}__{name.Replace(".", "")}{GetParamStr(hasThis, parameters, returnType)}";
+            return $"{type.FullName.Replace(".", "_").Replace("+", "_")}__{name.Replace(".", "").Replace("+", "_")}{GetParamStr(hasThis, parameters, returnType)}";
         }
-        public static string GetParamStr(bool hasThis, List<Type> parameters, Type returnType)
+        public string GetParamStr(bool hasThis, List<Type> parameters, Type returnType)
         {
             StringBuilder builder = new StringBuilder();
 
@@ -373,7 +422,7 @@ namespace WrapperCodeGenerator
                     builder.Append($"__{returnType.FullName.Replace(".", "")}");
             }
 
-            return builder.ToString();
+            return builder.ToString().Replace("[]", "__").Replace("+", "_");
         }
         public static string Retieve(ParameterInfo param)
         {

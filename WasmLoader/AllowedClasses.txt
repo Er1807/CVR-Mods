@@ -297,3 +297,4 @@ UnityEngine.AI.NavMeshQueryFilter
 UnityEngine.AI.NavMeshTriangulation
 UnityEngine.AI.OffMeshLink
 UnityEngine.AI.OffMeshLinkData
+UnityEngine.Rigidbody
