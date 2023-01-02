@@ -63,9 +63,17 @@ namespace Converter
                 }
             }
 
+            foreach (var item in type.Fields)
+            {
+                if (!item.FieldSig.Type.IsPrimitive)
+                {
+                    item.FieldSig = item.FieldSig.Clone();
+                    item.FieldSig.Type = module.CorLibTypes.Int32;
+                }
+            }
+
             foreach (var item in toRename)
             {
-
                 item.Name = "DontUseThisClass";
             }
 
