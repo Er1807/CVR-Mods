@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
+using System.Xml.Linq;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.Writer;
@@ -24,23 +25,34 @@ namespace Converter
 
             for (int i = 0; i < module.Types.Count; i++)
             {
-                if(type != module.Types[i])
+                if (type != module.Types[i])
                 {
                     module.Types.Remove(module.Types[i]);
                     i--;
                 }
             }
-            
-            List<ITypeDefOrRef> toRename = new List<ITypeDefOrRef>();
+
+            HandleFields(module, type);
 
             foreach (var method in type.Methods.Where(x => !x.IsConstructor))
             {
+                if (!method.ReturnType.IsValueType)
+                {
+                    method.ReturnType = module.CorLibTypes.Int32;
+                }
+                foreach (var item in method.Body.Variables)
+                {
+                    if (!item.Type.IsValueType)
+                    {
+                        item.Type = module.CorLibTypes.Int32;
+                    }
+                }
                 for (int i = 0; i < method.Body.Instructions.Count; i++)
                 {
                     Instruction item = method.Body.Instructions[i];
                     if (item.OpCode == OpCodes.Callvirt || item.OpCode == OpCodes.Call)
                     {
-                        HandleMethodCall(toRename, item);
+                        HandleMethodCall(module, item,type);
                     }
                     else if (item.OpCode == OpCodes.Ldlen)
                     {
@@ -51,53 +63,42 @@ namespace Converter
                     {
                         HandleNewArray(module, item);
                     }
-                    else if (item.OpCode == OpCodes.Ldelem_Ref || item.OpCode == OpCodes.Ldelem)
+                    else if (item.OpCode == OpCodes.Ldelem_Ref
+                        || item.OpCode == OpCodes.Ldelem
+                        || item.OpCode == OpCodes.Ldelem_I4
+                        || item.OpCode == OpCodes.Ldelem_I8
+                        || item.OpCode == OpCodes.Ldelem_R4
+                        || item.OpCode == OpCodes.Ldelem_R8)
                     {
                         HandleGetArray(module, item);
                     }
-                    else if (item.OpCode == OpCodes.Stelem)
+                    else if (item.OpCode == OpCodes.Stelem || item.OpCode == OpCodes.Stelem_Ref
+                        || item.OpCode == OpCodes.Stelem_I4
+                        || item.OpCode == OpCodes.Stelem_I8
+                        || item.OpCode == OpCodes.Stelem_R4
+                        || item.OpCode == OpCodes.Stelem_R8)
                     {
                         HandleSetArray(module, item);
+                    }
+                    else if (item.OpCode == OpCodes.Ldstr)
+                    {
+                        method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(CreateFunction(module, "String_To_Managed", module.CorLibTypes.Int32, module.CorLibTypes.Int32)));
+                    }
+                    else if (item.OpCode == OpCodes.Br_S)
+                    {
+                        item.OpCode = OpCodes.Br;
+                    }
+                    else if (item.OpCode == OpCodes.Brtrue_S)
+                    {
+                        item.OpCode = OpCodes.Brtrue;
+                    }
+                    else if (item.OpCode == OpCodes.Brfalse_S)
+                    {
+                        item.OpCode = OpCodes.Brfalse;
                     }
                 }
             }
 
-            foreach (var item in type.Fields)
-            {
-                if (!item.FieldSig.Type.IsPrimitive)
-                {
-                    item.FieldSig = item.FieldSig.Clone();
-                    item.FieldSig.Type = module.CorLibTypes.Int32;
-                }
-
-                var getter = new MethodDefUser($"GET_{item.Name}", MethodSig.CreateStatic(module.CorLibTypes.Int32),
-                            MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public);
-                var setter = new MethodDefUser($"SET_{item.Name}", MethodSig.CreateStatic(module.CorLibTypes.Void, module.CorLibTypes.Int32),
-                            MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public);
-
-                getter.Signature.HasThis = true;
-                setter.Signature.HasThis = true;
-
-                getter.Body = new CilBody();
-                getter.Body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
-                getter.Body.Instructions.Add(OpCodes.Ldfld.ToInstruction(item));
-                getter.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
-
-
-                setter.Body = new CilBody();
-                setter.Body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
-                setter.Body.Instructions.Add(OpCodes.Ldarg_1.ToInstruction());
-                setter.Body.Instructions.Add(OpCodes.Stfld.ToInstruction(item));
-                setter.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
-
-                type.Methods.Add(getter);
-                type.Methods.Add(setter);
-            }
-
-            foreach (var item in toRename)
-            {
-                item.Name = "DontUseThisClass";
-            }
 
             module.Write("E:\\Temp\\test.dll");
 
@@ -105,29 +106,65 @@ namespace Converter
 
         }
 
-        private static void HandleMethodCall(List<ITypeDefOrRef> toRename, Instruction item)
+        private static void HandleFields(ModuleDef module, TypeDef type)
+        {
+            foreach (var item in type.Fields)
+            {
+                if (!item.FieldSig.Type.IsPrimitive)
+                {
+                    item.FieldSig = item.FieldSig.Clone();
+                    item.FieldSig.Type = module.CorLibTypes.Int32;
+                }
+                if (item.FieldSig.Type == module.CorLibTypes.Int32)
+                {
+                    var getter = new MethodDefUser($"GET_{item.Name}", MethodSig.CreateStatic(module.CorLibTypes.Int32),
+                                MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public);
+                    var setter = new MethodDefUser($"SET_{item.Name}", MethodSig.CreateStatic(module.CorLibTypes.Void, module.CorLibTypes.Int32),
+                                MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public);
+
+                    getter.Signature.HasThis = true;
+                    setter.Signature.HasThis = true;
+
+                    getter.Body = new CilBody();
+                    getter.Body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+                    getter.Body.Instructions.Add(OpCodes.Ldfld.ToInstruction(item));
+                    getter.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+
+                    setter.Body = new CilBody();
+                    setter.Body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+                    setter.Body.Instructions.Add(OpCodes.Ldarg_1.ToInstruction());
+                    setter.Body.Instructions.Add(OpCodes.Stfld.ToInstruction(item));
+                    setter.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+                    type.Methods.Add(getter);
+                    type.Methods.Add(setter);
+                }
+            }
+        }
+
+        private static void HandleMethodCall(ModuleDef module, Instruction item, TypeDef type)
         {
             var refs = (item.Operand as MemberRef);
             var refs2 = (item.Operand as MethodSpec);
             var refs3 = (item.Operand as MethodDef);
-            if (refs != null && !refs.Name.Contains("__"))
+            if (refs != null && refs.DeclaringType != type && refs.DeclaringType != dontUseThisClass)
             {
                 
                 //item.OpCode = OpCodes.Call;
-                refs.Name = ConvertMethod(refs.DeclaringType, refs.Name, refs.MethodSig.HasThis, refs.MethodSig.Params, refs.MethodSig.RetType);
+                var name = ConvertMethod(refs.DeclaringType, refs.Name, refs.MethodSig.HasThis, refs.MethodSig.Params, refs.MethodSig.RetType);
                 
                 if (refs.MethodSig.HasThis)
                 {
                     refs.MethodSig.HasThis = false;
                     refs.MethodSig.Params.Insert(0, refs.DeclaringType.ToTypeSig());
                 }
-
-                toRename.Add(refs.DeclaringType);
+                item.Operand = CreateFunction(module, name, refs.MethodSig.RetType, refs.MethodSig.Params.ToArray());
 
             }
-            if (refs2 != null && !refs2.Name.Contains("__"))
+            if (refs2 != null && refs2.DeclaringType != type && refs2.DeclaringType != dontUseThisClass)
             {
-                refs2.Name = ConvertMethod(refs2.Method.DeclaringType, refs2.Name, refs2.Method.MethodSig.HasThis, refs2.Method.MethodSig.Params, refs2.Method.MethodSig.RetType);
+                var name = ConvertMethod(refs2.Method.DeclaringType, refs2.Name, refs2.Method.MethodSig.HasThis, refs2.Method.MethodSig.Params, refs2.Method.MethodSig.RetType);
 
                 //item.OpCode = OpCodes.Call;
                 if (refs2.Method.MethodSig.HasThis)
@@ -136,19 +173,20 @@ namespace Converter
                     refs2.Method.MethodSig.Params.Insert(0, refs2.DeclaringType.ToTypeSig());
                 }
 
-                toRename.Add(refs2.DeclaringType);
+                item.Operand = CreateFunction(module, name, refs2.Method.MethodSig.RetType, refs2.Method.MethodSig.Params.ToArray());
+
 
             }
-            if (refs3 != null && !refs3.Name.Contains("__"))
+            if (refs3 != null && refs3.DeclaringType != type)
             {
-                refs3.Name = ConvertMethod(refs3.DeclaringType, refs3.Name, refs3.MethodSig.HasThis, refs3.MethodSig.Params, refs3.MethodSig.RetType);
+                var name = ConvertMethod(refs3.DeclaringType, refs3.Name, refs3.MethodSig.HasThis, refs3.MethodSig.Params, refs3.MethodSig.RetType);
                 if (refs3.MethodSig.HasThis)
                 {
                     refs3.MethodSig.HasThis = false;
                     refs3.MethodSig.Params.Insert(0, refs3.DeclaringType.ToTypeSig());
                 }
                 //item.OpCode = OpCodes.Call;
-                toRename.Add(refs3.DeclaringType);
+                item.Operand = CreateFunction(module, name, refs3.MethodSig.RetType, refs3.MethodSig.Params.ToArray());
 
             }
         }
@@ -189,17 +227,49 @@ namespace Converter
         }
         private static void HandleGetArray(ModuleDef module, Instruction current)
         {
-            if(current.OpCode == OpCodes.Ldelem_Ref || current.OpCode == OpCodes.Ldelem)
+            if (current.OpCode == OpCodes.Ldelem_Ref || current.OpCode == OpCodes.Ldelem)
             {
                 current.Operand = CreateFunction(module, "Arr_Get_Object", module.CorLibTypes.Int32, module.CorLibTypes.Int32, module.CorLibTypes.Int32);
+            }
+            else if (current.OpCode == OpCodes.Ldelem_I4)
+            {
+                current.Operand = CreateFunction(module, "Arr_Get_Int", module.CorLibTypes.Int32, module.CorLibTypes.Int32, module.CorLibTypes.Int32);
+            }
+            else if (current.OpCode == OpCodes.Ldelem_I8)
+            {
+                current.Operand = CreateFunction(module, "Arr_Get_Long", module.CorLibTypes.Int64, module.CorLibTypes.Int32, module.CorLibTypes.Int32);
+            }
+            else if (current.OpCode == OpCodes.Ldelem_R4)
+            {
+                current.Operand = CreateFunction(module, "Arr_Get_Float", module.CorLibTypes.Single, module.CorLibTypes.Int32, module.CorLibTypes.Int32);
+            }
+            else if (current.OpCode == OpCodes.Ldelem_R8)
+            {
+                current.Operand = CreateFunction(module, "Arr_Get_Double", module.CorLibTypes.Double, module.CorLibTypes.Int32, module.CorLibTypes.Int32);
             }
             current.OpCode = OpCodes.Call;
         }
         private static void HandleSetArray(ModuleDef module, Instruction current)
         {
-            if (current.OpCode == OpCodes.Stelem)
+            if (current.OpCode == OpCodes.Stelem || current.OpCode == OpCodes.Stelem_Ref)
             {
-                current.Operand = CreateFunction(module, "Arr_Set_Object",module.CorLibTypes.Void, module.CorLibTypes.Int32, module.CorLibTypes.Int32, module.CorLibTypes.Object);
+                current.Operand = CreateFunction(module, "Arr_Set_Object", module.CorLibTypes.Void, module.CorLibTypes.Int32, module.CorLibTypes.Int32, module.CorLibTypes.Object);
+            }
+            else if (current.OpCode == OpCodes.Stelem_I4)
+            {
+                current.Operand = CreateFunction(module, "Arr_Set_Int", module.CorLibTypes.Void, module.CorLibTypes.Int32, module.CorLibTypes.Int32, module.CorLibTypes.Int32);
+            }
+            else if (current.OpCode == OpCodes.Stelem_I8)
+            {
+                current.Operand = CreateFunction(module, "Arr_Set_Long", module.CorLibTypes.Void, module.CorLibTypes.Int32, module.CorLibTypes.Int32, module.CorLibTypes.Int64);
+            }
+            else if (current.OpCode == OpCodes.Stelem_R4)
+            {
+                current.Operand = CreateFunction(module, "Arr_Set_Float", module.CorLibTypes.Void, module.CorLibTypes.Int32, module.CorLibTypes.Int32, module.CorLibTypes.Single);
+            }
+            else if (current.OpCode == OpCodes.Stelem_R8)
+            {
+                current.Operand = CreateFunction(module, "Arr_Set_Double", module.CorLibTypes.Void, module.CorLibTypes.Int32, module.CorLibTypes.Int32, module.CorLibTypes.Double);
             }
             current.OpCode = OpCodes.Call;
         }
