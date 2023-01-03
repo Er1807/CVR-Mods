@@ -84,6 +84,25 @@ namespace Converter
                     {
                         method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(CreateFunction(module, "String_To_Managed", module.CorLibTypes.Int32, module.CorLibTypes.Int32)));
                     }
+                    else if (item.OpCode == OpCodes.Ldfld)
+                    {
+                        if (item.Operand is MemberRef fieldMemberRef)
+                        {
+                            item.OpCode = OpCodes.Call;
+                            var name = ConvertMethod(fieldMemberRef.DeclaringType, $"get_{fieldMemberRef.Name}", true, new List<TypeSig>(), fieldMemberRef.FieldSig.Type);
+                            item.Operand = CreateFunction(module, name, fieldMemberRef.FieldSig.Type, new TypeSig[1] { fieldMemberRef.DeclaringType.ToTypeSig() });
+                        }
+                    }
+                    else if (item.OpCode == OpCodes.Stfld)
+                    {
+                        if (item.Operand is MemberRef fieldMemberRef)
+                        {
+                            item.OpCode = OpCodes.Call;
+                            var name = ConvertMethod(fieldMemberRef.DeclaringType, $"set_{fieldMemberRef.Name}", true, new List<TypeSig>() { fieldMemberRef.FieldSig.Type }, module.CorLibTypes.Void);
+                            item.Operand = CreateFunction(module, name, module.CorLibTypes.Void, new TypeSig[2] { fieldMemberRef.DeclaringType.ToTypeSig(), fieldMemberRef.FieldSig.Type });
+                        }
+                    }
+                    //Make branches long to mitigate errors when generating DLL do to short branches
                     else if (item.OpCode == OpCodes.Br_S)
                     {
                         item.OpCode = OpCodes.Br;
