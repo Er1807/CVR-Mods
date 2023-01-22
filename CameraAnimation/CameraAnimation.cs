@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(CameraAnimationMod), "CameraAnimation", "3.1.1", "Eric van Fandenfart")]
+[assembly: MelonInfo(typeof(CameraAnimationMod), "CameraAnimation", "3.2.0", "Eric van Fandenfart")]
 [assembly: MelonAdditionalDependencies("ActionMenu")]
 [assembly: MelonGame]
 
@@ -26,7 +26,7 @@ namespace CameraAnimation
 
 
 
-        public override void OnApplicationStart()
+        public override void OnInitializeMelon()
         {
             Instance = this;
             new AnimationSaveManager();

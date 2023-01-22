@@ -184,12 +184,14 @@ namespace CameraAnimation
             var vrUiCam = GameObject.Find("_PLAYERLOCAL/[CameraRigVR]/Camera/_UICamera");
             if (vrUiCam != null)
                 vrUiCam.GetComponent<Camera>().enabled = true;
+            secondCam.enabled = false;
             return true;
         }
+
+        static Camera secondCam;
+        
         public static bool PlayPath()
         {
-            //var maincam = GameObject.Find("_PLAYERLOCAL/CameraSpawn/CVR Camera 2.0/Content/Cam").GetComponent<Camera>();
-            //GetInstance.selectedCamera.targetTexture = maincam.targetTexture;
             //FreezeFrame integration
             var clonesParent = GameObject.Find("Avatar Clone Holder");
             if (clonesParent != null && clonesParent.scene.IsValid())
@@ -203,6 +205,16 @@ namespace CameraAnimation
                 vrUiCam.GetComponent<Camera>().enabled = false;
             GetInstance.selectedCamera.stereoTargetEye = StereoTargetEyeMask.None;
             GetInstance.selectedCamera.enabled = true;
+            if(secondCam == null)
+            {
+                secondCam = GameObject.Instantiate(GetInstance.selectedCamera.gameObject, GetInstance.selectedCamera.transform).GetComponent<Camera>();
+                secondCam.gameObject.name = "CameraDisplayCam";
+                var maincam = GameObject.Find("_PLAYERLOCAL/CameraSpawn/CVR Camera 2.0/Content/Cam").GetComponent<Camera>();
+                secondCam.targetTexture = maincam.targetTexture;
+            }
+
+            secondCam.enabled = true;
+
             GenerateCurves();
             Instance.Active = true;
             return false;
