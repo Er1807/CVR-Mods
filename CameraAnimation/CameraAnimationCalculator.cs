@@ -88,6 +88,9 @@ namespace CameraAnimation
             HarmonyInstance.Patch(
                 typeof(CVRPathCamController).GetMethod("PlayPath", BindingFlags.Instance | BindingFlags.Public),
                 prefix: new HarmonyMethod(typeof(CameraAnimationCalculator).GetMethod("PlayPath", BindingFlags.Static | BindingFlags.Public)));
+            HarmonyInstance.Patch(
+                            typeof(CVRPathCamController).GetMethod("StopPath", BindingFlags.Instance | BindingFlags.Public),
+                            prefix: new HarmonyMethod(typeof(CameraAnimationCalculator).GetMethod("StopPath", BindingFlags.Static | BindingFlags.Public)));
 
             HarmonyInstance.Patch(
                 typeof(CVRPathCamController).GetMethod("RefreschIndexes", BindingFlags.Instance | BindingFlags.Public),
@@ -121,7 +124,7 @@ namespace CameraAnimation
 
             if (GetInstance.looping)
             {
-                
+
                 //atleast 2 points required
                 if (GetInstance.points.Count >= 2)
                 {
@@ -129,7 +132,7 @@ namespace CameraAnimation
                     var firstPoint = GetInstance.points[0];
                     var secondPoint = GetInstance.points[1];
 
-                    
+
                     PosX.AddKey(time, firstPoint.position.x);
                     PosY.AddKey(time, firstPoint.position.y);
                     PosZ.AddKey(time, firstPoint.position.z);
@@ -175,9 +178,18 @@ namespace CameraAnimation
                 lastValue = curve.keys[i].value;
             }
         }
+        public static bool StopPath()
+        {
 
+            var vrUiCam = GameObject.Find("_PLAYERLOCAL/[CameraRigVR]/Camera/_UICamera");
+            if (vrUiCam != null)
+                vrUiCam.GetComponent<Camera>().enabled = true;
+            return true;
+        }
         public static bool PlayPath()
         {
+            //var maincam = GameObject.Find("_PLAYERLOCAL/CameraSpawn/CVR Camera 2.0/Content/Cam").GetComponent<Camera>();
+            //GetInstance.selectedCamera.targetTexture = maincam.targetTexture;
             //FreezeFrame integration
             var clonesParent = GameObject.Find("Avatar Clone Holder");
             if (clonesParent != null && clonesParent.scene.IsValid())
@@ -186,6 +198,9 @@ namespace CameraAnimation
                     item.Stop();
                 }
 
+            var vrUiCam = GameObject.Find("_PLAYERLOCAL/[CameraRigVR]/Camera/_UICamera");
+            if (vrUiCam != null)
+                vrUiCam.GetComponent<Camera>().enabled = false;
             GetInstance.selectedCamera.stereoTargetEye = StereoTargetEyeMask.None;
             GetInstance.selectedCamera.enabled = true;
             GenerateCurves();
