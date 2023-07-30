@@ -68,11 +68,11 @@ namespace CameraAnimation
 
             Vector3 vector3 = new Vector3();
             GetBezierPosition(ref vector3, currentWaypointIndex, currentTimeInWaypoint);
-            GetInstance.selectedCamera.transform.position = vector3;
+            GetInstance.cam.transform.position = vector3;
 
             Quaternion quaternion = new Quaternion();
             GetLerpRotation(ref quaternion, currentWaypointIndex, currentTimeInWaypoint);
-            GetInstance.selectedCamera.transform.rotation = quaternion;
+            GetInstance.cam.transform.rotation = quaternion;
         }
 
         public static void ApplyPatches()
@@ -203,11 +203,11 @@ namespace CameraAnimation
             var vrUiCam = GameObject.Find("_PLAYERLOCAL/[CameraRigVR]/Camera/_UICamera");
             if (vrUiCam != null)
                 vrUiCam.GetComponent<Camera>().enabled = false;
-            GetInstance.selectedCamera.stereoTargetEye = StereoTargetEyeMask.None;
-            GetInstance.selectedCamera.enabled = true;
+            GetInstance.cam.stereoTargetEye = StereoTargetEyeMask.None;
+            GetInstance.cam.enabled = true;
             if(secondCam == null)
             {
-                secondCam = GameObject.Instantiate(GetInstance.selectedCamera.gameObject, GetInstance.selectedCamera.transform).GetComponent<Camera>();
+                secondCam = GameObject.Instantiate(GetInstance.cam.gameObject, GetInstance.cam.transform).GetComponent<Camera>();
                 secondCam.gameObject.name = "CameraDisplayCam";
                 var maincam = GameObject.Find("_PLAYERLOCAL/CameraSpawn/CVR Camera 2.0/Content/Cam").GetComponent<Camera>();
                 secondCam.targetTexture = maincam.targetTexture;

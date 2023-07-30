@@ -43,11 +43,11 @@ namespace CameraAnimation
             {
                 yield return null;
             }
-            while (GetInstance.selectedCamera == null)
+            while (GetInstance.cam == null)
             {
                 yield return null;
             }
-            GetInstance.selectedCamera.gameObject.AddComponent<CameraAnimationCalculator>();
+            GetInstance.cam.gameObject.AddComponent<CameraAnimationCalculator>();
         }
 
         public class CameraAnimationMenu : ActionMenuMod.Lib

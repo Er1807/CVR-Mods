@@ -22,7 +22,7 @@ namespace FreezeFrame
         {
             if (desriptor.name == "_PLAYERLOCAL")
                 return MetaPort.Instance.currentAvatarGuid;
-            return desriptor.GetAvatarGameObject().GetComponent<CVRAssetInfo>().guid;
+            return desriptor.GetAvatarGameObject().GetComponent<CVRAssetInfo>().objectId;
         }
     }
 }

@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuteTTS", "MuteTTS\MuteTTS.csproj", "{05B88D2A-CA9A-4419-A2EC-C00964C87A84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FreezeFrame", "FreezeFrame\FreezeFrame.csproj", "{95FF8421-9E29-44DB-8CE6-DC13498B86FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FreezeFrame", "FreezeFrame\FreezeFrame.csproj", "{95FF8421-9E29-44DB-8CE6-DC13498B86FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuteTTSClient", "MuteTTSClient\MuteTTSClient.csproj", "{7D9ABCEE-9E13-4644-A023-2130986DFE6E}"
 EndProject
@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnableFingerTrackingByDefault", "EnableFingerTrackingByDefault\EnableFingerTrackingByDefault.csproj", "{BF72F2A7-352C-41EF-A145-54851A14AC11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CameraAnimation", "CameraAnimation\CameraAnimation.csproj", "{87160CA8-D7C5-4766-91E3-E54DC3693FB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraAnimation", "CameraAnimation\CameraAnimation.csproj", "{87160CA8-D7C5-4766-91E3-E54DC3693FB1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WrapperCodeGenerator", "WrapperCodeGenerator\WrapperCodeGenerator.csproj", "{48EF0EE7-4F21-4067-8C6D-582FC37E80B8}"
 EndProject
